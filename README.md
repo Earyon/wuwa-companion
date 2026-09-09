@@ -34,6 +34,16 @@ Le premier lancement des données du jeu nécessite Internet. Le cache local val
 Les nouvelles versions du service worker attendent la fermeture de toutes les fenêtres de l'application avant de s'activer. Modifier CACHE_NAME dans sw.js à chaque livraison des fichiers de l'interface.
 Les données personnelles restent dans le navigateur et dépendent de l'adresse utilisée : un ancien fichier HTML local et un site HTTPS ne partagent pas automatiquement leur stockage.
 
+Sur tablette, ouvrir l'application avec Internet pour télécharger la mise à jour, fermer tous ses onglets et fenêtres (y compris dans les applications récentes), puis la rouvrir. Cette procédure a été confirmée par l'utilisateur. Ne pas désinstaller ni effacer les données pour actualiser l'interface.
+
+## Passifs Forte
+
+`forte.js` ajoute le suivi des déblocages dans l'éditeur existant. Il lit les bonus de `SkillTree` et les compétences `Inherent Skill` ayant un coût de déblocage dans `Consumes`. Les bonus automatiques sans coût ne sont pas proposés comme déblocages. Cette distinction a été vérifiée sur Sanhua, Qingxiao et les Rover Spectro/Aero à partir des fiches publiques Encore le 10 septembre 2026.
+
+Les cases sont enregistrées uniquement avec **Enregistrer**, dans le champ additionnel `forteNodes` de chaque Résonateur, avec les clés `node:<Id>` et `skill:<SkillId>`. Les champs précédents et les identifiants momentanément absents de la source sont conservés. Fermer sans enregistrer annule les modifications. Les noms/descriptions restent ceux de la source anglaise déjà utilisée par l'application ; les contrôles existent en FR/EN. Les numéros affichés servent à distinguer les bonus identiques, sans prétendre reproduire leur position dans l'arbre du jeu.
+
+Les priorités, niveaux recommandés et objectifs personnalisés constituent des étapes suivantes, non implémentées ici. Source : [documentation Encore](https://api-v2.encore.moe/_docs/scalar).
+
 ## Vérifications reproductibles
 
 Les tests utilisent Node.js, Playwright 1.62.1 et Microsoft Edge installé. Playwright est déjà disponible dans l'environnement Codex utilisé pour cette livraison ; ailleurs, installer cette dépendance de développement avec `npm install --no-save playwright@1.62.1`. L'application publiée n'en dépend pas.
@@ -44,8 +54,8 @@ node tests/pwa-update.cjs
 git diff --check
 ```
 
-- `responsive.cjs` exécute les vrais scripts de l'application avec des données synthétiques dans un navigateur isolé : 42 cas de dimensions/langue, rotations, noms longs, placement et absence de chevauchement, tri, filtres, recherche, édition et conservation après rechargement. Les captures sont produites dans `test-results/`, exclu de Git.
-- `pwa-update.cjs` vérifie le passage du commit `7028d08` au shell courant avec deux anciennes fenêtres ouvertes, l'attente d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne.
+- `responsive.cjs` exécute les vrais scripts de l'application avec un catalogue synthétique dans un navigateur isolé : 42 cas de dimensions/langue, rotations, noms longs, placement et absence de chevauchement, tri, filtres, recherche, édition et conservation après rechargement. Il utilise aussi un extrait réel des champs de passifs de Sanhua pour vérifier les identifiants, doublons, données absentes, annulation, sauvegarde, rafraîchissement et isolation entre Résonateurs. Les captures sont produites dans `test-results/`, exclu de Git.
+- `pwa-update.cjs` vérifie le passage du commit `9d62571` au shell courant avec deux anciennes fenêtres ouvertes, l'attente d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne incluant le nouveau script Forte.
 - Examiner les captures, la syntaxe JavaScript et le diff avant publication. Après publication, comparer les fichiers réellement servis par Pages avec les fichiers livrés.
 
 Ces essais ne constituent pas une validation sur la tablette physique et ne vérifient pas l'exactitude des données des services de jeu. Ils ne modifient jamais le navigateur ni les données de l'utilisateur.

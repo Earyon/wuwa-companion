@@ -6,6 +6,7 @@ const path = require('node:path');
 const http = require('node:http');
 const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
+const forteFixture=require('./fixtures/sanhua-forte.json');
 const out = path.join(root, 'test-results');
 fs.mkdirSync(out, { recursive: true });
 const characters = Array.from({length:55}, (_,i)=>({
@@ -66,7 +67,7 @@ async function inspect(page,label){
    const context=await browser.newContext({viewport:{width:720,height:1122},deviceScaleFactor:4/3,serviceWorkers:'block'});
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
-   await page.route('https://**/*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({GameVer:'test',ResVer:'test',Skills:[]})}));
+   await page.route('https://**/*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(route.request().url().endsWith('/character/1')?forteFixture:{GameVer:'test',ResVer:'test',Skills:[]})}));
    await page.addInitScript(({characters,weapons,account,lang})=>{
     if(localStorage.getItem('test-seeded'))return;
     localStorage.setItem('wwc_catalog_canonical_v050',JSON.stringify({characters,weapons,state:{gameVersion:'test',resourceVersion:'test'}}));
@@ -113,9 +114,52 @@ async function inspect(page,label){
    const saved=JSON.parse(await page.evaluate(()=>localStorage.getItem('wwc_account_data')));
    const initial=JSON.parse(stored);
    assert.deepEqual(saved.Qingxiao,initial.Qingxiao);assert.deepEqual(saved.Aalto,initial.Aalto);
+   // Real editor, observed source schema; never replace rendered components.
+   const openQ=async()=>{await page.locator('#ownedSearch').fill('Qingxiao');await page.locator('.edit-chevron').click();await page.waitForFunction(()=>document.querySelectorAll('#forteEditor input').length===10);};
+   await openQ();
+   const normalized=await page.evaluate(fixture=>{
+    const original=normalizeForteDefs(fixture);
+    const duplicate=normalizeForteDefs({...fixture,SkillTree:[...fixture.SkillTree,...fixture.SkillTree,{Id:'invalid',PropertyNodeTitle:'Invalid'}]});
+    const reversed=normalizeForteDefs({...fixture,SkillTree:[...fixture.SkillTree].reverse()});
+    return {original,duplicate,reversed,empty:normalizeForteDefs(null)};
+   },forteFixture);
+   assert.deepEqual(normalized.original,normalized.duplicate,'Duplicate or malformed IDs cannot create extra controls');
+   assert.deepEqual(normalized.original,normalized.reversed,'Source ordering does not change node identity or order');
+   assert.deepEqual(normalized.empty,[]);
+   const node=page.locator('[data-forte-key="node:9"]'),inherent=page.locator('[data-forte-key="skill:1000504"]');
+   assert.equal(await page.locator('[data-forte-key="skill:1000508"]').count(),0,'Cooking passive is automatic');
+   await node.check();await inherent.check();
+   await page.locator('#editorClose').click();await openQ();
+   assert.equal(await node.isChecked(),false,'Closing without saving cancels changes');
+   await node.check();await inherent.check();
+   for(const width of [320,720,1152,720]){
+    await page.setViewportSize({width,height:1122});
+    assert.equal(await page.evaluate(()=>{const e=document.querySelector('#accountEditor .modal');return e?e.scrollWidth<=e.clientWidth+1:document.documentElement.scrollWidth<=innerWidth+1;}),true);
+    const overlap=await page.locator('.forte-node').evaluateAll(rows=>rows.some(row=>{const r=row.getBoundingClientRect(),input=row.querySelector('input').getBoundingClientRect(),copy=row.querySelector('.forte-node-copy').getBoundingClientRect();return input.right>copy.left||copy.right>r.right+1||copy.left<r.left;}));
+    assert.equal(overlap,false,'Passive controls and text stay inside their row');
+   }
+   await page.locator('#forteEditor').screenshot({path:path.join(out,`${lang}-forte.png`)});
+   await page.locator('#editorSave').click();await page.reload();await page.locator('.res-row').first().waitFor();await openQ();
+   assert.equal(await node.isChecked(),true);assert.equal(await inherent.isChecked(),true);
+   // A background refresh must preserve unsaved checkbox changes.
+   await node.uncheck();await page.evaluate(()=>{editingForteDefs=normalizeForteDefs({...readCharacterDetailCache('1'),SkillTree:[...readCharacterDetailCache('1').SkillTree].reverse()});drawSkillsEditor();});
+   assert.equal(await node.isChecked(),false);await page.locator('#editorSave').click();
+   const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data')));
+   assert.deepEqual(after.Qingxiao,{...initial.Qingxiao,forteNodes:{'node:9':false,'skill:1000504':true}});
+   assert.deepEqual(after.Aalto,initial.Aalto);
+   // Missing upstream nodes do not delete stored unlocks on the next save.
+   await openQ();await page.evaluate(()=>{editingForteNodes['node:999']=true;editingForteDefs=editingForteDefs.filter(d=>d.key!=='skill:1000504');drawSkillsEditor();});
+   await node.check();await page.locator('#editorSave').click();
+   const preserved=await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data')).Qingxiao.forteNodes);
+   assert.equal(preserved['node:999'],true);assert.equal(preserved['skill:1000504'],true);
+   await page.locator('#ownedSearch').fill('Aalto');await page.locator('.edit-chevron').click();
+   await page.waitForFunction(()=>document.querySelector('#forteEditor').textContent.includes('unavailable')||document.querySelector('#forteEditor').textContent.includes('indisponibles'));
+   assert.equal(await page.locator('#forteEditor input').count(),0,'Missing data must not reuse another character’s nodes');
+   await page.locator('#editorSave').click();
+   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data')).Aalto),{level:null,sequence:0,weapon:null,skills:{}});
    assert.deepEqual(errors,[]);
    await context.close();
   }
-  console.log(`PASS: ${cases} real-page viewport/language cases; constrained panel; sort directions; filters; search; edit/save; reload persistence; no page errors.`);
+  console.log(`PASS: ${cases} real-page viewport/language cases; list interactions; passive source normalization, cancel/save, reload, refresh, missing nodes, character isolation and geometry; no page errors.`);
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1});

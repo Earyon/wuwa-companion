@@ -1,0 +1,992 @@
+{
+  "source": "https://api-v2.encore.moe/api/en/character/1102",
+  "retrieved": "2026-09-10",
+  "Skills": [
+    {
+      "SkillId": 1000501,
+      "SkillType": "Normal Attack",
+      "SkillName": "Frigid Light",
+      "SkillDescribe": "",
+      "Consumes": [
+        {
+          "Consume": []
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 2
+            },
+            {
+              "Key": 41100011,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 1500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 3
+            },
+            {
+              "Key": 41100011,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 2000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 2
+            },
+            {
+              "Key": 41100012,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 4500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 3
+            },
+            {
+              "Key": 41100012,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 6000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 3
+            },
+            {
+              "Key": 41100013,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 16000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 5
+            },
+            {
+              "Key": 41100013,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 30000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 2
+            },
+            {
+              "Key": 41100014,
+              "Value": 2
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 50000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 3
+            },
+            {
+              "Key": 41100014,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 70000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 6
+            },
+            {
+              "Key": 41100014,
+              "Value": 4
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 100000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "SkillId": 1000502,
+      "SkillType": "Resonance Skill",
+      "SkillName": "Eternal Frost",
+      "SkillDescribe": "",
+      "Consumes": [
+        {
+          "Consume": []
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 2
+            },
+            {
+              "Key": 41100011,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 1500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 3
+            },
+            {
+              "Key": 41100011,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 2000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 2
+            },
+            {
+              "Key": 41100012,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 4500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 3
+            },
+            {
+              "Key": 41100012,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 6000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 3
+            },
+            {
+              "Key": 41100013,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 16000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 5
+            },
+            {
+              "Key": 41100013,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 30000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 2
+            },
+            {
+              "Key": 41100014,
+              "Value": 2
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 50000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 3
+            },
+            {
+              "Key": 41100014,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 70000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 6
+            },
+            {
+              "Key": 41100014,
+              "Value": 4
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 100000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "SkillId": 1000503,
+      "SkillType": "Resonance Liberation",
+      "SkillName": "Glacial Gaze",
+      "SkillDescribe": "",
+      "Consumes": [
+        {
+          "Consume": []
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 2
+            },
+            {
+              "Key": 41100011,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 1500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 3
+            },
+            {
+              "Key": 41100011,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 2000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 2
+            },
+            {
+              "Key": 41100012,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 4500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 3
+            },
+            {
+              "Key": 41100012,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 6000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 3
+            },
+            {
+              "Key": 41100013,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 16000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 5
+            },
+            {
+              "Key": 41100013,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 30000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 2
+            },
+            {
+              "Key": 41100014,
+              "Value": 2
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 50000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 3
+            },
+            {
+              "Key": 41100014,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 70000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 6
+            },
+            {
+              "Key": 41100014,
+              "Value": 4
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 100000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "SkillId": 1000504,
+      "SkillType": "Inherent Skill",
+      "SkillName": "Condensation",
+      "SkillDescribe": "Damage dealt by Sanhua's Resonance Skill increased by 20% for 8s after casting her Intro Skill.",
+      "Consumes": [
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 3
+            },
+            {
+              "Key": 41100012,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 10000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "SkillId": 1000505,
+      "SkillType": "Inherent Skill",
+      "SkillName": "Avalanche",
+      "SkillDescribe": "Damage dealt by Sanhua's Forte Circuit <span style=\"color:#ffd12f;\" class=\"font-bold\">Ice Burst</span> is increased by 20% for 8s after casting <span style=\"color:#ffd12f;\" class=\"font-bold\">Basic Attack 5</span>.",
+      "Consumes": [
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 3
+            },
+            {
+              "Key": 41100013,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 20000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "SkillId": 1000506,
+      "SkillType": "Intro Skill",
+      "SkillName": "Freezing Thorns",
+      "SkillDescribe": "",
+      "Consumes": [
+        {
+          "Consume": []
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 2
+            },
+            {
+              "Key": 41100011,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 1500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 3
+            },
+            {
+              "Key": 41100011,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 2000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 2
+            },
+            {
+              "Key": 41100012,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 4500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 3
+            },
+            {
+              "Key": 41100012,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 6000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 3
+            },
+            {
+              "Key": 41100013,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 16000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 5
+            },
+            {
+              "Key": 41100013,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 30000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 2
+            },
+            {
+              "Key": 41100014,
+              "Value": 2
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 50000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 3
+            },
+            {
+              "Key": 41100014,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 70000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 6
+            },
+            {
+              "Key": 41100014,
+              "Value": 4
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 100000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "SkillId": 1000507,
+      "SkillType": "Forte Circuit",
+      "SkillName": "Clarity of Mind",
+      "SkillDescribe": "",
+      "Consumes": [
+        {
+          "Consume": []
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 2
+            },
+            {
+              "Key": 41100011,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 1500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020011,
+              "Value": 3
+            },
+            {
+              "Key": 41100011,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 2000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 2
+            },
+            {
+              "Key": 41100012,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 4500
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020012,
+              "Value": 3
+            },
+            {
+              "Key": 41100012,
+              "Value": 3
+            },
+            {
+              "Key": 2,
+              "Value": 6000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 3
+            },
+            {
+              "Key": 41100013,
+              "Value": 2
+            },
+            {
+              "Key": 2,
+              "Value": 16000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020013,
+              "Value": 5
+            },
+            {
+              "Key": 41100013,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 30000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 2
+            },
+            {
+              "Key": 41100014,
+              "Value": 2
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 50000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 3
+            },
+            {
+              "Key": 41100014,
+              "Value": 3
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 70000
+            }
+          ]
+        },
+        {
+          "Consume": [
+            {
+              "Key": 43020014,
+              "Value": 6
+            },
+            {
+              "Key": 41100014,
+              "Value": 4
+            },
+            {
+              "Key": 41400114,
+              "Value": 1
+            },
+            {
+              "Key": 2,
+              "Value": 100000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "SkillId": 1000508,
+      "SkillType": "Inherent Skill",
+      "SkillName": "Skillful Cooking",
+      "SkillDescribe": "Has a chance to produce special dishes when cooking.",
+      "Consumes": [
+        {
+          "Consume": []
+        }
+      ]
+    },
+    {
+      "SkillId": 1000509,
+      "SkillType": "Outro Skill",
+      "SkillName": "Silversnow",
+      "SkillDescribe": "",
+      "Consumes": [
+        {
+          "Consume": []
+        }
+      ]
+    },
+    {
+      "SkillId": 1000510,
+      "SkillType": "Tune Break",
+      "SkillName": "Tune Break: Sword",
+      "SkillDescribe": "",
+      "Consumes": [
+        {
+          "Consume": []
+        }
+      ]
+    }
+  ],
+  "SkillTree": [
+    {
+      "Id": 9,
+      "PropertyNodeTitle": "Glacio DMG Bonus+",
+      "PropertyNodeDescribe": "Glacio DMG Bonus increased by 1.80%."
+    },
+    {
+      "Id": 10,
+      "PropertyNodeTitle": "ATK+",
+      "PropertyNodeDescribe": "ATK increased by 1.80%."
+    },
+    {
+      "Id": 12,
+      "PropertyNodeTitle": "Glacio DMG Bonus+",
+      "PropertyNodeDescribe": "Glacio DMG Bonus increased by 1.80%."
+    },
+    {
+      "Id": 13,
+      "PropertyNodeTitle": "Glacio DMG Bonus+",
+      "PropertyNodeDescribe": "Glacio DMG Bonus increased by 4.20%."
+    },
+    {
+      "Id": 14,
+      "PropertyNodeTitle": "ATK+",
+      "PropertyNodeDescribe": "ATK increased by 4.20%."
+    },
+    {
+      "Id": 15,
+      "PropertyNodeTitle": "ATK+",
+      "PropertyNodeDescribe": "ATK increased by 4.20%."
+    },
+    {
+      "Id": 16,
+      "PropertyNodeTitle": "Glacio DMG Bonus+",
+      "PropertyNodeDescribe": "Glacio DMG Bonus increased by 4.20%."
+    },
+    {
+      "Id": 11,
+      "PropertyNodeTitle": "ATK+",
+      "PropertyNodeDescribe": "ATK increased by 1.80%."
+    }
+  ]
+}

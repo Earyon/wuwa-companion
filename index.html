@@ -79,6 +79,7 @@
     <small id="skillsSource"></small>
    </div>
    <div id="skillsEditor"><div class="skill-loading">Chargement…</div></div>
+   <div id="forteEditor"></div>
   </div>
   <div class="editor-actions">
    <button class="goldbtn" id="editorSave" onclick="saveAccountEditor()">Enregistrer</button>
@@ -767,6 +768,7 @@ function auditCoreSkillIcons(){
 }
 
 function drawSkillsEditor(state="ready"){
+ drawForteEditor(state);
  const box=document.querySelector("#skillsEditor"); if(!box)return;
  document.querySelector("#skillsLabel").textContent=lang==="fr"?"Compétences / Forte":"Skills / Forte";
  const src=document.querySelector("#skillsSource");
@@ -805,24 +807,29 @@ async function loadEditorSkills(resonator){
  const token=++skillDetailRequestToken;
  editingSkillDefs=[];
  editingSkills={...(accountData[editingName]?.skills||{})};
+ editingForteNodes={...(accountData[editingName]?.forteNodes||{})};
+ editingForteDefs=[];
+ editingForteChanged=false;
  drawSkillsEditor("loading");
  if(!resonator?.gameId){drawSkillsEditor("error");return}
  try{
    const cached=readCharacterDetailCache(resonator.gameId);
    if(cached){
      editingSkillDefs=normalizeSkillDefs(cached);
+     editingForteDefs=normalizeForteDefs(cached);
      if(token===skillDetailRequestToken)drawSkillsEditor();
      // refresh detail in background, never block the editor
      getCharacterDetail(resonator.gameId,{background:true}).then(({detail})=>{
        if(token!==skillDetailRequestToken)return;
        const next=normalizeSkillDefs(detail);
-       if(next.length){editingSkillDefs=next;drawSkillsEditor()}
+       if(next.length){editingSkillDefs=next;editingForteDefs=normalizeForteDefs(detail);drawSkillsEditor()}
      }).catch(()=>{});
      return;
    }
    const {detail}=await getCharacterDetail(resonator.gameId);
    if(token!==skillDetailRequestToken)return;
    editingSkillDefs=normalizeSkillDefs(detail);
+   editingForteDefs=normalizeForteDefs(detail);
    drawSkillsEditor();
  }catch(e){
    console.warn("Skill detail unavailable",e);
@@ -987,6 +994,7 @@ function drawLevels(){
 function saveAccountEditor(){
  if(!editingName)return;
  accountData[editingName]={...(accountData[editingName]||{}),level:editingLevel,sequence:editingSeq,weapon:editingWeapon?{name:editingWeapon,level:editingWeaponLevel,rank:editingWeaponRank}:null,skills:{...editingSkills}};
+ if(editingForteChanged)accountData[editingName].forteNodes={...editingForteNodes};
  localStorage.setItem("wwc_account_data",JSON.stringify(accountData));
  document.querySelector("#accountEditor").classList.remove("open");
  render();
@@ -1073,5 +1081,6 @@ auditCompanionData();
 
 bootstrapCanonicalCatalog().catch(err=>dataErrorScreen(err));
 </script>
+<script src="./forte.js"></script>
 </body>
 </html>

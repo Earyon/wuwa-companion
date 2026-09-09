@@ -191,6 +191,20 @@ button{cursor:pointer}
 .skill-levels{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .skill-levels button{border:1px solid #304b65;border-radius:8px;background:#091a2a;color:#c7d5e5;padding:6px 9px;font-size:11px}
 .skill-levels button.active{border-color:#c7a756;color:#ffe5a2;background:rgba(199,167,86,.12)}
+.forte-heading{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:20px;font-size:13px;color:#dbe7f4}
+.forte-heading span{color:var(--gold);font-size:12px}
+.forte-note{color:#93a8bd;font-size:12px;line-height:1.5}
+.forte-group{min-width:0;margin:14px 0 0;padding:0;border:0}
+.forte-group legend{padding:0 0 8px;color:#b9c9dc;font-size:12px}
+.forte-nodes{display:grid;gap:8px}
+.forte-node{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:10px;min-height:48px;padding:10px;border:1px solid #29445f;border-radius:11px;background:#0a1d2e;cursor:pointer}
+.forte-node input{width:22px;height:22px;margin:0;accent-color:var(--gold);cursor:pointer}
+.forte-node input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.forte-node-copy{min-width:0;overflow-wrap:anywhere}
+.forte-node-copy b{display:block;color:#e6eef8;font-size:12px;font-weight:500}
+.forte-node-copy small{color:#93a8bd;font-size:10px}
+.forte-node-copy>span{display:block;margin-top:4px;color:#93a8bd;font-size:11px;line-height:1.5}
+.forte-node input:checked+.forte-node-copy b{color:var(--gold)}
 .data-refresh-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:5px;opacity:.8}
 .char-card img,.select-card img,.weapon-card img{content-visibility:auto}
 .cold-loader{max-width:560px;margin:15vh auto 0;padding:24px}
