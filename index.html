@@ -581,6 +581,12 @@ button{cursor:pointer}
 }
 .sort-trigger:hover,.sort-trigger:focus-visible{border-color:#d1b35e;color:#f3dc99;outline:none}
 .sort-caret{font-size:12px;opacity:.8}
+.sort-direction{
+ display:inline-grid;grid-template-columns:auto 1em auto;align-items:center;gap:.3em;line-height:1
+}
+.sort-flow-arrow{
+ display:grid;place-items:center;width:1em;height:1em;font-family:system-ui,sans-serif;line-height:1
+}
 .sort-menu{
  display:none;position:absolute;z-index:80;right:0;top:calc(100% + 7px);min-width:150px;
  padding:6px;border:1px solid #304c67;border-radius:12px;background:#081827;
@@ -697,11 +703,11 @@ button{cursor:pointer}
 }
 
 
-/* Keep progress near the identity in portrait; use one row on wide screens. */
+/* Keep progress near the identity on narrow cards; use one row when space permits. */
 @media(max-width:1250px){
  .res-row .res-actions{max-width:340px;justify-self:start}
 }
-@media(min-width:700px) and (orientation:landscape), (min-width:1251px){
+@media(min-width:820px){
  .res-row{
   grid-template-columns:74px minmax(0,1fr) minmax(180px,250px) 38px;
   grid-template-rows:auto;
@@ -730,7 +736,7 @@ button{cursor:pointer}
  }
  .filter-sort-row .sort-dropdown{margin-left:0;justify-self:end}
 }
-@media(max-width:699px), (orientation:portrait) and (max-width:1250px){
+@media(max-width:819px){
  .res-row{
   grid-template-columns:70px minmax(0,1fr) 38px;
   grid-template-rows:auto auto;
@@ -1224,14 +1230,18 @@ function sortOptionLabel(scope,kind){
  const dir=activeKind==="rarity"?activeDir:-1;
  return dir===-1?"5★ → 4★":"4★ → 5★";
 }
+function sortDirectionHTML(label){
+ const [from,to]=label.split(" → ");
+ return `<span class="sort-direction"><span>${from}</span><span class="sort-flow-arrow" aria-hidden="true">→</span><span>${to}</span></span>`;
+}
 function sortDropdownHTML(scope){
  return `<div class="sort-dropdown">
-   <button class="sort-trigger" aria-haspopup="menu" aria-expanded="false" onclick="toggleSortMenu('${scope}',event)">
-     <span>${sortLabel(scope)}</span><span class="sort-caret">⌄</span>
+   <button class="sort-trigger" aria-label="${sortLabel(scope)}" aria-haspopup="menu" aria-expanded="false" onclick="toggleSortMenu('${scope}',event)">
+     ${sortDirectionHTML(sortLabel(scope))}<span class="sort-caret">⌄</span>
    </button>
    <div class="sort-menu" id="sortMenu-${scope}" role="menu">
-     <button role="menuitem" onclick="chooseSort('${scope}','alpha',event)">${sortOptionLabel(scope,"alpha")}</button>
-     <button role="menuitem" onclick="chooseSort('${scope}','rarity',event)">${sortOptionLabel(scope,"rarity")}</button>
+     <button role="menuitem" onclick="chooseSort('${scope}','alpha',event)">${sortDirectionHTML(sortOptionLabel(scope,"alpha"))}</button>
+     <button role="menuitem" onclick="chooseSort('${scope}','rarity',event)">${sortDirectionHTML(sortOptionLabel(scope,"rarity"))}</button>
    </div>
  </div>`;
 }

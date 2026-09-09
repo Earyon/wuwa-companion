@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='wuwa-companion-shell-';
-const CACHE_NAME=CACHE_PREFIX+'057-pwa-5';
+const CACHE_NAME=CACHE_PREFIX+'057-pwa-6';
 const SHELL=['./','./index.html','./manifest.webmanifest','./pwa.js','./assets/icon-192.png','./assets/icon-512.png'];
 const shellURLs=new Set(SHELL.map(p=>new URL(p,self.registration.scope).href));
 self.addEventListener('install',event=>{
