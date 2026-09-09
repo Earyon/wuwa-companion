@@ -8,7 +8,7 @@ SHA-256 du texte HTML original : d4a2507e96e2c4c3556d62bc12dc22b98d970b5e53e70e6
 
 La conversation annonce ensuite une V0.5.8 PWA. Son bouton de téléchargement était visible mais ne livrait aucun fichier pendant la récupération. Aucun artefact ultérieur n'a été trouvé dans les messages postérieurs. Ce paquet est donc une adaptation documentée de la V0.5.7 récupérée, et NON l'archive originale V0.5.8.
 
-## Changements limités
+## Adaptation initiale
 
 - HTML, CSS et logique de la V0.5.7 conservés, y compris leurs sections encore en attente de développement.
 - Ajout de 20 px sous la ligne filtres/tri dans les deux listes, conformément au dernier retour validé (la valeur exacte n'était pas précisée).
@@ -16,10 +16,11 @@ La conversation annonce ensuite une V0.5.8 PWA. Son bouton de téléchargement �
 - Icônes d'installation créées à partir du nom et des couleurs de l'interface ; aucune icône d'application d'origine récupérable.
 - Clés de stockage, données et logique de validation d'origine conservées.
 
-## Copier dans le dépôt
+## Développement et publication
 
-Extraire le ZIP puis copier son contenu à la racine du dépôt local wuwa-companion. index.html doit être directement à la racine. Aucun outil de compilation ni installation de dépendances n'est nécessaire.
-Vérifier les changements dans GitHub Desktop, puis effectuer le commit et le push lorsque souhaité.
+Le site reste statique, sans compilation ni dépendance à installer pour son utilisation. GitHub Pages publie la branche `main`. Les corrections demandées peuvent être vérifiées, commitées et envoyées directement depuis Codex, conformément au cadre décrit dans `AGENTS.md`.
+
+Depuis la consolidation du 10 septembre 2026, `styles.css` contient les styles généraux et `layout.css` possède la disposition des listes, cartes et filtres. Les anciennes règles concurrentes de ces composants ont été supprimées. La disposition des cartes dépend de la largeur réelle du panneau ; sur un petit panneau, le niveau et l'arme passent ensemble sous l'identité. Les autres fonctions et les clés de stockage sont conservées.
 
 ## Hébergement
 
@@ -33,7 +34,20 @@ Le premier lancement des données du jeu nécessite Internet. Le cache local val
 Les nouvelles versions du service worker attendent la fermeture de toutes les fenêtres de l'application avant de s'activer. Modifier CACHE_NAME dans sw.js à chaque livraison des fichiers de l'interface.
 Les données personnelles restent dans le navigateur et dépendent de l'adresse utilisée : un ancien fichier HTML local et un site HTTPS ne partagent pas automatiquement leur stockage.
 
-## Vérifications
+## Vérifications reproductibles
 
-Syntaxe JavaScript d'origine et des ajouts contrôlée ; comparaison confirmant l'absence de modification du script applicatif ; manifeste, icônes et fichiers du cache contrôlés ; intégrité du ZIP contrôlée.
-L'installation sur tablette, le comportement hors ligne et les services distants restent à valider sur l'adresse HTTPS finale.
+Les tests utilisent Node.js, Playwright 1.62.1 et Microsoft Edge installé. Playwright est déjà disponible dans l'environnement Codex utilisé pour cette livraison ; ailleurs, installer cette dépendance de développement avec `npm install --no-save playwright@1.62.1`. L'application publiée n'en dépend pas.
+
+```
+node tests/responsive.cjs
+node tests/pwa-update.cjs
+git diff --check
+```
+
+- `responsive.cjs` exécute les vrais scripts de l'application avec des données synthétiques dans un navigateur isolé : 42 cas de dimensions/langue, rotations, noms longs, placement et absence de chevauchement, tri, filtres, recherche, édition et conservation après rechargement. Les captures sont produites dans `test-results/`, exclu de Git.
+- `pwa-update.cjs` vérifie le passage du commit `7028d08` au shell courant avec deux anciennes fenêtres ouvertes, l'attente d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne.
+- Examiner les captures, la syntaxe JavaScript et le diff avant publication. Après publication, comparer les fichiers réellement servis par Pages avec les fichiers livrés.
+
+Ces essais ne constituent pas une validation sur la tablette physique et ne vérifient pas l'exactitude des données des services de jeu. Ils ne modifient jamais le navigateur ni les données de l'utilisateur.
+
+Références des choix techniques : [container queries, MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Container_queries) et [cycle de vie du service worker, web.dev](https://web.dev/articles/service-worker-lifecycle).
