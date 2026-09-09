@@ -667,6 +667,35 @@ button{cursor:pointer}
 
 /* Validated follow-up to V0.5.7: space below filters and sorting. */
 .filter-sort-row{margin-bottom:20px}
+
+/* Portrait layout: explicit areas prevent inherited implicit grid tracks. */
+.res-row .res-actions{min-width:0}
+.res-row .status{grid-area:auto;min-width:0}
+.status-weapon-copy{flex:0 1 auto;min-width:0;max-width:100%}
+.status-weapon-copy b{max-width:100%}
+.filter-sort-row .filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+.filter-sort-row .filters button{flex:0 0 auto;white-space:nowrap}
+.filter-sort-row .sort-dropdown{flex:0 0 auto}
+@media(max-width:1250px){
+ .res-row{
+  grid-template-columns:70px minmax(0,1fr) 38px;
+  grid-template-rows:auto auto;
+  grid-template-areas:"portrait identity edit" "portrait progress edit";
+  align-items:center;gap:8px 12px;padding:12px;
+ }
+ .res-row>img{grid-area:portrait;width:70px;height:90px;align-self:start}
+ .res-row .res-main{grid-area:identity;min-width:0}
+ .res-row .res-main b{overflow-wrap:anywhere}
+ .res-row .res-actions{
+  grid-area:progress;min-width:0;width:100%;justify-self:stretch;
+  display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:10px;
+ }
+ .res-row .status{grid-area:auto;width:100%;min-width:0;padding:5px 0;margin:0}
+ .res-row .chev{grid-area:edit;display:block;align-self:center;min-width:0;width:38px}
+ .res-row .trash-btn{width:34px;height:34px}
+ .filter-sort-row{align-items:center;gap:10px}
+}
+
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./assets/icon-192.png">
