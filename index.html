@@ -720,6 +720,29 @@ button{cursor:pointer}
  .res-row .trash-btn{width:34px;height:34px}
 }
 
+/* Stable tablet layout: keep every filter visible and anchor card actions. */
+@media(max-width:979px){
+ .filter-sort-row{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-items:start
+ }
+ .filter-sort-row .filters{
+  width:100%;flex-wrap:wrap;overflow:visible;gap:8px;padding-bottom:0
+ }
+ .filter-sort-row .sort-dropdown{margin-left:0;justify-self:end}
+}
+@media(max-width:699px), (orientation:portrait) and (max-width:1250px){
+ .res-row{
+  grid-template-columns:70px minmax(0,1fr) 38px;
+  grid-template-rows:auto auto;
+  grid-template-areas:"portrait identity identity" "portrait progress edit";
+  align-items:center;gap:8px 12px
+ }
+ .res-row>img{grid-area:portrait;align-self:start}
+ .res-row .res-main{grid-area:identity}
+ .res-row .res-actions{grid-area:progress;max-width:340px;justify-self:start}
+ .res-row .chev{grid-area:edit;align-self:center}
+}
+
 </style>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./assets/icon-192.png">
