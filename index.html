@@ -32,11 +32,11 @@ body:before{
 }
 button,input,select{font:inherit}
 button{cursor:pointer}
-.shell{min-height:100vh}
+.shell{min-height:100vh;min-height:100dvh}
 .sidebar{
   display:none;position:fixed;left:0;top:0;bottom:0;width:250px;z-index:50;
   background:linear-gradient(180deg,rgba(5,16,28,.98),rgba(6,17,29,.98));
-  border-right:1px solid var(--line-soft);padding:34px 0 24px;
+  border-right:1px solid var(--line-soft);padding:calc(34px + env(safe-area-inset-top,0px)) 0 24px;
 }
 .logo{text-align:center;margin-bottom:42px;padding:0 18px}
 .logo strong{display:block;font-size:26px;line-height:1.05;letter-spacing:.03em;color:#c7d5ea;font-weight:500}
@@ -52,7 +52,7 @@ button{cursor:pointer}
 .side-foot{position:absolute;left:0;right:0;bottom:26px;text-align:center;color:#6f849e}
 .side-foot .wave{font-size:24px;color:#c8a55e}
 .side-foot div:last-child{font:600 10px/1.8 system-ui;letter-spacing:.28em;margin-top:8px}
-.main{padding:20px 14px 95px;max-width:1250px;margin:auto}
+.main{padding:calc(20px + env(safe-area-inset-top,0px)) 14px 95px;max-width:1250px;margin:auto}
 .page-head{
   position:relative;min-height:158px;border-bottom:1px solid var(--line);padding:18px 14px 20px;
   overflow:hidden;margin-bottom:0
@@ -147,7 +147,7 @@ button{cursor:pointer}
 .select-card span{display:block;padding:8px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .select-card.detected:after{content:"?";position:absolute;top:7px;right:7px;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#17140f;font:bold 12px system-ui}
 .detail{position:fixed;inset:0;z-index:85;background:linear-gradient(145deg,#07111c,#0b1825);overflow:auto;display:none}
-.detail.open{display:block}.detail-inner{max-width:900px;margin:auto;padding:18px 16px 90px}
+.detail.open{display:block}.detail-inner{max-width:900px;margin:auto;padding:calc(18px + env(safe-area-inset-top,0px)) 16px 90px}
 .back{border:1px solid #314b64;background:#091a29;color:#e2eaf4;border-radius:999px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;line-height:1}
 .back .arrow{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px}
 .detailhero{position:relative;min-height:380px;margin-top:14px;border:1px solid #2c465f;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#132b40,#07131e)}
@@ -166,7 +166,7 @@ button{cursor:pointer}
   .card-grid{grid-template-columns:repeat(4,1fr)}.selector-grid{grid-template-columns:repeat(4,1fr)}
 }
 @media(min-width:980px){
-  .sidebar{display:block}.main{margin-left:250px;padding:30px 28px 40px;max-width:none}
+  .sidebar{display:block}.main{margin-left:250px;padding:calc(30px + env(safe-area-inset-top,0px)) 28px 40px;max-width:none}
   .bottom-nav{display:none}.page-head{padding:14px 14px 22px;min-height:165px}.quote{display:block}
   .content-panel{padding:30px}.hidden-mobile{display:block}
 }
