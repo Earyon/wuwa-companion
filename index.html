@@ -1,0 +1,1734 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08121e">
+<title>WuWa Companion V0.5.7</title>
+<style>
+:root{
+  --bg:#07111c;--bg2:#0a1724;--panel:rgba(8,20,32,.90);--panel2:rgba(12,27,42,.88);
+  --line:rgba(132,172,207,.25);--line-soft:rgba(132,172,207,.13);
+  --text:#e7eef8;--muted:#91a5bd;--muted2:#6f849e;--gold:#f0d48b;--gold2:#ffd887;
+  --cyan:#74d6d1;--pink:#ff5577;--shadow:0 20px 55px rgba(0,0,0,.28)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#07111c;color:var(--text)}
+body{
+  font-family:Georgia,"Times New Roman",serif;
+  background:
+    radial-gradient(circle at 78% 7%,rgba(33,85,139,.28),transparent 28%),
+    radial-gradient(circle at 32% 82%,rgba(24,60,96,.18),transparent 34%),
+    linear-gradient(145deg,#07111c,#0a1724 50%,#07111c);
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;
+  background-image:
+    radial-gradient(circle at 12% 25%,rgba(255,255,255,.45) 0 1px,transparent 1.2px),
+    radial-gradient(circle at 68% 18%,rgba(255,255,255,.35) 0 1px,transparent 1.2px),
+    radial-gradient(circle at 86% 62%,rgba(255,255,255,.28) 0 1px,transparent 1.2px),
+    linear-gradient(115deg,transparent 0 49%,rgba(108,160,204,.05) 50%,transparent 51%);
+  background-size:170px 170px,240px 240px,290px 290px,620px 620px;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.shell{min-height:100vh}
+.sidebar{
+  display:none;position:fixed;left:0;top:0;bottom:0;width:250px;z-index:50;
+  background:linear-gradient(180deg,rgba(5,16,28,.98),rgba(6,17,29,.98));
+  border-right:1px solid var(--line-soft);padding:34px 0 24px;
+}
+.logo{text-align:center;margin-bottom:42px;padding:0 18px}
+.logo strong{display:block;font-size:26px;line-height:1.05;letter-spacing:.03em;color:#c7d5ea;font-weight:500}
+.logo span{display:block;margin-top:9px;letter-spacing:.28em;font:700 10px/1 system-ui;color:#91a7c4}
+.side-nav{display:grid;gap:6px}
+.side-nav button{
+  position:relative;width:100%;border:0;background:transparent;color:#91a7c4;text-align:left;
+  padding:18px 30px;font-size:17px;display:flex;align-items:center;gap:15px
+}
+.side-nav button.active{color:var(--gold);background:linear-gradient(90deg,rgba(243,207,121,.16),transparent)}
+.side-nav button.active:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--gold);box-shadow:0 0 16px rgba(240,212,139,.45)}
+.side-icon{width:25px;text-align:center;font-family:system-ui}
+.side-foot{position:absolute;left:0;right:0;bottom:26px;text-align:center;color:#6f849e}
+.side-foot .wave{font-size:24px;color:#c8a55e}
+.side-foot div:last-child{font:600 10px/1.8 system-ui;letter-spacing:.28em;margin-top:8px}
+.main{padding:20px 14px 95px;max-width:1250px;margin:auto}
+.page-head{
+  position:relative;min-height:158px;border-bottom:1px solid var(--line);padding:18px 14px 20px;
+  overflow:hidden;margin-bottom:0
+}
+.page-head h1{margin:4px 0 6px;font-weight:500;font-size:34px;color:#e6edf8}
+.page-head p{margin:0;color:#9eb0c5;font-size:15px}
+.head-art{
+  position:absolute;right:0;top:-38px;width:350px;height:200px;opacity:.36;
+  background:radial-gradient(circle at 65% 50%,rgba(69,126,185,.25),transparent 55%);
+  overflow:hidden;pointer-events:none
+}
+.head-art:after{
+  content:"";position:absolute;right:18px;top:28px;width:160px;height:160px;border-radius:50%;
+  border:1px solid rgba(159,198,225,.08);box-shadow:0 0 70px rgba(52,110,167,.16)
+}
+.quote{display:none;position:absolute;right:220px;top:38px;color:#6e84a0;font-style:italic;font-size:16px}
+.account-tabs{
+  display:flex;gap:34px;overflow:auto;border-bottom:1px solid var(--line);padding:0 12px
+}
+.account-tabs button{
+  position:relative;border:0;background:transparent;color:#8fa4c2;padding:16px 4px 14px;font-size:16px;white-space:nowrap
+}
+.account-tabs button.active{color:#eef4fd}
+.account-tabs button.active:after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--gold);
+  box-shadow:0 0 10px rgba(240,212,139,.6)
+}
+.content-panel{
+  margin-top:28px;border:1px solid var(--line);border-radius:14px;padding:24px;
+  background:linear-gradient(180deg,rgba(7,20,33,.87),rgba(7,17,29,.94));box-shadow:var(--shadow)
+}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.panel-head h2{margin:0;font-size:28px;font-weight:500}
+.panel-head p{margin:6px 0 0;color:#8398b4;font-size:13px}
+.tools{display:flex;gap:12px;align-items:center}
+.searchbox{position:relative}
+.searchbox input{
+  width:300px;max-width:44vw;background:rgba(9,24,39,.95);border:1px solid #38516c;color:var(--text);
+  border-radius:999px;padding:12px 16px 12px 42px;outline:none
+}
+.searchbox:before{content:"⌕";position:absolute;left:16px;top:50%;transform:translateY(-52%);font:24px/1 system-ui;color:#88a3c9}
+.goldbtn{
+  border:0;color:#1a1a18;border-radius:999px;padding:12px 24px;
+  background:linear-gradient(180deg,#ffe6a8,#e9c770);box-shadow:0 0 20px rgba(240,212,139,.15);
+  font-size:16px;display:inline-flex;align-items:center;gap:10px
+}
+.goldbtn b{font:300 28px/1 system-ui}
+.res-list{display:grid;gap:14px}
+.res-row{
+  min-height:124px;border:1px solid #253d56;border-radius:12px;background:linear-gradient(180deg,rgba(10,25,40,.78),rgba(7,19,31,.86));
+  display:grid;grid-template-columns:94px 1fr auto 34px;align-items:center;gap:18px;padding:7px 20px 7px 7px
+}
+.res-row img{width:86px;height:108px;object-fit:contain;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(239,207,128,.55)}
+.res-main b{display:block;font-size:23px;font-weight:500;margin-bottom:9px}
+.res-meta{display:flex;gap:24px;flex-wrap:wrap;color:#aebed3;font-size:14px}
+.res-meta .element{color:var(--element)}
+.status{
+  min-width:230px;border:1px solid #29445f;border-radius:999px;padding:13px 24px;
+  text-align:center;color:#b9c9dc;background:linear-gradient(180deg,rgba(21,43,67,.82),rgba(13,30,49,.88));
+  margin-right:18px
+}
+.chev{font:32px/1 system-ui;color:#a8bdd7;text-align:center}
+.footer-row{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-top:26px;color:#8095b1;font-size:13px}
+.footer-row select{background:#0a1a2b;color:#aebed3;border:1px solid #314b66;border-radius:8px;padding:10px 38px 10px 12px}
+.empty{padding:55px 20px;text-align:center;color:#7f93ad}
+.card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.char-card{
+  position:relative;overflow:hidden;border:1px solid #2a435c;border-radius:14px;min-height:240px;
+  background:linear-gradient(160deg,rgba(17,37,55,.9),rgba(7,18,30,.98));cursor:pointer
+}
+.char-card .pic{height:175px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.char-card img{width:100%;height:100%;object-fit:contain}
+.char-card .info{padding:10px 12px;border-top:1px solid rgba(255,255,255,.03)}
+.char-card .info b{display:block;font-size:16px;font-weight:500}
+.char-card .info small{color:#8095ac}
+.filters{display:flex;gap:8px;overflow:auto;margin:12px 0 16px}
+.filters button{border:1px solid #29445e;background:#0c1e30;color:#9eb0c4;padding:8px 12px;border-radius:999px}
+.filters button.active{color:#17202a;background:linear-gradient(#ffe4a1,#e6c36d);border-color:#e6c36d}
+.selector-overlay{position:fixed;inset:0;z-index:90;background:rgba(2,8,14,.78);backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center}
+.selector-overlay.open{display:flex}
+.selector-sheet{
+  width:min(760px,100%);max-height:88vh;overflow:auto;background:linear-gradient(180deg,#0c1c2b,#07131f);
+  border:1px solid #35506b;border-radius:20px 20px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom))
+}
+.selector-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.selector-head h2{margin:0;font-size:24px;font-weight:500}
+.closebtn{border:1px solid #34506a;background:#0b1b2b;color:#d5dfeb;width:38px;height:38px;border-radius:50%}
+.selector-search{width:100%;background:#081827;border:1px solid #34506a;color:var(--text);border-radius:999px;padding:12px 16px;margin-bottom:12px}
+.selector-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.select-card{position:relative;border:1px solid #29445f;border-radius:12px;overflow:hidden;background:#0a1d2e;color:#e5edf8;padding:0}
+.select-card img{width:100%;height:120px;object-fit:contain;background:rgba(255,255,255,.02)}
+.select-card span{display:block;padding:8px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.select-card.detected:after{content:"?";position:absolute;top:7px;right:7px;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#17140f;font:bold 12px system-ui}
+.detail{position:fixed;inset:0;z-index:85;background:linear-gradient(145deg,#07111c,#0b1825);overflow:auto;display:none}
+.detail.open{display:block}.detail-inner{max-width:900px;margin:auto;padding:18px 16px 90px}
+.back{border:1px solid #314b64;background:#091a29;color:#e2eaf4;border-radius:999px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;line-height:1}
+.back .arrow{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px}
+.detailhero{position:relative;min-height:380px;margin-top:14px;border:1px solid #2c465f;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#132b40,#07131e)}
+.detailhero img{position:absolute;right:0;bottom:0;width:72%;height:100%;object-fit:contain}
+.detailhero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,13,21,.9),rgba(5,13,21,.2) 55%,transparent)}
+.detailcopy{position:absolute;left:22px;bottom:24px;z-index:2}.detailcopy h1{margin:0;font-size:38px;font-weight:500}.detailcopy p{color:#b4c3d5}
+.actions{display:flex;gap:10px;margin-top:12px}.action{border:1px solid #2e4861;background:#0b1d2e;color:#e4edf8;border-radius:12px;padding:11px 16px;display:inline-flex;gap:9px;align-items:center}.action.primary{border-color:#d2b66e;color:#f4deb0}.action svg{width:19px;height:19px}.wish svg{fill:var(--pink)}
+.bottom-nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(5,15,25,.96);backdrop-filter:blur(16px);
+  border-top:1px solid var(--line-soft);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)
+}
+.bottom-nav button{border:0;background:transparent;color:#6f849f;padding:10px 2px 8px}.bottom-nav button.active{color:var(--gold)}
+.bottom-nav b{display:block;font:18px/1 system-ui}.bottom-nav small{font:9px/1.1 system-ui}
+.hidden-mobile{display:none}
+@media(min-width:720px){
+  .card-grid{grid-template-columns:repeat(4,1fr)}.selector-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(min-width:980px){
+  .sidebar{display:block}.main{margin-left:250px;padding:30px 28px 40px;max-width:none}
+  .bottom-nav{display:none}.page-head{padding:14px 14px 22px;min-height:165px}.quote{display:block}
+  .content-panel{padding:30px}.hidden-mobile{display:block}
+}
+@media(max-width:760px){
+  .page-head{min-height:130px;padding:8px 4px 18px}.page-head h1{font-size:30px}.head-art{width:180px;opacity:.2}
+  .content-panel{margin-top:18px;padding:16px}.panel-head{align-items:flex-start;flex-direction:column}
+  .tools{width:100%}.searchbox{flex:1}.searchbox input{width:100%;max-width:none}.goldbtn{padding:11px 16px}
+  .res-row{grid-template-columns:72px 1fr;gap:12px;padding:8px}.res-row img{width:70px;height:90px}.status{grid-column:2;min-width:0;width:max-content;margin:0 0 4px auto;padding:9px 18px}.chev{display:none}.res-meta{gap:12px;font-size:12px}
+  .footer-row{display:none}
+}
+
+.remove-res{
+  border:1px solid rgba(198,105,105,.28);background:rgba(71,24,31,.35);color:#d8a3aa;
+  border-radius:999px;padding:8px 12px;font-size:12px;white-space:nowrap
+}
+.remove-res:hover{border-color:rgba(220,120,120,.5);color:#f0bcc3}
+.res-actions{display:flex;align-items:center;gap:10px}
+@media(max-width:760px){
+  .res-actions{grid-column:2;justify-content:flex-end}
+  .status{margin:0}
+}
+
+.rarity-stars{margin-top:7px;color:#e8c66f;font:10px/1 system-ui;letter-spacing:3px;opacity:.92;text-shadow:0 0 7px rgba(232,198,111,.18)}
+.top-sort{display:flex;align-items:center;gap:7px;color:#8fa4bd;font-size:13px;white-space:nowrap}
+.top-sort select{background:#0a1a2b;color:#b7c7d9;border:1px solid #314b66;border-radius:999px;padding:11px 30px 11px 13px}
+@media(max-width:760px){.tools{flex-wrap:wrap}.top-sort{order:3;width:100%}.top-sort select{flex:1}}
+
+/* Responsive stability pass: reduce layout jumps between portrait/landscape */
+.main,.page-head,.content-panel,.panel-head,.tools,.res-row,.res-main,.res-actions,
+.account-tabs,.footer-row,.searchbox,.top-sort{min-width:0}
+
+.page-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:
+    "title art"
+    "sub art";
+  align-items:start;
+  column-gap:18px;
+}
+.page-head h1{grid-area:title}
+.page-head p{grid-area:sub}
+.head-art{grid-area:art;position:relative;right:auto;top:auto;width:280px;height:130px;align-self:start}
+.quote{display:none!important}
+
+.panel-head{
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) minmax(0,auto);
+  align-items:start;
+}
+.tools{
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) auto auto;
+  align-items:center;
+  justify-content:end;
+  gap:10px;
+}
+.searchbox{width:min(340px,100%)}
+.searchbox input{width:100%;max-width:none}
+.top-sort{width:auto}
+.top-sort select{max-width:180px}
+
+.res-row{
+  grid-template-columns:86px minmax(0,1fr) minmax(230px,auto) 28px;
+}
+.res-main{overflow:hidden}
+.res-main b,.res-meta{min-width:0}
+.res-actions{justify-self:end}
+.status{margin-right:0}
+
+.account-tabs{
+  scroll-snap-type:x proximity;
+  scrollbar-width:none;
+}
+.account-tabs::-webkit-scrollbar{display:none}
+.account-tabs button{scroll-snap-align:start}
+
+@media (max-width: 979px){
+  .main{max-width:100%;padding-left:14px;padding-right:14px}
+  .page-head{
+    grid-template-columns:minmax(0,1fr) 160px;
+    min-height:130px;
+    padding:10px 4px 16px;
+  }
+  .head-art{width:160px;height:110px;opacity:.22}
+  .panel-head{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  .tools{
+    width:100%;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "search add"
+      "sort sort";
+  }
+  .searchbox{grid-area:search;width:100%}
+  .goldbtn{grid-area:add}
+  .top-sort{grid-area:sort;width:100%}
+  .top-sort select{max-width:none;flex:1}
+  .res-row{
+    grid-template-columns:72px minmax(0,1fr);
+    grid-template-areas:
+      "img main"
+      "img actions";
+    align-items:center;
+    gap:8px 12px;
+    padding:8px 10px;
+  }
+  .res-row>img{grid-area:img;width:70px;height:90px}
+  .res-main{grid-area:main}
+  .res-actions{grid-area:actions;justify-self:stretch;display:flex;justify-content:flex-end;gap:8px}
+  .status{min-width:0;width:auto;padding:9px 16px}
+  .chev{display:none}
+}
+
+@media (orientation:landscape) and (max-width:979px){
+  .page-head{
+    grid-template-columns:minmax(0,1fr) 220px;
+    min-height:112px;
+  }
+  .head-art{width:220px;height:95px}
+  .tools{
+    grid-template-columns:minmax(200px,1fr) auto auto;
+    grid-template-areas:"search sort add";
+  }
+  .top-sort{width:auto}
+  .top-sort select{max-width:175px}
+  .res-row{
+    grid-template-columns:76px minmax(0,1fr) minmax(180px,auto);
+    grid-template-areas:"img main actions";
+  }
+  .res-row>img{width:74px;height:94px}
+  .res-actions{justify-self:end;justify-content:flex-end}
+}
+
+@media (max-width:520px){
+  .page-head{
+    grid-template-columns:1fr;
+    grid-template-areas:"title" "sub";
+  }
+  .head-art{display:none}
+  .tools{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "search add"
+      "sort sort";
+  }
+  .goldbtn{padding:11px 14px}
+  .status{font-size:12px;padding:8px 13px}
+  .remove-res{font-size:11px;padding:7px 10px}
+  .res-meta{gap:8px}
+}
+
+
+/* Compact controls: preserve breathing room, especially in landscape */
+@media (orientation:landscape) and (min-width:700px) and (max-width:979px){
+  .content-panel{padding:24px}
+  .panel-head{
+    grid-template-columns:minmax(300px,1fr) minmax(520px,auto);
+    gap:24px;
+    align-items:center;
+  }
+  .panel-head h2{
+    font-size:25px;
+    white-space:nowrap;
+  }
+  .panel-head p{max-width:360px}
+  .tools{
+    grid-template-columns:minmax(210px,270px) auto auto;
+    grid-template-areas:"search sort add";
+    gap:9px;
+    justify-content:end;
+  }
+  .searchbox{width:100%}
+  .searchbox input{padding-top:10px;padding-bottom:10px}
+  .top-sort{font-size:12px;gap:5px}
+  .top-sort select{
+    max-width:145px;
+    padding:9px 25px 9px 11px;
+    font-size:13px;
+  }
+  .goldbtn{
+    padding:9px 16px;
+    font-size:14px;
+    white-space:nowrap;
+  }
+  .goldbtn b{font-size:23px}
+  .res-row{
+    grid-template-columns:76px minmax(0,1fr) minmax(175px,auto);
+    column-gap:16px;
+  }
+  .status{
+    padding:9px 16px;
+    font-size:13px;
+  }
+  .remove-res{
+    padding:7px 10px;
+    font-size:11px;
+  }
+}
+@media (orientation:landscape) and (min-width:980px){
+  .panel-head{
+    grid-template-columns:minmax(285px,1fr) minmax(500px,auto);
+    gap:24px;
+    align-items:center;
+  }
+  .panel-head h2{white-space:nowrap}
+  .tools{
+    grid-template-columns:minmax(200px,300px) auto auto;
+    gap:10px;
+  }
+  .top-sort select{max-width:155px;padding:10px 27px 10px 12px}
+  .goldbtn{padding:10px 18px;font-size:15px}
+  .goldbtn b{font-size:24px}
+  .status{min-width:190px;padding:10px 18px}
+  .remove-res{padding:8px 11px}
+}
+
+
+/* Landscape tablet/mobile: avoid overflow after sidebar consumes viewport width */
+@media (orientation:landscape) and (min-width:700px) and (max-width:1250px){
+  .panel-head{
+    grid-template-columns:minmax(260px,1fr) minmax(360px,1.25fr);
+    gap:20px;
+    align-items:start;
+  }
+  .panel-head h2{white-space:nowrap}
+  .tools{
+    width:100%;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "search search"
+      "sort add";
+    gap:9px 10px;
+    justify-content:stretch;
+  }
+  .searchbox{grid-area:search;width:100%;max-width:none}
+  .top-sort{grid-area:sort;width:auto;justify-self:end}
+  .top-sort select{max-width:155px}
+  .goldbtn{grid-area:add;justify-self:end;padding:9px 16px;font-size:14px}
+}
+@media (orientation:landscape) and (min-width:700px) and (max-width:1050px){
+  .panel-head{grid-template-columns:minmax(230px,.9fr) minmax(330px,1.1fr)}
+  .content-panel{padding-left:20px;padding-right:20px}
+}
+
+
+.account-editor-sheet{max-width:560px}
+.editor-sub{margin-top:4px;color:#8196af;font-size:13px}
+.editor-block{border:1px solid #29445e;border-radius:14px;padding:16px;margin:12px 0;background:rgba(9,24,38,.72)}
+.editor-label{color:#90a5bd;font-size:13px;margin-bottom:10px}
+.level-current{width:100%;border:1px solid #38536f;border-radius:12px;background:#0a1b2b;color:#edf4fc;padding:14px 16px;text-align:left;font-size:18px}
+.seq-row{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+.seq-btn{border:1px solid #35516c;background:#091a2a;color:#91a6bd;border-radius:10px;padding:11px 4px}
+.seq-btn.active{border-color:#e7c978;background:linear-gradient(180deg,rgba(74,60,31,.95),rgba(37,31,21,.95));color:#f7e5af;box-shadow:0 0 14px rgba(231,201,120,.12)}
+.editor-actions{display:flex;justify-content:flex-end;margin-top:16px}
+.level-sheet{max-width:620px}
+.level-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.level-btn{border:1px solid #2d4863;background:#091a2a;color:#c4d1df;border-radius:10px;padding:11px 5px}
+.level-btn.active{border-color:#e7c978;color:#f6e4ae;background:rgba(68,55,31,.85)}
+.res-row.clickable{cursor:pointer}
+.res-row.clickable:hover{border-color:#3d5d7d}
+@media(max-width:520px){.seq-row{grid-template-columns:repeat(4,1fr)}.level-grid{grid-template-columns:repeat(5,1fr)}}
+
+
+.weapon-current{width:100%;min-height:66px;border:1px solid #38536f;border-radius:12px;background:#0a1b2b;color:#edf4fc;padding:10px 12px;text-align:left;display:flex;align-items:center;gap:12px}
+.weapon-current img{width:52px;height:52px;object-fit:contain;border-radius:9px;background:rgba(255,255,255,.025)}
+.weapon-current .weapon-copy b{display:block;font-size:16px;font-weight:500}
+.weapon-current .weapon-copy small{display:block;margin-top:4px;color:#8fa4bd}
+.weapon-current.empty{color:#9aacbf}
+.weapon-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.weapon-setting{border:1px solid #2d4863;background:#091a2a;color:#cad6e2;border-radius:10px;padding:10px 12px;text-align:left}
+.weapon-setting b{display:block;color:#8fa4bd;font-size:11px;font-weight:400;margin-bottom:4px}
+.rank-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:9px}
+.rank-btn{border:1px solid #35516c;background:#091a2a;color:#91a6bd;border-radius:9px;padding:9px 3px}
+.rank-btn.active{border-color:#e7c978;color:#f7e5af;background:rgba(68,55,31,.85)}
+.weapon-sheet{max-width:700px}
+.weapon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.weapon-card{border:1px solid #29445f;border-radius:12px;background:#0a1d2e;color:#e5edf8;padding:8px;text-align:center;min-width:0}
+.weapon-card img{width:100%;height:95px;object-fit:contain;display:block}
+.weapon-card b{display:block;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.weapon-card small{display:block;margin-top:4px;color:#d8bd73;font:10px/1 system-ui;letter-spacing:1px}
+@media(min-width:700px){.weapon-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:520px){.weapon-settings{grid-template-columns:1fr}.weapon-grid{grid-template-columns:repeat(2,1fr)}}
+
+
+.weapon-img-wrap,.equipped-img-wrap{position:relative;display:grid;place-items:center}
+.weapon-img-wrap{height:95px}
+.weapon-img-wrap img{width:100%;height:95px;object-fit:contain;display:block}
+.equipped-img-wrap{width:52px;height:52px;flex:none}
+.equipped-img-wrap img{width:52px;height:52px;object-fit:contain;border-radius:9px;background:rgba(255,255,255,.025)}
+.weapon-fallback{display:none;place-items:center;color:#7f96b2;border:1px solid #2c4660;border-radius:9px;background:#091a2a}
+.weapon-img-wrap .weapon-fallback{position:absolute;inset:8px;font-size:28px}
+.equipped-img-wrap .weapon-fallback{position:absolute;inset:0;font-size:22px}
+.status{display:block;text-align:left;min-width:220px}
+.status-main{text-align:center;white-space:nowrap}
+.status-weapon{display:flex;align-items:center;gap:8px;margin-top:7px;padding-top:7px;border-top:1px solid rgba(125,159,192,.16)}
+.status-weapon-icon{position:relative;width:28px;height:28px;display:grid;place-items:center;flex:none}
+.status-weapon-icon img{width:28px;height:28px;object-fit:contain}
+.status-weapon-icon .weapon-fallback{position:absolute;inset:0;font-size:12px}
+.status-weapon-copy{min-width:0;display:block;line-height:1.1}
+.status-weapon-copy b{display:block;max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;font-weight:500;color:#d4dfec}
+.status-weapon-copy small{display:block;margin-top:3px;font:9px/1 system-ui;color:#8297b0}
+@media(max-width:760px){.status{min-width:0}.status-weapon-copy b{max-width:120px}}
+
+
+/* V0.4.2 — centered equipped-weapon summary */
+.status-weapon{position:relative;justify-content:center;min-height:34px;padding-left:38px;padding-right:38px}
+.status-weapon-icon{position:absolute;left:2px;top:50%;transform:translateY(-50%)}
+.status-weapon-copy{text-align:center;width:100%;display:flex;flex-direction:column;align-items:center}
+.status-weapon-copy b{max-width:100%;text-align:center;font-size:11px}
+.status-weapon-copy small{text-align:center;font-size:9px}
+
+
+/* V0.4.3 — weapon summary centered as one visual group */
+.status-weapon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:36px;
+  padding:7px 8px 0;
+}
+.status-weapon-icon{
+  position:relative;
+  left:auto;
+  top:auto;
+  transform:none;
+  flex:0 0 30px;
+  width:30px;
+  height:30px;
+}
+.status-weapon-icon img{width:30px;height:30px;object-fit:contain}
+.status-weapon-copy{
+  width:auto;
+  min-width:0;
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+.status-weapon-copy b{
+  max-width:150px;
+  text-align:left;
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.status-weapon-copy small{text-align:left;font-size:9px}
+
+
+/* V0.5.7 — Skills / Forte */
+.skill-state{margin-top:14px;border-top:1px solid rgba(118,154,190,.16);padding-top:14px}
+.skill-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.skill-head b{font-size:13px;font-weight:500;color:#dbe7f4}
+.skill-head small{font-size:10px;color:#7f95ad}
+.skill-loading,.skill-error{border:1px solid #29445f;border-radius:10px;padding:12px;color:#93a8bd;background:#091a2a;font-size:12px}
+.skill-grid-edit{display:grid;grid-template-columns:1fr;gap:8px}
+.skill-edit-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #29445f;border-radius:11px;background:#0a1d2e;padding:8px}
+.skill-edit-row img{width:42px;height:42px;object-fit:contain;border-radius:8px;background:rgba(255,255,255,.025)}
+.skill-edit-copy{min-width:0}
+.skill-edit-copy b{display:block;font-size:12px;font-weight:500;color:#e6eef8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skill-edit-copy small{display:block;margin-top:3px;font-size:10px;color:#7f95ad}
+.skill-level-btn{min-width:64px;border:1px solid #3a526a;border-radius:9px;background:#0b1c2c;color:#f0d48b;padding:8px 10px;font-weight:600}
+.skill-levels{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.skill-levels button{border:1px solid #304b65;border-radius:8px;background:#091a2a;color:#c7d5e5;padding:6px 9px;font-size:11px}
+.skill-levels button.active{border-color:#c7a756;color:#ffe5a2;background:rgba(199,167,86,.12)}
+.data-refresh-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:5px;opacity:.8}
+
+
+/* V0.5.7 — one edit affordance per owned Resonator */
+.res-row .status{
+  border:0;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+  padding:8px 10px;
+  margin-right:10px;
+}
+.res-row .chev{display:block}
+@media(max-width:760px){
+  .res-row{grid-template-columns:70px minmax(0,1fr) 20px}
+  .res-row>img{grid-column:1;grid-row:1 / span 2}
+  .res-row .res-main{grid-column:2;grid-row:1}
+  .res-row .res-actions{grid-column:2;grid-row:2}
+  .res-row .chev{grid-column:3;grid-row:1 / span 2;display:block;align-self:center}
+  .res-row .status{padding:5px 0;margin:0}
+}
+/* Smaller thumbnails reduce transfer and improve first paint. */
+.char-card img,.select-card img,.res-row>img,.weapon-card img{content-visibility:auto}
+
+
+/* V0.5.7 — cold-start loading */
+.edit-chevron{border:0;background:transparent;color:#9fb3c7;font-size:25px;line-height:1;cursor:pointer;padding:12px 6px;border-radius:8px}
+.edit-chevron:hover,.edit-chevron:focus-visible{color:#f2d57d;background:rgba(242,213,125,.08);outline:none}
+.cold-loader{max-width:560px;margin:15vh auto 0;padding:24px}
+.cold-loader h2{margin:0 0 8px;font-size:24px}
+.cold-loader p{color:#8197ad;font-size:12px}
+.load-track{height:5px;border-radius:99px;background:#142a3e;overflow:hidden;margin-top:18px}
+.load-bar{height:100%;width:15%;background:linear-gradient(90deg,#c9a957,#f1d987);border-radius:99px;animation:wwcLoad 1.35s ease-in-out infinite}
+@keyframes wwcLoad{0%{width:12%;transform:translateX(-20%)}55%{width:55%}100%{width:18%;transform:translateX(470%)}}
+
+
+/* V0.5.7 — compact, shared sort control */
+.sort-dropdown{position:relative;flex:0 0 auto}
+.sort-trigger{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ min-width:116px;padding:10px 13px;border:1px solid #3a536d;border-radius:999px;
+ background:#0a1b2b;color:#c1cfdf;font:inherit;font-size:12px;cursor:pointer
+}
+.sort-trigger:hover,.sort-trigger:focus-visible{border-color:#d1b35e;color:#f3dc99;outline:none}
+.sort-caret{font-size:12px;opacity:.8}
+.sort-menu{
+ display:none;position:absolute;z-index:80;right:0;top:calc(100% + 7px);min-width:150px;
+ padding:6px;border:1px solid #304c67;border-radius:12px;background:#081827;
+ box-shadow:0 16px 38px rgba(0,0,0,.38)
+}
+.sort-menu.open{display:grid;gap:3px}
+.sort-menu button{
+ border:0;border-radius:8px;background:transparent;color:#b9c8d9;text-align:left;
+ padding:9px 10px;font:inherit;font-size:12px;cursor:pointer
+}
+.sort-menu button:hover,.sort-menu button:focus-visible{background:rgba(222,190,104,.1);color:#f2d98f;outline:none}
+.owned-filters{margin-top:2px}
+.res-row{cursor:default}
+.res-row:hover{border-color:#29445f}
+.edit-chevron{min-width:38px;min-height:44px}
+
+
+/* V0.5.7 — refined account controls */
+.filter-sort-row{
+ display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px
+}
+.filter-sort-row .filters{margin:0;min-width:0;flex:1}
+.filter-sort-row .sort-dropdown{margin-left:auto}
+.owned-filters button.active,.filter-sort-row .filters button.active{
+ color:#1a1a18 !important;
+ border-color:#efd27d !important;
+ background:linear-gradient(180deg,#ffe6a8,#e8c66f) !important;
+ box-shadow:0 0 18px rgba(239,205,119,.12)
+}
+.res-actions{
+ min-width:260px;
+ display:grid;
+ grid-template-columns:minmax(210px,250px) 40px;
+ align-items:center;
+ justify-content:center;
+ gap:14px;
+}
+.res-row .status{
+ width:100%;
+ min-width:0;
+ margin:0;
+ justify-self:center;
+}
+.status-main{text-align:center}
+.status-weapon{justify-content:center}
+.trash-btn{
+ width:38px;height:38px;padding:0;border-radius:50%;
+ display:grid;place-items:center;
+ border:1px solid rgba(214,81,91,.35);
+ background:rgba(91,24,33,.28);
+ color:#e8757d;
+ cursor:pointer;
+}
+.trash-btn svg{width:17px;height:17px;fill:currentColor}
+.trash-btn:hover,.trash-btn:focus-visible{
+ color:#ff9ba2;border-color:rgba(255,115,125,.65);background:rgba(111,28,39,.42);outline:none
+}
+@media(max-width:900px){
+ .filter-sort-row{align-items:flex-start}
+ .filter-sort-row .filters{flex-wrap:wrap}
+ .res-actions{min-width:220px;grid-template-columns:minmax(180px,1fr) 38px}
+}
+@media(max-width:760px){
+ .filter-sort-row{gap:10px;align-items:center}
+ .filter-sort-row .sort-dropdown{flex:0 0 auto}
+ .res-actions{min-width:0;grid-template-columns:minmax(0,1fr) 36px}
+ .trash-btn{width:34px;height:34px}
+}
+
+
+.skill-icon-wrap{width:42px;height:42px;display:grid;place-items:center;position:relative}
+.skill-icon-wrap img{width:42px;height:42px}
+.skill-icon-fallback{
+ display:none;position:absolute;inset:0;place-items:center;border-radius:8px;
+ border:1px solid #314d67;background:#0a1b2b;color:#d8c078;font-size:17px
+}
+
+
+/* V0.5.7 — Encyclopedia filter/sort alignment */
+.ency-filter-sort{margin-top:12px}
+.ency-filter-sort .filters{flex:1;min-width:0}
+.ency-filter-sort .sort-dropdown{margin-left:auto;flex:0 0 auto}
+
+
+/* Validated follow-up to V0.5.7: space below filters and sorting. */
+.filter-sort-row{margin-bottom:20px}
+</style>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./assets/icon-192.png">
+<script src="./pwa.js" defer></script>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="logo"><strong>WUTHERING<br>WAVES</strong><span>COMPANION</span></div>
+  <nav class="side-nav">
+    <button data-view="daily"><span class="side-icon">⌂</span><span data-i18n="daily">Accueil</span></button>
+    <button data-view="ency"><span class="side-icon">▤</span><span data-i18n="ency">Encyclopédie</span></button>
+    <button data-view="account" class="active"><span class="side-icon">●</span><span data-i18n="account">Mon compte</span></button>
+    <button data-view="planner"><span class="side-icon">✣</span><span data-i18n="planner">Planner</span></button>
+    <button data-view="more"><span class="side-icon">⚙</span><span data-i18n="more">Plus</span></button>
+  </nav>
+  <div class="side-foot"><div class="wave">⌁</div><div>EXPLORE<br>PLAN<br>PROGRESS</div></div>
+</aside>
+
+<main class="main">
+  <section class="page-head">
+    <h1 id="pageTitle">Mon compte</h1>
+    <p id="pageSub">Gérez vos Résonateurs, armes et ressources.</p>
+    <div class="quote">Plus qu’un jeu,<br>un voyage.</div>
+    <div class="head-art"></div>
+  </section>
+  <div id="accountTabs"></div>
+  <section id="view"></section>
+</main>
+</div>
+
+<nav class="bottom-nav">
+  <button data-view="daily"><b>⌂</b><small>Accueil</small></button>
+  <button data-view="ency"><b>▤</b><small>Encyclopédie</small></button>
+  <button data-view="account" class="active"><b>●</b><small>Mon compte</small></button>
+  <button data-view="planner"><b>✣</b><small>Planner</small></button>
+  <button data-view="more"><b>•••</b><small>Plus</small></button>
+</nav>
+
+<section class="selector-overlay" id="selector">
+ <div class="selector-sheet">
+  <div class="selector-head"><h2 id="selectorTitle">Ajouter un Résonateur</h2><button class="closebtn" id="selectorClose">✕</button></div>
+  <input class="selector-search" id="selectorQ" placeholder="Rechercher…" oninput="drawSelector()">
+  <div class="selector-grid" id="selectorGrid"></div>
+ </div>
+</section>
+
+
+<section class="selector-overlay" id="accountEditor">
+ <div class="selector-sheet account-editor-sheet">
+  <div class="selector-head">
+   <div><h2 id="editorName">Résonateur</h2><div class="editor-sub" id="editorSub"></div></div>
+   <button class="closebtn" id="editorClose">✕</button>
+  </div>
+  <div class="editor-block">
+   <div class="editor-label" id="levelLabel">Niveau</div>
+   <button class="level-current" id="levelCurrent" onclick="openLevelPicker()">À définir</button>
+  </div>
+  <div class="editor-block">
+   <div class="editor-label" id="sequenceLabel">Séquence</div>
+   <div class="seq-row" id="seqRow"></div>
+  </div>
+  <div class="editor-block">
+   <div class="editor-label" id="weaponLabel">Arme équipée</div>
+   <button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button>
+   <div class="weapon-settings" id="weaponSettings"></div>
+  </div>
+  <div class="editor-block skill-state">
+   <div class="skill-head">
+    <b id="skillsLabel">Compétences / Forte</b>
+    <small id="skillsSource"></small>
+   </div>
+   <div id="skillsEditor"><div class="skill-loading">Chargement…</div></div>
+  </div>
+  <div class="editor-actions">
+   <button class="goldbtn" id="editorSave" onclick="saveAccountEditor()">Enregistrer</button>
+  </div>
+ </div>
+</section>
+
+
+<section class="selector-overlay" id="weaponPicker">
+ <div class="selector-sheet weapon-sheet">
+  <div class="selector-head"><h2 id="weaponPickerTitle">Choisir une arme</h2><button class="closebtn" id="weaponPickerClose">✕</button></div>
+  <input class="selector-search" id="weaponQ" placeholder="Rechercher une arme…" oninput="drawWeapons()">
+  <div class="weapon-grid" id="weaponGrid"></div>
+ </div>
+</section>
+
+<section class="selector-overlay" id="weaponLevelPicker">
+ <div class="selector-sheet level-sheet">
+  <div class="selector-head"><h2 id="weaponLevelTitle">Niveau de l’arme</h2><button class="closebtn" id="weaponLevelClose">✕</button></div>
+  <input class="selector-search" id="weaponLevelQ" inputmode="numeric" placeholder="Rechercher un niveau…" oninput="drawWeaponLevels()">
+  <div class="level-grid" id="weaponLevelGrid"></div>
+ </div>
+</section>
+<section class="selector-overlay" id="levelPicker">
+ <div class="selector-sheet level-sheet">
+  <div class="selector-head"><h2 id="levelPickerTitle">Choisir le niveau</h2><button class="closebtn" id="levelPickerClose">✕</button></div>
+  <input class="selector-search" id="levelQ" inputmode="numeric" placeholder="Rechercher un niveau…" oninput="drawLevels()">
+  <div class="level-grid" id="levelGrid"></div>
+ </div>
+</section>
+<section class="detail" id="detail">
+ <div class="detail-inner">
+  <button class="back" id="back"><span class="arrow"><svg viewBox="0 0 24 24" width="15" height="15"><path d="M15.5 5 8.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="backLabel">Retour</span></button>
+  <div id="detailContent"></div>
+ </div>
+</section>
+
+<script>
+let DATA=[];
+let WEAPONS=[];
+
+const CATALOG_VERSION="0.5.7";
+const CATALOG_CACHE_KEY="wwc_catalog_canonical_v050";
+const ENCORE_BASE="https://api-v2.encore.moe/api";
+let catalogState={status:"loading",source:"Encore API / WW_Data",error:null,gameVersion:null,resourceVersion:null};
+
+function content(v){
+  if(v==null)return "";
+  if(typeof v==="string"||typeof v==="number")return String(v);
+  return String(v.Content ?? v.content ?? v.Name ?? v.name ?? "");
+}
+function first(obj,keys){
+  for(const k of keys) if(obj && obj[k]!=null && obj[k]!=="") return obj[k];
+  return null;
+}
+function normalizeType(v){
+  const raw=content(v).trim().toLowerCase().replace(/[\s_-]+/g,"");
+  const map={
+    sword:"Sword", longsword:"Sword",
+    broadblade:"Broadblade", broadblades:"Broadblade",
+    pistols:"Pistols", pistol:"Pistols",
+    gauntlets:"Gauntlets", gauntlet:"Gauntlets",
+    rectifier:"Rectifier", rectifiers:"Rectifier"
+  };
+  return map[raw]||null;
+}
+function normalizeElement(v){
+  const raw=content(v).trim().toLowerCase();
+  const map={aero:"Aero",electro:"Electro",fusion:"Fusion",glacio:"Glacio",havoc:"Havoc",spectro:"Spectro"};
+  return map[raw]||null;
+}
+function assetUrl(v){
+  if(v==null)return "";
+  if(typeof v==="object"){
+    v=v.Url ?? v.URL ?? v.url ?? v.Path ?? v.path ?? v.Icon ?? v.icon ?? v.Content ?? v.content ?? "";
+  }
+  let p=String(v||"").trim();
+  if(!p)return "";
+  if(/^https?:\/\//i.test(p))return p;
+  p=p.split(".")[0];
+  if(p.startsWith("/Game/Aki/")) return "https://api.encore.moe/resource/Data"+p+".webp";
+  if(p.startsWith("Game/Aki/")) return "https://api.encore.moe/resource/Data/"+p+".webp";
+  return p;
+}
+function quality(v){
+  const n=Number(v);
+  if([1,2,3,4,5].includes(n))return n;
+  const m=content(v).match(/[1-5]/); return m?Number(m[0]):null;
+}
+function stableId(prefix,id,name){
+  if(id!=null && String(id)!=="")return `${prefix}:${id}`;
+  return `${prefix}:`+String(name).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+}
+function listFrom(payload,keys){
+  if(Array.isArray(payload))return payload;
+  for(const k of keys) if(Array.isArray(payload?.[k])) return payload[k];
+  return [];
+}
+function normalizeWeapon(w){
+  const name=content(first(w,["WeaponName","Name","name"]));
+  const id=first(w,["ItemId","Id","id","WeaponId"]);
+  return {
+    id:stableId("weapon",id,name),
+    gameId:id==null?null:String(id),
+    name,
+    rarity:quality(first(w,["QualityId","Quality","Rarity","rarity"])),
+    type:normalizeType(first(w,["WeaponTypeName","WeaponType","TypeName","type"])),
+    image:assetUrl(first(w,["IconSmall","IconMiddle","Icon","icon"]))
+  };
+}
+function normalizeCharacter(r){
+  const name=content(first(r,["Name","RoleName","name"]));
+  const id=first(r,["Id","RoleId","id"]);
+  return {
+    id:stableId("resonator",id,name),
+    gameId:id==null?null:String(id),
+    name,
+    rarity:quality(first(r,["QualityId","Quality","Rarity","rarity"])),
+    weapon:normalizeType(first(r,["WeaponTypeName","WeaponType","weaponType","WeaponName"])),
+    element:normalizeElement(first(r,["ElementName","Element","AttributeName","element"])),
+    gender:content(first(r,["Gender","Sex","gender","sex"])).trim(),
+    image:assetUrl(first(r,["RoleHeadIconCircle","RoleHeadIcon","Icon","RoleHeadIconBig","icon"]))
+  };
+}
+
+function isRover(r){
+ return /^rover(?:\s*:|\s*$)/i.test(String(r?.name||"").trim());
+}
+const VERIFIED_MALE_ROVER_IDS=new Set(["1406","1501","1605"]);
+function keepPlayableMaleRovers(chars){
+ const groups=new Map(), others=[];
+ for(const r of chars){
+   if(!isRover(r)){others.push(r);continue}
+   const key=r.element||String(r.name).replace(/^rover\s*:?\s*/i,"").trim()||"Unknown";
+   if(!groups.has(key))groups.set(key,[]);
+   groups.get(key).push(r);
+ }
+ for(const [element,group] of groups){
+   if(group.length===1){others.push(group[0]);continue}
+   // 1) Prefer explicit canonical gender metadata.
+   let chosen=group.find(r=>/^(male|man|m|男)$/i.test(String(r.gender||"").trim()));
+   // 2) Verified game IDs for existing Rover elements.
+   if(!chosen)chosen=group.find(r=>VERIFIED_MALE_ROVER_IDS.has(String(r.gameId||"")));
+   // 3) Never expose both genders. If a future element arrives before gender metadata
+   // is available, retain one deterministic entry and flag it internally for review.
+   if(!chosen){
+     chosen=[...group].sort((a,b)=>String(a.gameId||a.id).localeCompare(String(b.gameId||b.id),undefined,{numeric:true}))[0];
+     chosen._genderFallback=true;
+   }
+   others.push(chosen);
+ }
+ return others;
+}
+function validateCanonical(chars,weapons){
+  const errors=[];
+  const types=new Set(["Sword","Broadblade","Pistols","Gauntlets","Rectifier"]);
+  const elements=new Set(["Aero","Electro","Fusion","Glacio","Havoc","Spectro"]);
+  const ids=new Set();
+  for(const w of weapons){
+    if(!w.id||ids.has(w.id))errors.push(`weapon duplicate/missing id ${w.name}`); ids.add(w.id);
+    if(!w.name)errors.push(`weapon ${w.id}: missing name`);
+    if(!types.has(w.type))errors.push(`${w.name}: missing/invalid canonical type`);
+    if(![1,2,3,4,5].includes(w.rarity))errors.push(`${w.name}: missing/invalid rarity`);
+  }
+  const rids=new Set();
+  for(const r of chars){
+    if(!r.id||rids.has(r.id))errors.push(`resonator duplicate/missing id ${r.name}`); rids.add(r.id);
+    if(!r.name)errors.push(`resonator ${r.id}: missing name`);
+    if(!types.has(r.weapon))errors.push(`${r.name}: missing/invalid weapon type`);
+    if(!elements.has(r.element))errors.push(`${r.name}: missing/invalid element`);
+    if(![4,5].includes(r.rarity))errors.push(`${r.name}: missing/invalid rarity`);
+  }
+  // Catalogue sanity checks: block obviously partial/broken upstream responses.
+  if(weapons.length<120)errors.push(`weapon catalogue unexpectedly small: ${weapons.length}`);
+  if(chars.length<55)errors.push(`resonator catalogue unexpectedly small: ${chars.length}`);
+  if(errors.length) throw new Error(errors.slice(0,12).join(" | ")+(errors.length>12?` | +${errors.length-12} more`:""));
+}
+async function fetchJSON(url){
+  const res=await fetch(url,{cache:"no-store"});
+  if(!res.ok)throw new Error(`HTTP ${res.status} — ${url}`);
+  return res.json();
+}
+
+async function fetchCanonicalLists(newPayload=null){
+  const [weaponPayload,charPayload]=await Promise.all([
+    fetchJSON(`${ENCORE_BASE}/en/weapon`),
+    fetchJSON(`${ENCORE_BASE}/en/character`)
+  ]);
+  const rawWeapons=listFrom(weaponPayload,["weapons","weaponList","data"]);
+  const rawChars=listFrom(charPayload,["roleList","characters","characterList","data"]);
+  const nw=rawWeapons.map(normalizeWeapon).filter(x=>x.name);
+  const nc=keepPlayableMaleRovers(rawChars.map(normalizeCharacter).filter(x=>x.name));
+  validateCanonical(nc,nw);
+  DATA=nc; WEAPONS=nw;
+  catalogState={
+    status:"ready",source:"Encore API / WW_Data",error:null,
+    gameVersion:first(newPayload,["GameVer","gameVersion"])||null,
+    resourceVersion:first(newPayload,["ResVer","resourceVersion"])||null,
+    updatedAt:new Date().toISOString()
+  };
+  localStorage.setItem(CATALOG_CACHE_KEY,JSON.stringify({
+    savedAt:new Date().toISOString(),state:catalogState,characters:DATA,weapons:WEAPONS
+  }));
+  updateHealth();
+}
+function restoreValidatedCache(){
+  try{
+    const cached=JSON.parse(localStorage.getItem(CATALOG_CACHE_KEY)||"null");
+    if(!cached?.characters?.length || !cached?.weapons?.length) return false;
+    validateCanonical(cached.characters,cached.weapons);
+    DATA=keepPlayableMaleRovers(cached.characters); WEAPONS=cached.weapons;
+    migrateOwnershipToCanonical();
+    catalogState={...cached.state,status:"cached",error:null,savedAt:cached.savedAt};
+    updateHealth();
+    return true;
+  }catch(e){
+    console.warn("Rejected catalogue cache",e);
+    return false;
+  }
+}
+function updateHealth(){
+  window.__WWC_DATA_HEALTH__={
+    ok:true,catalogVersion:CATALOG_VERSION,
+    source:catalogState.source,status:catalogState.status,
+    gameVersion:catalogState.gameVersion,resourceVersion:catalogState.resourceVersion,
+    resonators:DATA.length,weapons:WEAPONS.length
+  };
+}
+async function refreshCanonicalCatalog({force=false}={}){
+  try{
+    const newPayload=await fetchJSON(`${ENCORE_BASE}/en/new`).catch(()=>null);
+    const newGame=first(newPayload,["GameVer","gameVersion"])||null;
+    const newRes=first(newPayload,["ResVer","resourceVersion"])||null;
+    const sameVersion=!force && DATA.length && WEAPONS.length &&
+      newGame && newRes &&
+      String(newGame)===String(catalogState.gameVersion) &&
+      String(newRes)===String(catalogState.resourceVersion);
+    if(sameVersion){
+      catalogState={...catalogState,status:"cached",error:null,lastChecked:new Date().toISOString()};
+      updateHealth();
+      return {changed:false};
+    }
+    await fetchCanonicalLists(newPayload);
+    return {changed:true};
+  }catch(err){
+    if(DATA.length && WEAPONS.length){
+      catalogState={...catalogState,status:"cached",error:String(err)};
+      updateHealth();
+      return {changed:false,error:err};
+    }
+    catalogState={status:"error",source:"Encore API / WW_Data",error:String(err)};
+    throw err;
+  }
+}
+async function bootstrapCanonicalCatalog(){
+  const hadCache=restoreValidatedCache();
+  if(hadCache){
+    render(); // immediate startup from last validated catalogue
+    // Non-blocking freshness check. Only rerender if the canonical dataset changed.
+    refreshCanonicalCatalog().then(r=>{if(r.changed)render()}).catch(()=>{});
+    return;
+  }
+  loadingScreen();
+  await refreshCanonicalCatalog({force:true});
+  render();
+}
+function loadingScreen(){
+ document.querySelector("#view").innerHTML=`<div class="content-panel cold-loader">
+   <h2>${lang==="fr"?"Préparation de WuWa Companion":"Preparing WuWa Companion"}</h2>
+   <p>${lang==="fr"?"Premier chargement : récupération et validation des données du jeu. Les ouvertures suivantes utiliseront le cache local validé.":"First load: fetching and validating game data. Following launches will use the validated local cache."}</p>
+   <div class="load-track" role="progressbar" aria-label="${lang==="fr"?"Chargement":"Loading"}"><div class="load-bar"></div></div>
+ </div>`;
+}
+function dataErrorScreen(err){
+ document.querySelector("#view").innerHTML=`<div class="content-panel"><div class="empty"><b>${
+   lang==="fr"?"Base de données indisponible":"Game database unavailable"
+ }</b><br><br>${
+   lang==="fr"
+    ?"WuWa Companion refuse d’utiliser l’ancienne base manuelle ou des données incomplètes. Vérifie la connexion puis recharge la page."
+    :"WuWa Companion refuses to use the old manual catalogue or incomplete data. Check the connection and reload."
+ }</div></div>`;
+ console.error("Canonical catalogue rejected:",err);
+}
+
+const PROFILE={name:"Earyon",uid:"534230812",playerId:"601844929",unionLevel:68,sol3Rank:7,birthday:"13/12"};
+const detected=new Set(["Aalto","Aemeath","Baizhi","Buling","Calcharo","Changli","Chixia","Danjin","Denia","Encore","Jianxin","Lingyang","Lumi","Luuk Herssen","Lynae","Mortefi","Qingxiao","Sanhua","Suisui","Taoqi","Verina","Yangyang","Youhu","Yuanwu"]);
+let owned=JSON.parse(localStorage.getItem("wwc_owned")||"[]");
+let ownedIds=JSON.parse(localStorage.getItem("wwc_owned_ids")||"[]");
+let accountData=JSON.parse(localStorage.getItem("wwc_account_data")||"{}");
+
+function normalizedLookupName(v){
+ return String(v||"")
+   .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+   .toLowerCase()
+   .replace(/[’‘`]/g,"'")
+   .replace(/\bthe\b/g,"")
+   .replace(/[^a-z0-9]+/g,"")
+   .trim();
+}
+function resolveResonatorRef(ref){
+ if(ref==null)return null;
+ const raw=String(ref);
+ let r=DATA.find(x=>x.id===raw||String(x.gameId||"")===raw||x.name===raw);
+ if(r)return r;
+ const key=normalizedLookupName(raw);
+ return DATA.find(x=>normalizedLookupName(x.name)===key)||null;
+}
+function persistCanonicalOwnership(){
+ ownedIds=[...new Set(ownedIds)].filter(id=>DATA.some(r=>r.id===id));
+ owned=ownedIds.map(id=>DATA.find(r=>r.id===id)?.name).filter(Boolean);
+ localStorage.setItem("wwc_owned_ids",JSON.stringify(ownedIds));
+ // Keep legacy storage synced during prototype migration.
+ localStorage.setItem("wwc_owned",JSON.stringify(owned));
+}
+function migrateOwnershipToCanonical(){
+ if(!DATA.length)return;
+ const resolvedIds=new Set();
+
+ // New stable-ID storage wins.
+ for(const id of ownedIds){
+   const r=resolveResonatorRef(id);
+   if(r)resolvedIds.add(r.id);
+ }
+
+ // Migrate the old name-based list.
+ for(const name of owned){
+   const r=resolveResonatorRef(name);
+   if(r)resolvedIds.add(r.id);
+ }
+
+ // Recover characters that had account-specific data even if the old owned list
+ // was lost/corrupted during a prototype catalogue migration.
+ for(const name of Object.keys(accountData||{})){
+   const r=resolveResonatorRef(name);
+   if(r)resolvedIds.add(r.id);
+ }
+
+ ownedIds=[...resolvedIds];
+ persistCanonicalOwnership();
+}
+let lang=localStorage.getItem("wwc_lang")||"fr";
+let encySort="alpha";
+let encySortDir=1;
+let ownedSort="alpha";
+let ownedSortDir=1;
+let ownedElement="All";
+let currentView="account", accountTab="res", element="All";
+
+const I18N={
+ fr:{daily:"Accueil",ency:"Encyclopédie",account:"Mon compte",planner:"Planner",more:"Plus",back:"Retour",res:"Mes Résonateurs",weap:"Mes Armes",echo:"Mes Échos",resources:"Mes Ressources"},
+ en:{daily:"Home",ency:"Encyclopedia",account:"My Account",planner:"Planner",more:"More",back:"Back",res:"My Resonators",weap:"My Weapons",echo:"My Echoes",resources:"My Resources"}
+};
+const WEAPON_LABELS={fr:{Sword:"Sabre",Broadblade:"Épée",Pistols:"Pistolets",Gauntlets:"Gantelets",Rectifier:"Amplificateur",Unknown:"Inconnu"},en:{Sword:"Sword",Broadblade:"Broadblade",Pistols:"Pistols",Gauntlets:"Gauntlets",Rectifier:"Rectifier",Unknown:"Unknown"}};
+const t=k=>I18N[lang][k]||k;
+const weaponLabel=w=>(WEAPON_LABELS[lang]&&WEAPON_LABELS[lang][w])||w;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function setHeader(title,sub){
+ document.querySelector("#pageTitle").textContent=title;
+ document.querySelector("#pageSub").textContent=sub;
+}
+function setActiveNav(){
+ document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===currentView));
+ const labs=[t("daily"),t("ency"),t("account"),t("planner"),t("more")];
+ document.querySelectorAll(".bottom-nav small").forEach((x,i)=>x.textContent=labs[i]);
+ document.querySelectorAll(".side-nav button span:last-child").forEach((x,i)=>x.textContent=labs[i]);
+}
+function accountTabs(){
+ if(currentView!=="account"){document.querySelector("#accountTabs").innerHTML="";return}
+ const tabs=[["res",t("res")],["weap",t("weap")],["echo",t("echo")],["resources",t("resources")]];
+ document.querySelector("#accountTabs").innerHTML=`<div class="account-tabs">${tabs.map(([k,l])=>`<button class="${accountTab===k?"active":""}" onclick="accountTab='${k}';render()">${l}</button>`).join("")}</div>`;
+}
+
+function updateFilterButtons(containerSelector,value){
+ const box=document.querySelector(containerSelector); if(!box)return;
+ [...box.querySelectorAll("button")].forEach(btn=>{
+   const txt=(btn.textContent||"").trim();
+   const normalized=txt==="Tous"||txt==="All"?"All":txt;
+   btn.classList.toggle("active",normalized===value);
+ });
+}
+function setEncyElement(value){
+ element=value;
+ updateFilterButtons(".filter-sort-row .filters",value);
+ drawCards();
+}
+function setOwnedElement(value){
+ ownedElement=value;
+ updateFilterButtons(".owned-filters",value);
+ renderOwnedList();
+}
+
+function sortLabel(scope){
+ const kind=scope==="ency"?encySort:ownedSort;
+ const dir=scope==="ency"?encySortDir:ownedSortDir;
+ if(kind==="alpha")return dir===1?"A → Z":"Z → A";
+ return dir===-1?"5★ → 4★":"4★ → 5★";
+}
+function sortOptionLabel(scope,kind){
+ const activeKind=scope==="ency"?encySort:ownedSort;
+ const activeDir=scope==="ency"?encySortDir:ownedSortDir;
+ if(kind==="alpha"){
+   const dir=activeKind==="alpha"?activeDir:1;
+   return dir===1?"A → Z":"Z → A";
+ }
+ const dir=activeKind==="rarity"?activeDir:-1;
+ return dir===-1?"5★ → 4★":"4★ → 5★";
+}
+function sortDropdownHTML(scope){
+ return `<div class="sort-dropdown">
+   <button class="sort-trigger" aria-haspopup="menu" aria-expanded="false" onclick="toggleSortMenu('${scope}',event)">
+     <span>${sortLabel(scope)}</span><span class="sort-caret">⌄</span>
+   </button>
+   <div class="sort-menu" id="sortMenu-${scope}" role="menu">
+     <button role="menuitem" onclick="chooseSort('${scope}','alpha',event)">${sortOptionLabel(scope,"alpha")}</button>
+     <button role="menuitem" onclick="chooseSort('${scope}','rarity',event)">${sortOptionLabel(scope,"rarity")}</button>
+   </div>
+ </div>`;
+}
+function closeSortMenus(){
+ document.querySelectorAll(".sort-menu.open").forEach(m=>m.classList.remove("open"));
+ document.querySelectorAll(".sort-trigger[aria-expanded='true']").forEach(b=>b.setAttribute("aria-expanded","false"));
+}
+function toggleSortMenu(scope,event){
+ event?.stopPropagation();
+ const menu=document.querySelector(`#sortMenu-${scope}`); if(!menu)return;
+ const open=!menu.classList.contains("open");
+ closeSortMenus();
+ menu.classList.toggle("open",open);
+ menu.previousElementSibling?.setAttribute("aria-expanded",open?"true":"false");
+}
+function chooseSort(scope,kind,event){
+ event?.stopPropagation();
+ if(scope==="ency"){
+   if(encySort===kind)encySortDir*=-1;
+   else{encySort=kind;encySortDir=kind==="alpha"?1:-1}
+   const oldQ=document.querySelector("#q")?.value||"";
+   closeSortMenus();
+   document.querySelector("#view").innerHTML=encyclopedia();
+   const q=document.querySelector("#q"); if(q)q.value=oldQ;
+   drawCards();
+ }else{
+   if(ownedSort===kind)ownedSortDir*=-1;
+   else{ownedSort=kind;ownedSortDir=kind==="alpha"?1:-1}
+   const oldQ=document.querySelector("#ownedSearch")?.value||"";
+   closeSortMenus();
+   document.querySelector("#view").innerHTML=account();
+   const q=document.querySelector("#ownedSearch"); if(q)q.value=oldQ;
+   renderOwnedList();
+ }
+}
+document.addEventListener("click",closeSortMenus);
+
+function account(){
+ setHeader(t("account"),lang==="fr"?"Gérez vos Résonateurs, armes et ressources.":"Manage your Resonators, weapons and resources.");
+ accountTabs();
+ if(accountTab!=="res"){
+   const name=accountTab==="weap"?t("weap"):accountTab==="echo"?t("echo"):t("resources");
+   return `<div class="content-panel"><div class="panel-head"><div><h2>${name}</h2><p>${lang==="fr"?"Structure visuelle prête pour l’itération dédiée.":"Visual structure ready for its dedicated iteration."}</p></div></div><div class="empty">${lang==="fr"?"Cette section sera remplie progressivement.":"This section will be populated progressively."}</div></div>`;
+ }
+ return `<div class="content-panel">
+   <div class="panel-head"><div><h2>${lang==="fr"?`Mes Résonateurs (${ownedIds.length})`:`My Resonators (${ownedIds.length})`}</h2><p>${lang==="fr"?"Ajoutez les Résonateurs que vous possédez et suivez leur progression.":"Add the Resonators you own and track their progression."}</p></div>
+   <div class="tools"><div class="searchbox"><input id="ownedSearch" placeholder="${lang==="fr"?"Rechercher un Résonateur…":"Search a Resonator…"}" oninput="filterOwned()"></div><button class="goldbtn" onclick="openSelector()"><b>＋</b>${lang==="fr"?"Ajouter":"Add"}</button></div></div>
+   <div class="filter-sort-row"><div class="filters owned-filters">${["All","Aero","Electro","Fusion","Glacio","Havoc","Spectro"].map(x=>`<button class="${ownedElement===x?"active":""}" onclick="setOwnedElement('${x}')">${x==="All"?(lang==="fr"?"Tous":"All"):x}</button>`).join("")}</div>${sortDropdownHTML("owned")}</div>
+   <div class="res-list" id="ownedList"></div>
+   <div class="footer-row"><span>${lang==="fr"?`Affichage : ${ownedIds.length} sur ${ownedIds.length}`:`Showing: ${ownedIds.length} of ${ownedIds.length}`}</span></div>
+ </div>`;
+}
+function encyclopedia(){
+ setHeader(t("ency"),lang==="fr"?"Résonateurs, armes et Échos de Wuthering Waves.":"Resonators, weapons and Echoes from Wuthering Waves.");
+ document.querySelector("#accountTabs").innerHTML="";
+ return `<div class="content-panel">
+   <div class="panel-head"><div><h2>${lang==="fr"?"Résonateurs":"Resonators"}</h2><p>${DATA.length} ${lang==="fr"?"entrées":"entries"}</p></div><div class="tools"><div class="searchbox"><input id="q" placeholder="${lang==="fr"?"Rechercher un Résonateur…":"Search a Resonator…"}" oninput="drawCards()"></div></div></div>
+   <div class="filter-sort-row ency-filter-sort"><div class="filters">${["All","Aero","Electro","Fusion","Glacio","Havoc","Spectro"].map(x=>`<button class="${element===x?"active":""}" onclick="setEncyElement('${x}')">${x==="All"?(lang==="fr"?"Tous":"All"):x}</button>`).join("")}</div>${sortDropdownHTML("ency")}</div>
+   <div class="card-grid" id="grid"></div>
+ </div>`;
+}
+function toggleEncySort(kind){
+ if(encySort===kind)encySortDir*=-1;
+ else{
+   encySort=kind;
+   encySortDir=kind==="rarity"?-1:1;
+ }
+ drawCards();
+}
+
+function drawCards(){
+ const q=(document.querySelector("#q")?.value||"").toLowerCase().trim();
+ const a=DATA
+   .filter(x=>(element==="All"||x.element===element)&&x.name.toLowerCase().includes(q))
+   .sort((a,b)=>{
+     const alpha=a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"});
+     if(encySort==="alpha")return encySortDir*alpha;
+     const rarity=(Number(a.rarity)-Number(b.rarity))*encySortDir;
+     return rarity||alpha;
+   });
+ document.querySelectorAll(".filters button").forEach(b=>b.classList.toggle("active",(element==="All"&&(b.textContent==="Tous"||b.textContent==="All"))||b.textContent===element));
+ document.querySelector("#grid").innerHTML=a.map(x=>`<article class="char-card" onclick='openDetail(${JSON.stringify(x.name)})'><div class="pic">${x.image?`<img src="${x.image}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">`:""}</div><div class="info"><b>${esc(x.name)}</b><small>${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</small></div></article>`).join("");
+}
+function daily(){
+ setHeader(t("daily"),lang==="fr"?"Votre tableau de bord personnel.":"Your personal dashboard.");document.querySelector("#accountTabs").innerHTML="";
+ return `<div class="content-panel"><div class="panel-head"><div><h2>${lang==="fr"?"Priorités du jour":"Today's priorities"}</h2><p>${lang==="fr"?"Cette page restera légère et personnalisée.":"This page will stay lightweight and personalized."}</p></div></div><div class="empty">${lang==="fr"?"Aucun objectif actif configuré pour le moment.":"No active goal configured yet."}</div></div>`;
+}
+function planner(){
+ setHeader(t("planner"),lang==="fr"?"Préparez un seul objectif actif à la fois.":"Prepare one active goal at a time.");document.querySelector("#accountTabs").innerHTML="";
+ return `<div class="content-panel"><div class="panel-head"><div><h2>${lang==="fr"?"Objectif actif":"Active goal"}</h2><p>${lang==="fr"?"Un seul Résonateur peut être prioritaire.":"Only one Resonator can be prioritized."}</p></div></div><div class="empty">Hiyuki · ${lang==="fr"?"Souhait / préparation future":"Wishlist / future preparation"}</div></div>`;
+}
+function more(){
+ setHeader(t("more"),lang==="fr"?"Réglages, import, historique et autres fonctions.":"Settings, import, history and more.");document.querySelector("#accountTabs").innerHTML="";
+ return `<div class="content-panel"><div class="panel-head"><div><h2>${lang==="fr"?"Langue":"Language"}</h2></div></div><div class="filters"><button class="${lang==="fr"?"active":""}" onclick="setLang('fr')">Français</button><button class="${lang==="en"?"active":""}" onclick="setLang('en')">English</button></div><div class="empty" style="margin-top:18px">${lang==="fr"?"Données du jeu":"Game data"} : <b>${esc(catalogState.source||"—")}</b><br>${DATA.length} ${lang==="fr"?"Résonateurs":"Resonators"} · ${WEAPONS.length} ${lang==="fr"?"armes":"weapons"}${catalogState.gameVersion?` · v${esc(catalogState.gameVersion)}`:""}<br><small>${catalogState.status==="cached"?(lang==="fr"?"Démarrage local rapide · vérification réseau non bloquante":"Fast local startup · non-blocking network check"):(lang==="fr"?"Base canonique validée":"Validated canonical database")}</small></div></div>`;
+}
+
+
+function auditRoverUniqueness(){
+ const problems=[];
+ const byElement=new Map();
+ for(const r of DATA.filter(x=>isRover(x))){
+   byElement.set(r.element,(byElement.get(r.element)||0)+1);
+ }
+ for(const [el,count] of byElement)if(count!==1)problems.push(`Rover ${el}: ${count} variants visible`);
+ window.__WWC_ROVER_AUDIT__={ok:problems.length===0,problems,visible:[...byElement.entries()]};
+ return window.__WWC_ROVER_AUDIT__;
+}
+
+function auditOrderingAndOwnership(){
+ const problems=[];
+ const sorted=[...DATA].sort((a,b)=>(Number(b.rarity)-Number(a.rarity))||a.name.localeCompare(b.name,"en",{sensitivity:"base"}));
+ for(let i=1;i<sorted.length;i++){
+   if(Number(sorted[i-1].rarity)<Number(sorted[i].rarity))problems.push("rarity ordering regression");
+ }
+ for(const id of ownedIds){
+   if(!DATA.some(r=>r.id===id))problems.push(`owned id missing from catalogue: ${id}`);
+ }
+ window.__WWC_MIGRATION_AUDIT__={
+   ok:problems.length===0,
+   problems,
+   ownedCount:ownedIds.length,
+   catalogueCount:DATA.length,
+   ownershipStorage:"stable IDs",
+   encyclopediaOrder:"rarity desc, then alphabetical"
+ };
+ return window.__WWC_MIGRATION_AUDIT__;
+}
+
+function render(){
+ if(DATA.length){auditOrderingAndOwnership();auditRoverUniqueness();}
+ setActiveNav();
+ const html=currentView==="account"?account():currentView==="ency"?encyclopedia():currentView==="daily"?daily():currentView==="planner"?planner():more();
+ document.querySelector("#view").innerHTML=html;
+ if(currentView==="ency")drawCards();
+ if(currentView==="account"&&accountTab==="res")renderOwnedList();
+ const bl=document.querySelector("#backLabel");if(bl)bl.textContent=t("back");
+}
+
+
+let editingName=null, editingLevel=null, editingSeq=0, editingWeapon=null, editingWeaponLevel=null, editingWeaponRank=1;
+function accountStatus(name){
+ const d=accountData[name]||{};
+ const bits=[];
+ if(d.level) bits.push(`${lang==="fr"?"Niv.":"Lv."} ${d.level}`);
+ if(d.sequence!==undefined) bits.push(`S${d.sequence}`);
+ const top=bits.length?bits.join(" · "):(lang==="fr"?"À compléter":"To complete");
+ if(d.weapon?.name){
+   const w=WEAPONS.find(x=>x.name===d.weapon.name);
+   const wl=d.weapon.level?`${lang==="fr"?"Niv.":"Lv."}${d.weapon.level}`:"";
+   const wr=d.weapon.rank?`R${d.weapon.rank}`:"";
+   const sub=[wl,wr].filter(Boolean).join(" · ");
+   return `<div class="status-main">${top}</div><div class="status-weapon"><span class="status-weapon-icon"><img src="${w?.image||""}" alt="" data-candidates='${JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||""))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></span><span class="status-weapon-copy"><b>${esc(d.weapon.name)}</b>${sub?`<small>${sub}</small>`:""}</span></div>`;
+ }
+ return `<div class="status-main">${top}</div>`;
+}
+
+const CHARACTER_DETAIL_CACHE_PREFIX="wwc_character_detail_v4:";
+let editingSkills={};
+let editingSkillDefs=[];
+let skillDetailRequestToken=0;
+const SKILL_ORDER=["Normal Attack","Skill","Forte Circuit","Liberation","Intro"];
+const SKILL_LABELS={
+ fr:{"Normal Attack":"Attaque normale","Skill":"Compétence de Résonance","Forte Circuit":"Circuit Forte","Liberation":"Libération de Résonance","Intro":"Compétence d’Intro"},
+ en:{"Normal Attack":"Normal Attack","Skill":"Resonance Skill","Forte Circuit":"Forte Circuit","Liberation":"Resonance Liberation","Intro":"Intro Skill"}
+};
+function normalizeSkillType(v){
+ const raw=content(v).trim().toLowerCase().replace(/resonance\s+/g,"");
+ // Order matters: "Intro Skill", "Outro Skill" and "Inherent Skill"
+ // must not be swallowed by the generic "skill" branch.
+ if(raw.includes("intro"))return "Intro";
+ if(raw.includes("outro"))return "Outro";
+ if(raw.includes("inherent"))return "Inherent Skill";
+ if(raw.includes("forte"))return "Forte Circuit";
+ if(raw.includes("liberation"))return "Liberation";
+ if(raw.includes("normal"))return "Normal Attack";
+ if(raw==="skill"||raw.includes("skill"))return "Skill";
+ return content(v).trim();
+}
+function skillIcon(v){return assetUrl(v)}
+function normalizeSkillDefs(detail){
+ const arr=Array.isArray(detail?.Skills)?detail.Skills:Array.isArray(detail?.skills)?detail.skills:[];
+ const byType=new Map();
+ for(const sk of arr){
+   const rawType=first(sk,["SkillType","Type","type"]);
+   const rawName=first(sk,["SkillName","Name","name"]);
+   const type=normalizeSkillType(rawType)||normalizeSkillType(rawName);
+   if(!SKILL_ORDER.includes(type) || byType.has(type))continue;
+   byType.set(type,{
+     id:String(first(sk,["Id","SkillId","id"])||type),
+     type,
+     icon:skillIcon(first(sk,["Icon","SkillIcon","SkillIconPath","IconPath","SkillIconUrl","icon"]))
+   });
+ }
+ // Some API character payloads omit the Intro icon in Skills but expose it in SkillTree.
+ const tree=Array.isArray(detail?.SkillTree)?detail.SkillTree:Array.isArray(detail?.skillTree)?detail.skillTree:[];
+ for(const node of tree){
+   const type=normalizeSkillType(first(node,["SkillType","Type","NodeType","type"]))||
+              normalizeSkillType(first(node,["SkillName","Name","NodeName","name"]));
+   if(!SKILL_ORDER.includes(type))continue;
+   const icon=skillIcon(first(node,["Icon","SkillIcon","SkillIconPath","IconPath","NodeIcon","PropertyNodeIcon","icon"]));
+   if(icon && (!byType.has(type)||!byType.get(type).icon)){
+     const previous=byType.get(type)||{id:String(first(node,["Id","SkillId","NodeId","id"])||type),type,icon:""};
+     previous.icon=icon; byType.set(type,previous);
+   }
+ }
+ // The control remains visible even if upstream data is temporarily incomplete.
+ return SKILL_ORDER.map(type=>byType.get(type)||{id:type,type,icon:""});
+}
+function characterDetailCacheKey(gameId){return CHARACTER_DETAIL_CACHE_PREFIX+String(gameId)}
+function readCharacterDetailCache(gameId){
+ try{
+   const x=JSON.parse(localStorage.getItem(characterDetailCacheKey(gameId))||"null");
+   return x?.detail||null;
+ }catch(e){return null}
+}
+
+const ROVER_SKILL_SIBLING={
+ "1406":"1408","1408":"1406",
+ "1501":"1502","1502":"1501",
+ "1604":"1605","1605":"1604"
+};
+function coreSkillCount(detail){
+ const defs=normalizeSkillDefsRaw(detail);
+ return defs.length;
+}
+function normalizeSkillDefsRaw(detail){
+ const arr=Array.isArray(detail?.Skills)?detail.Skills:Array.isArray(detail?.skills)?detail.skills:[];
+ const seen=new Set(), out=[];
+ for(const sk of arr){
+   const type=normalizeSkillType(first(sk,["SkillType","Type","type"]))||normalizeSkillType(first(sk,["SkillName","Name","name"]));
+   if(SKILL_ORDER.includes(type)&&!seen.has(type)){seen.add(type);out.push(type)}
+ }
+ return out;
+}
+async function backfillRoverDetail(gameId,detail){
+ const sibling=ROVER_SKILL_SIBLING[String(gameId)];
+ if(!sibling || coreSkillCount(detail)>=5)return detail;
+ try{
+   const sib=await fetchJSON(`${ENCORE_BASE}/en/character/${encodeURIComponent(sibling)}`);
+   const merged={...detail};
+   if((!Array.isArray(merged.Skills)||coreSkillCount(merged)<5)&&Array.isArray(sib?.Skills))merged.Skills=sib.Skills;
+   if((!Array.isArray(merged.SkillTree)||!merged.SkillTree.length)&&Array.isArray(sib?.SkillTree))merged.SkillTree=sib.SkillTree;
+   return merged;
+ }catch(e){
+   return detail;
+ }
+}
+
+async function getCharacterDetail(gameId,{background=false}={}){
+ const cached=readCharacterDetailCache(gameId);
+ if(cached && !background)return {detail:cached,fromCache:true};
+ let detail=await fetchJSON(`${ENCORE_BASE}/en/character/${encodeURIComponent(gameId)}`);
+ detail=await backfillRoverDetail(gameId,detail);
+ localStorage.setItem(characterDetailCacheKey(gameId),JSON.stringify({savedAt:new Date().toISOString(),detail}));
+ return {detail,fromCache:false};
+}
+
+function auditCoreSkillIcons(){
+ const missing=editingSkillDefs.filter(x=>SKILL_ORDER.includes(x.type)&&!x.icon).map(x=>x.type);
+ window.__WWC_SKILL_ICON_AUDIT__={
+   ok:missing.length===0,
+   character:editingName||null,
+   missing
+ };
+ return window.__WWC_SKILL_ICON_AUDIT__;
+}
+
+function drawSkillsEditor(state="ready"){
+ const box=document.querySelector("#skillsEditor"); if(!box)return;
+ document.querySelector("#skillsLabel").textContent=lang==="fr"?"Compétences / Forte":"Skills / Forte";
+ const src=document.querySelector("#skillsSource");
+ if(state==="loading"&&!editingSkillDefs.length){
+   src.textContent="";
+   box.innerHTML=`<div class="skill-loading">${lang==="fr"?"Chargement des données du Résonateur…":"Loading Resonator data…"}</div>`;
+   return;
+ }
+ if(state==="error"&&!editingSkillDefs.length){
+   src.textContent="";
+   box.innerHTML=`<div class="skill-error">${lang==="fr"?"Données de compétences indisponibles pour le moment.":"Skill data is unavailable right now."}</div>`;
+   return;
+ }
+ auditCoreSkillIcons();
+ src.innerHTML=`<span class="data-refresh-dot"></span>${lang==="fr"?"données du jeu":"game data"}`;
+ if(!editingSkillDefs.length){
+   box.innerHTML=`<div class="skill-error">${lang==="fr"?"Aucune donnée de compétence exploitable trouvée.":"No usable skill data found."}</div>`;
+   return;
+ }
+ box.innerHTML=`<div class="skill-grid-edit">${editingSkillDefs.map(def=>{
+   const lv=Number(editingSkills[def.type]||1);
+   return `<div class="skill-edit-row">
+     ${def.icon?`<span class="skill-icon-wrap"><img src="${def.icon}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="skill-icon-fallback">✦</span></span>`:`<span class="skill-icon-wrap"><span class="skill-icon-fallback" style="display:grid">✦</span></span>`}
+     <div class="skill-edit-copy"><b>${esc(SKILL_LABELS[lang][def.type]||def.type)}</b><small>${lang==="fr"?"Niveau actuel":"Current level"}</small>
+       <div class="skill-levels">${Array.from({length:10},(_,i)=>i+1).map(n=>`<button class="${lv===n?"active":""}" onclick="event.stopPropagation();setEditingSkillLevel('${def.type}',${n})">${n}</button>`).join("")}</div>
+     </div>
+     <button class="skill-level-btn" onclick="event.stopPropagation()">${lang==="fr"?"Niv.":"Lv."} ${lv}</button>
+   </div>`;
+ }).join("")}</div>`;
+}
+function setEditingSkillLevel(type,level){
+ editingSkills[type]=level;
+ drawSkillsEditor();
+}
+async function loadEditorSkills(resonator){
+ const token=++skillDetailRequestToken;
+ editingSkillDefs=[];
+ editingSkills={...(accountData[editingName]?.skills||{})};
+ drawSkillsEditor("loading");
+ if(!resonator?.gameId){drawSkillsEditor("error");return}
+ try{
+   const cached=readCharacterDetailCache(resonator.gameId);
+   if(cached){
+     editingSkillDefs=normalizeSkillDefs(cached);
+     if(token===skillDetailRequestToken)drawSkillsEditor();
+     // refresh detail in background, never block the editor
+     getCharacterDetail(resonator.gameId,{background:true}).then(({detail})=>{
+       if(token!==skillDetailRequestToken)return;
+       const next=normalizeSkillDefs(detail);
+       if(next.length){editingSkillDefs=next;drawSkillsEditor()}
+     }).catch(()=>{});
+     return;
+   }
+   const {detail}=await getCharacterDetail(resonator.gameId);
+   if(token!==skillDetailRequestToken)return;
+   editingSkillDefs=normalizeSkillDefs(detail);
+   drawSkillsEditor();
+ }catch(e){
+   console.warn("Skill detail unavailable",e);
+   if(token===skillDetailRequestToken)drawSkillsEditor("error");
+ }
+}
+
+function openAccountEditor(name){
+ const x=DATA.find(v=>v.name===name); if(!x)return;
+ editingName=name;
+ const d=accountData[name]||{};
+ editingLevel=d.level||null;
+ editingSeq=(d.sequence!==undefined?d.sequence:0);
+ editingWeapon=d.weapon?.name||null;
+ editingWeaponLevel=d.weapon?.level||null;
+ editingWeaponRank=d.weapon?.rank||1;
+ document.querySelector("#editorName").textContent=name;
+ document.querySelector("#editorSub").textContent=`${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}`;
+ document.querySelector("#levelLabel").textContent=lang==="fr"?"Niveau":"Level";
+ document.querySelector("#sequenceLabel").textContent=lang==="fr"?"Séquence":"Sequence";
+ document.querySelector("#weaponLabel").textContent=lang==="fr"?"Arme équipée":"Equipped weapon";
+ document.querySelector("#editorSave").textContent=lang==="fr"?"Enregistrer":"Save";
+ updateEditorControls();
+ document.querySelector("#accountEditor").classList.add("open");
+ loadEditorSkills(x);
+}
+function updateEditorControls(){
+ document.querySelector("#levelCurrent").textContent=editingLevel ? `${lang==="fr"?"Niveau":"Level"} ${editingLevel}` : (lang==="fr"?"Choisir un niveau":"Choose a level");
+ document.querySelector("#seqRow").innerHTML=[0,1,2,3,4,5,6].map(n=>`<button class="seq-btn ${editingSeq===n?"active":""}" onclick="editingSeq=${n};updateEditorControls()">S${n}</button>`).join("");
+ const wc=document.querySelector("#weaponCurrent"), ws=document.querySelector("#weaponSettings");
+ if(editingWeapon){
+   const w=WEAPONS.find(x=>x.name===editingWeapon);
+   wc.classList.remove("empty");
+   wc.innerHTML=`<div class="equipped-img-wrap"><img src="${w?.image||""}" alt="" data-candidates='${JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||""))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(editingWeapon)}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
+   ws.innerHTML=`<button class="weapon-setting" onclick="openWeaponLevelPicker()"><b>${lang==="fr"?"Niveau":"Level"}</b>${editingWeaponLevel||"—"}</button><div class="weapon-setting"><b>${lang==="fr"?"Syntonisation":"Syntony"}</b><div class="rank-row">${[1,2,3,4,5].map(n=>`<button class="rank-btn ${editingWeaponRank===n?"active":""}" onclick="event.stopPropagation();editingWeaponRank=${n};updateEditorControls()">R${n}</button>`).join("")}</div></div>`;
+ } else {
+   wc.classList.add("empty");
+   wc.textContent=lang==="fr"?"Choisir une arme compatible":"Choose a compatible weapon";
+   ws.innerHTML="";
+ }
+}
+
+function weaponImageCandidates(name, current){
+ const raw = String(name||"");
+ const strip = t => t.replace(/[^A-Za-z0-9]/g,"");
+ const words = raw.replace(/['’]/g,"").split(/[\s:#&-]+/).filter(Boolean);
+ const title = words.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join("");
+ const keep = strip(raw);
+ const lowerConnectors = words.map((w,i)=>{
+   const lw=w.toLowerCase();
+   if(i>0 && ["of","the","in","on","and"].includes(lw)) return lw;
+   return w.charAt(0).toUpperCase()+w.slice(1);
+ }).join("");
+ const base="https://raw.githubusercontent.com/ryanbenson/wuthering-waves-assets/master/images/weapons/";
+ const explicit={
+   "Ages of Harvest":"AgesOfHarvest.png",
+   "Broadblade of Night":"BroadbladeOfNight.png",
+   "Broadblade of Voyager":"BroadbladeOfVoyager.png",
+   "Sword of Night":"SwordOfNight.png",
+   "Sword of Voyager":"SwordOfVoyager.png",
+   "Pistols of Night":"PistolsOfNight.png",
+   "Pistols of Voyager":"PistolsOfVoyager.png",
+   "Gauntlets of Night":"GauntletsOfNight.png",
+   "Gauntlets of Voyager":"GauntletsOfVoyager.png",
+   "Rectifier of Night":"RectifierOfNight.png",
+   "Rectifier of Voyager":"RectifierOfVoyager.png",
+   "Call of the Abyss":"CalloftheAbyss.png",
+   "Fables of Wisdom":"FablesofWisdom.png",
+   "Meditations on Mercy":"MeditationsonMercy.png",
+   "Romance in Farewell":"RomanceinFarewell.png",
+   "Firstlight's Herald":"FirstlightsHerald.png",
+   "Defier's Thorn":"DefiersThorn.png",
+   "Moongazer's Sigil":"MoongazersSigil.png",
+   "Bloodpact's Pledge":"BloodpactsPledge.png",
+   "Starfield Calibrator":"StarfieldCalibrator.png",
+   "Lux & Umbra":"LuxUmbra.png"
+ };
+ return [...new Set([
+   current,
+   explicit[raw]?base+explicit[raw]:null,
+   base+title+".png",
+   base+keep+".png",
+   base+lowerConnectors+".png",
+   base+title+".webp",
+   base+keep+".webp"
+ ].filter(Boolean))];
+}
+function setWeaponImage(img,name,current){
+ img.dataset.weaponName=name||"";
+ img.dataset.candidates=JSON.stringify(weaponImageCandidates(name,current));
+ img.dataset.tryIndex="0";
+ img.src=weaponImageCandidates(name,current)[0]||"";
+}
+function weaponImgFallback(img){
+ let arr=[];
+ try{arr=JSON.parse(img.dataset.candidates||"[]")}catch(e){}
+ let i=(parseInt(img.dataset.tryIndex||"0",10)||0)+1;
+ if(i<arr.length){
+   img.dataset.tryIndex=String(i);
+   img.src=arr[i];
+   return;
+ }
+ img.style.display="none";
+ const wrap=img.parentElement;
+ const fb=wrap?.querySelector(".weapon-fallback");
+ if(fb) fb.style.display="grid";
+}
+function currentResonatorWeaponType(){
+ const x=DATA.find(v=>v.name===editingName); return x?.weapon||null;
+}
+function openWeaponPicker(){
+ const type=currentResonatorWeaponType();
+ const compatibleCount=WEAPONS.filter(w=>w.type===type).length;
+ document.querySelector("#weaponPickerTitle").textContent=(lang==="fr"?`Choisir une ${weaponLabel(type)}`:`Choose a ${weaponLabel(type)}`)+` · ${compatibleCount}`;
+ document.querySelector("#weaponQ").placeholder=lang==="fr"?"Rechercher une arme…":"Search a weapon…";
+ document.querySelector("#weaponQ").value="";
+ drawWeapons();
+ document.querySelector("#weaponPicker").classList.add("open");
+}
+function drawWeapons(){
+ const q=(document.querySelector("#weaponQ").value||"").toLowerCase();
+ const type=currentResonatorWeaponType();
+ const list=WEAPONS
+   .filter(w=>w.type===type && w.name.toLowerCase().includes(q))
+   .sort((a,b)=>(b.rarity-a.rarity)||a.name.localeCompare(b.name));
+ document.querySelector("#weaponGrid").innerHTML=list.length?list.map(w=>`<button class="weapon-card" onclick="selectWeaponByIndex(${WEAPONS.indexOf(w)})"><div class="weapon-img-wrap"><img src="${w.image}" alt="${esc(w.name)}" loading="lazy" decoding="async" fetchpriority="low" data-candidates='${JSON.stringify(weaponImageCandidates(w.name,w.image))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><b>${esc(w.name)}</b><small>${"★".repeat(w.rarity)}</small></button>`).join(""):`<div class="empty">${lang==="fr"?"Aucune arme compatible trouvée dans le catalogue actuel.":"No compatible weapon found in the current catalogue."}</div>`;
+}
+function selectWeaponByIndex(i){
+ const w=WEAPONS[i], expected=currentResonatorWeaponType();
+ if(!w || w.type!==expected) return;
+ selectWeapon(w.name);
+}
+function selectWeapon(name){
+ editingWeapon=name; editingWeaponLevel=null; editingWeaponRank=1;
+ document.querySelector("#weaponPicker").classList.remove("open");
+ updateEditorControls();
+}
+function openWeaponLevelPicker(){
+ document.querySelector("#weaponLevelTitle").textContent=lang==="fr"?"Niveau de l’arme":"Weapon level";
+ document.querySelector("#weaponLevelQ").placeholder=lang==="fr"?"Rechercher un niveau…":"Search a level…";
+ document.querySelector("#weaponLevelQ").value="";
+ drawWeaponLevels();
+ document.querySelector("#weaponLevelPicker").classList.add("open");
+}
+function drawWeaponLevels(){
+ const q=(document.querySelector("#weaponLevelQ").value||"").trim();
+ const nums=Array.from({length:90},(_,i)=>i+1).filter(n=>!q||String(n).includes(q));
+ document.querySelector("#weaponLevelGrid").innerHTML=nums.map(n=>`<button class="level-btn ${editingWeaponLevel===n?"active":""}" onclick="editingWeaponLevel=${n};document.querySelector('#weaponLevelPicker').classList.remove('open');updateEditorControls()">${n}</button>`).join("");
+}
+function openLevelPicker(){
+ document.querySelector("#levelPickerTitle").textContent=lang==="fr"?"Choisir le niveau":"Choose level";
+ document.querySelector("#levelQ").placeholder=lang==="fr"?"Rechercher un niveau…":"Search a level…";
+ document.querySelector("#levelQ").value="";
+ drawLevels();
+ document.querySelector("#levelPicker").classList.add("open");
+}
+function drawLevels(){
+ const q=(document.querySelector("#levelQ").value||"").trim();
+ const nums=Array.from({length:90},(_,i)=>i+1).filter(n=>!q||String(n).includes(q));
+ document.querySelector("#levelGrid").innerHTML=nums.map(n=>`<button class="level-btn ${editingLevel===n?"active":""}" onclick="editingLevel=${n};document.querySelector('#levelPicker').classList.remove('open');updateEditorControls()">${n}</button>`).join("");
+}
+function saveAccountEditor(){
+ if(!editingName)return;
+ accountData[editingName]={...(accountData[editingName]||{}),level:editingLevel,sequence:editingSeq,weapon:editingWeapon?{name:editingWeapon,level:editingWeaponLevel,rank:editingWeaponRank}:null,skills:{...editingSkills}};
+ localStorage.setItem("wwc_account_data",JSON.stringify(accountData));
+ document.querySelector("#accountEditor").classList.remove("open");
+ render();
+}
+function renderOwnedList(){
+ const listEl=document.querySelector("#ownedList"); if(!listEl)return;
+ const q=(document.querySelector("#ownedSearch")?.value||"").toLowerCase().trim();
+ let rows=ownedIds.map(id=>DATA.find(v=>v.id===id)).filter(Boolean);
+ if(q) rows=rows.filter(x=>x.name.toLowerCase().includes(q));
+ if(ownedElement!=="All")rows=rows.filter(x=>x.element===ownedElement);
+ rows.sort((a,b)=>{
+   const alpha=a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"});
+   if(ownedSort==="alpha")return ownedSortDir*alpha;
+   const rarity=(Number(a.rarity)-Number(b.rarity))*ownedSortDir;
+   return rarity||alpha;
+ });
+ listEl.innerHTML=rows.length?rows.map(x=>`<div class="res-row" style="--element:${x.element==="Fusion"?"#ff826d":x.element==="Aero"?"#6ce1d2":x.element==="Spectro"?"#ffe08a":x.element==="Glacio"?"#76d7ff":x.element==="Electro"?"#b99aff":"#d676ff"}">
+   <img src="${x.image||""}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">
+   <div class="res-main"><b>${esc(x.name)}</b><div class="res-meta"><span class="element">✦ ${x.element}</span><span>${weaponLabel(x.weapon)}</span></div><div class="rarity-stars">${"★".repeat(x.rarity)}</div></div>
+   <div class="res-actions"><div class="status">${accountStatus(x.name)}</div>
+   <button class="remove-res trash-btn" title="${lang==="fr"?"Retirer":"Remove"}" aria-label="${lang==="fr"?"Retirer "+esc(x.name):"Remove "+esc(x.name)}" onclick='event.stopPropagation();removeOwned(${JSON.stringify(x.name)})'>
+     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.8 11H7.8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg>
+   </button></div>
+   <button class="chev edit-chevron" title="${lang==="fr"?"Modifier":"Edit"}" aria-label="${lang==="fr"?"Modifier "+esc(x.name):"Edit "+esc(x.name)}" onclick='openAccountEditor(${JSON.stringify(x.name)})'>›</button>
+ </div>`).join(""):`<div class="empty">${q?(lang==="fr"?"Aucun Résonateur ne correspond à la recherche.":"No Resonator matches your search."):(lang==="fr"?"Aucun Résonateur confirmé.":"No confirmed Resonator yet.")}</div>`;
+ const footer=document.querySelector(".footer-row span");
+ if(footer) footer.textContent=lang==="fr"?`Affichage : ${rows.length} sur ${ownedIds.length}`:`Showing: ${rows.length} of ${ownedIds.length}`;
+}
+function removeOwned(name){
+ const msg=lang==="fr"?`Retirer ${name} de Mes Résonateurs ?`:`Remove ${name} from My Resonators?`;
+ if(!confirm(msg))return;
+ const r=resolveResonatorRef(name);
+ if(r)ownedIds=ownedIds.filter(id=>id!==r.id);
+ persistCanonicalOwnership();
+ render();
+}
+function filterOwned(){ renderOwnedList(); }
+function openSelector(){
+ document.querySelector("#selectorTitle").textContent=lang==="fr"?"Ajouter un Résonateur":"Add a Resonator";
+ document.querySelector("#selectorQ").placeholder=lang==="fr"?"Rechercher un Résonateur…":"Search a Resonator…";
+ document.querySelector("#selectorQ").value="";
+ document.querySelector("#selector").classList.add("open");drawSelector();
+}
+function drawSelector(){
+ const q=(document.querySelector("#selectorQ").value||"").toLowerCase();
+ const list=DATA
+   .filter(x=>!ownedIds.includes(x.id)&&x.name.toLowerCase().includes(q))
+   .sort((a,b)=>(Number(b.rarity)-Number(a.rarity))||a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"}));
+ document.querySelector("#selectorGrid").innerHTML=list.map(x=>`<button class="select-card ${detected.has(x.name)?"detected":""}" onclick='confirmOwned(${JSON.stringify(x.name)})'>${x.image?`<img src="${x.image}" alt="${esc(x.name)}">`:""}<span>${esc(x.name)}</span></button>`).join("");
+}
+function confirmOwned(name){
+ const r=resolveResonatorRef(name);
+ if(r&&!ownedIds.includes(r.id)){ownedIds.push(r.id);persistCanonicalOwnership()}
+ document.querySelector("#selector").classList.remove("open");render();
+}
+function openDetail(name){
+ const x=DATA.find(v=>v.name===name);if(!x)return;
+ document.querySelector("#detailContent").innerHTML=`<div class="detailhero">${x.image?`<img src="${x.image}" alt="${esc(x.name)}">`:""}<div class="detailcopy"><div style="color:#f0d48b">${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</div><h1>${esc(x.name)}</h1><p>${ownedIds.includes(x.id)?(lang==="fr"?"Possédé":"Owned"):name==="Hiyuki"?(lang==="fr"?"Souhait · non possédée":"Wishlist · not owned"):(lang==="fr"?"Statut inconnu":"Unknown status")}</p></div></div><div class="actions"><button class="action wish"><svg viewBox="0 0 24 24"><path d="M12 20.4 4.2 13C.8 9.8 2.4 4.5 6.8 4.5c2.1 0 3.7 1.2 5.2 3 1.5-1.8 3.1-3 5.2-3 4.4 0 6 5.3 2.6 8.5L12 20.4Z"/></svg>${lang==="fr"?"Souhait":"Wishlist"}</button><button class="action primary"><svg viewBox="0 0 24 24"><path d="M12 2.5 18.2 19 12 15.8 5.8 19 12 2.5Z" fill="currentColor"/></svg>${lang==="fr"?"Améliorer":"Improve"}</button></div>`;
+ document.querySelector("#detail").classList.add("open");
+}
+function setLang(v){lang=v;localStorage.setItem("wwc_lang",v);render()}
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{currentView=b.dataset.view;render()});
+document.querySelector("#selectorClose").onclick=()=>document.querySelector("#selector").classList.remove("open");
+document.querySelector("#editorClose").onclick=()=>document.querySelector("#accountEditor").classList.remove("open");
+document.querySelector("#levelPickerClose").onclick=()=>document.querySelector("#levelPicker").classList.remove("open");
+document.querySelector("#weaponPickerClose").onclick=()=>document.querySelector("#weaponPicker").classList.remove("open");
+document.querySelector("#weaponLevelClose").onclick=()=>document.querySelector("#weaponLevelPicker").classList.remove("open");
+document.querySelector("#back").onclick=()=>document.querySelector("#detail").classList.remove("open");
+
+function auditCompanionData(){
+ const allowed=new Set(["Broadblade","Gauntlets","Pistols","Rectifier","Sword"]);
+ const problems=[];
+ DATA.forEach(x=>{if(!allowed.has(x.weapon))problems.push(`Resonator ${x.name}: ${x.weapon}`)});
+ WEAPONS.forEach(w=>{
+   if(!allowed.has(w.type))problems.push(`Weapon ${w.name}: invalid type ${w.type}`);
+   if(![1,2,3,4,5].includes(Number(w.rarity)))problems.push(`Weapon ${w.name}: invalid rarity ${w.rarity}`);
+ });
+ window.__WWC_AUDIT__={ok:problems.length===0,problems,resonators:DATA.length,weapons:WEAPONS.length};
+ return window.__WWC_AUDIT__;
+}
+auditCompanionData();
+
+
+
+bootstrapCanonicalCatalog().catch(err=>dataErrorScreen(err));
+</script>
+</body>
+</html>
