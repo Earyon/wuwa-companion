@@ -12,7 +12,7 @@ function fixture(seed={}){
 const resolve=name=>['Old name','Alias','Renamed'].includes(name)?{id:'resonator:1'}:null;
 const legacy={'wwc_owned_ids':'[]','wwc_owned':'["Old name"]','wwc_account_data':JSON.stringify({'Old name':{level:70,forteNodes:{'node:999':true}},Alias:{level:20},Missing:{level:50}})};
 let f=fixture(legacy);f.store.migrate(resolve);
-assert.equal(f.store.get().version,6);assert.equal(f.store.get().roster.length,0);
+assert.equal(f.store.get().version,7);assert.equal(f.store.get().roster.length,0);
 assert.equal(f.store.get().characters['resonator:1'].level,70);
 assert.equal(f.store.get().legacyProgress.Alias.level,20);assert.equal(f.store.get().legacyProgress.Missing.level,50);
 for(const [k,v] of Object.entries(legacy))assert.equal(f.values.get(k),v,'Migration never rewrites legacy records');

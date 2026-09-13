@@ -67,7 +67,7 @@ async function inspect(page,label){
    const context=await browser.newContext({viewport:{width:720,height:1122},deviceScaleFactor:4/3,serviceWorkers:'block'});
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
-   await page.route('https://**/*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(route.request().url().endsWith('/character/1')?forteFixture:{GameVer:'test',ResVer:'test',Skills:[]})}));
+   await page.route('https://**/*',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(route.request().url().endsWith('/character/1')?{...forteFixture,Id:1}:{GameVer:'test',ResVer:'test',Skills:[]})}));
    await page.addInitScript(({characters,weapons,account,lang})=>{
     if(localStorage.getItem('test-seeded'))return;
     localStorage.setItem('wwc_catalog_canonical_v050',JSON.stringify({characters,weapons,state:{gameVersion:'test',resourceVersion:'test'}}));

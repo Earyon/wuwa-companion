@@ -2,7 +2,7 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Avancement : 12 / 14 lots vérifiés
+## Avancement : 13 / 14 lots vérifiés
 
 - [x] Catalogue Résonateurs / armes, compte et niveaux, cinq compétences et passifs.
 - [x] Mise en page consolidée, publication Pages et mises à jour PWA.
@@ -12,7 +12,7 @@ Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue
 - [x] Ressources connues / inconnues, inventaire et besoins nets.
 - [x] Objectifs personnels et priorités, un seul personnage actif, tâches dérivées.
 - [x] Coûts réels de montée : niveau, ascension, arme, compétences, passifs.
-- [ ] Fiches complètes, builds contextualisés, recommandations sourcées et datées.
+- [x] Fiches complètes, builds contextualisés, recommandations sourcées et datées.
 - [x] Équipes de trois, favoris et profils de builds.
 - [x] Succès, activités / événements / resets et historique utile.
 - [x] Wishlist et Pull Planner, historique Tracker et imports contrôlés.
@@ -163,3 +163,17 @@ Vérifications : règles de budget, import strict, fusion multiensemble, compteu
 Sources consultées le 13 septembre 2026 : [paramètres et export public WuWa Tracker](https://wuwatracker.com/settings), [importeur maintenu, révision identifiée](https://github.com/GoneTone/wuthering-waves-convene-gacha-analyzer/blob/12f49ab878874649c29147b2ec4ba6391970be14/lib/services/importers/wuwa_tracker_importer.dart), [catégories d’invocations](https://github.com/GoneTone/wuthering-waves-convene-gacha-analyzer/blob/12f49ab878874649c29147b2ec4ba6391970be14/lib/data/gacha_types.dart), [règles d’invocation Prydwen](https://www.prydwen.gg/wuthering-waves/guides/gacha), [transactions IndexedDB, MDN](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB). Seules les catégories sont reprises de l’importeur tiers, pas ses suppositions horaires ni ses correspondances approximatives de noms.
 
 Avancement : **12 / 14 lots vérifiés**, refonte **2 / 3**. Restent la couverture des recommandations contextualisées et la revue finale de l’ensemble.
+
+## Recommandations et références — lot 9 vérifié
+
+Couverture des 58 Résonateurs canoniques de la version 3.6, avec 80 contextes. Les listes d’armes, rangs, statistiques, recharge et priorités proviennent des guides Prydwen individuellement consultés le 13 septembre 2026 ; Shorekeeper conserve également sa référence Game8. Les conditions significatives sont conservées : investissement nécessaire à Empyrean/Midnight, Erosion pour Windward, seuils de recharge de Brant/Mornye/Suisui, modes de Denia/Lucilla/Phoebe, PV de Cartethyia/Jingran. Les noms d’armes ont tous une correspondance dans le catalogue Encore actuel et tous les types sont compatibles. Aucune comparaison de dégâts chiffrée n’est recopiée comme simulation du compte. Les suggestions d’équipe reproduisent uniquement les compositions effectivement identifiées dans les références, pas des partenaires inventés pour remplir les cases.
+
+Les profils prennent en charge 43311 et 44111 ainsi que les Sonates 5, 3+2 et 1+2+2. Les variantes héritent des données communes sans dupliquer les classements. La sauvegarde personnelle passe en version 7 ; les anciens profils conservent implicitement leur disposition 43311 et leur ensemble de 5 pièces. Le choix d’un build reste distinct de l’équipement réel.
+
+La cause des effets de Sonate incohérents a été isolée : les identifiants de groupe ne doivent pas être utilisés comme identifiants d’effet. `scripts/refresh-sonatas.cjs` joint les 34 groupes via `FetterMap`, vérifie leur nom de groupe, développe les paramètres depuis WW_Data et conserve les conditions en français/anglais. Les effets sont présentés en référence dans les fiches Écho, sans calculer abusivement des bonus permanents. Les données locales sont liées à la version 3.6. Le script se régénère depuis la révision WW_Data déjà identifiée, ou se vérifie hors réseau avec `WUWA_SOURCE_CACHE=test-results` et `--check`.
+
+Les caches de personnages et d’armes vérifient désormais l’identité et la version du jeu. Un cache facultatif ancien sans ces preuves doit être rechargé ; la progression personnelle demeure conservée. Les fixtures historiques qui associaient les données de Sanhua à un personnage synthétique portent maintenant explicitement l’identité synthétique attendue. L’identifiant masculin du Rover Electro (1309) a été vérifié dans `RoleBody: MaleM`, son équivalent 1310 dans `FemaleM`, avant l’ajout à la liste canonique.
+
+Validation : 80 contextes contrôlés (identifiants, cinq priorités, statistiques autorisées, rangs et équipes), profils FR/EN 44111 et Sonates combinées réellement créés/enregistrés, changement de variante, rejet du cache d’une autre identité et effets de Sonate affichés. Les suites account-store, editor (80 cas), responsive (42 cas), planning, profiles-teams, features et PWA passent. PWA 18 testée depuis ee54e28, avec les 34 Sonates disponibles hors ligne. Captures des nouvelles fiches examinées ; aucune validation matérielle sur tablette n’est prétendue.
+
+Avancement : **13 / 14 lots vérifiés**, refonte **2 / 3**. Reste la revue finale de l’ensemble, incluant les écrans historiques et les parcours de démarrage/réglages.

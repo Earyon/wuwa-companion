@@ -7,13 +7,14 @@ const profileKey=(selection,language=lang)=>language+':'+selection.kind+':'+sele
 function projectProfileDetail(kind,data){
  if(kind==='character')return {Id:data.Id,Introduction:data.Introduction,Properties:(data.Properties||[]).map(p=>({Name:p.Name,BaseValue:p.BaseValue})),Skills:(data.Skills||[]).map(s=>({SkillId:s.SkillId,SkillType:s.SkillType,SkillName:s.SkillName,SkillDescribe:s.SkillDescribe,SkillAttributes:s.SkillAttributes,SkillDetailNum:s.SkillDetailNum})),ResonantChain:data.ResonantChain||[]};
  if(kind==='weapon')return {ItemId:data.ItemId,Desc:data.Desc,ResonName:data.ResonName,Properties:(data.Properties||[]).map(p=>({Name:p.Name,BaseValue:p.BaseValue}))};
- return {Id:data.MonsterId,Name:data.MonsterName,Description:data.Skill?.SimplyDescription||data.AttributesDescription,unverifiedSets:true};
+ return {Id:data.MonsterId,Name:data.MonsterName,Description:data.Skill?.SimplyDescription||data.AttributesDescription};
 }
 async function loadProfileSource(selection,{refresh=false}={}){
- const language=lang,key=profileKey(selection,language),row=profileRow();if(!row)return;
+ const language=lang,key=profileKey(selection,language),row=(selection.kind==='character'?DATA:selection.kind==='weapon'?WEAPONS:extendedCatalog.echo).find(r=>r.id===selection.id);if(!row)return;
  if(profilePending.has(key))return profilePending.get(key);if(profileSources.has(key)&&!refresh)return;
  const promise=(async()=>{
   const cacheKey='wwc_profile_detail_v1:'+key;let cached=null;try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch{}
+  if(cached?.data&&String(selection.kind==='weapon'?cached.data.ItemId:cached.data.Id)!==String(row.gameId||row.id))cached=null;
   if(cached?.data&&cached.version===catalogState.gameVersion&&!refresh){profileSources.set(key,{data:cached.data});return;}
   try{
    let raw;if(language==='en'&&selection.kind==='character')raw=(await getCharacterDetail(row.gameId,{background:refresh})).detail;
@@ -44,7 +45,8 @@ function renderProfileSection(){
   if(profileTab==='skills')html=(data.Skills||[]).map(s=>`<details class="kit-skill"><summary><span>${esc(content(s.SkillType))}</span><b>${esc(content(s.SkillName))}</b></summary><p class="source-description">${esc(sourceText(s.SkillDescribe))}</p>${skillMultipliersHTML(s)}</details>`).join('')||`<p>${tr('Compétences non disponibles dans la source.','Skills unavailable from the source.')}</p>`;
   if(profileTab==='sequence')html=(data.ResonantChain||[]).map(s=>`<details class="kit-skill"><summary><span>S${esc(s.GroupIndex)}</span><b>${esc(content(s.NodeName))}</b></summary><p class="source-description">${esc(sourceText(s.AttributesDescription))}</p></details>`).join('')||`<p>${tr('Séquence indisponible dans la source.','Sequence unavailable from the source.')}</p>`;
  }
- box.innerHTML=html+(data?.unverifiedSets?`<p class="companion-note">${tr('Les effets chiffrés de Sonate ne sont pas affichés : des incohérences d’identifiants ont été détectées dans cette source.','Numeric Sonata effects are withheld: inconsistent identifiers were found in this source.')}</p>`:'')+`<p class="companion-note">${data?tr('Données de jeu · Encore · ','Game data · Encore · ')+lang.toUpperCase():source?.error?tr('Détail indisponible pour le moment.','Detail unavailable at this time.'):tr('Chargement du détail…','Loading detail…')}</p>${source?.error?`<p>${tr('Les données déjà disponibles restent affichées.','Previously available data remains visible.')}</p>`:''}${companionButton('profile-refresh',tr('Actualiser','Refresh'))}`;
+ if(profileSelection.kind==='weapon'&&data)html='<h3>'+esc(content(data.ResonName))+'</h3><p class="companion-note">'+tr('Les valeurs séparées par / correspondent aux rangs R1 à R5, dans cet ordre.','Values separated by / correspond to ranks R1 through R5, in that order.')+'</p>'+html;
+ box.innerHTML=html+(profileSelection.kind==='echo'?sonataReferencesHTML(row.sets.map(s=>s.id)):'')+`<p class="companion-note">${data?tr('Données de jeu · Encore · ','Game data · Encore · ')+lang.toUpperCase():source?.error?tr('Détail indisponible pour le moment.','Detail unavailable at this time.'):tr('Chargement du détail…','Loading detail…')}</p>${source?.error?`<p>${tr('Les données déjà disponibles restent affichées.','Previously available data remains visible.')}</p>`:''}${companionButton('profile-refresh',tr('Actualiser','Refresh'))}`;
 }
 function skillMultipliersHTML(skill){
  // Tables are displayed only when the source supplies explicit labelled rows.

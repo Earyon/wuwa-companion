@@ -20,8 +20,9 @@ async function loadProgressSources(character,{refresh=false}={}){
 }
 async function getWeaponDetail(gameId,{refresh=false}={}){
  const key='wwc_weapon_detail_v1:'+gameId;let cached;try{cached=JSON.parse(localStorage.getItem(key)||'null');}catch{}
+ if(cached?.gameVersion!==catalogState.gameVersion||String(cached?.detail?.ItemId)!==String(gameId))cached=null;
  if(cached?.detail&&!refresh)return cached.detail;
- try{const detail=await fetchJSON(`${ENCORE_BASE}/en/weapon/${encodeURIComponent(gameId)}`);if(String(detail.ItemId)!==String(gameId))throw Error('Invalid weapon ID');try{localStorage.setItem(key,JSON.stringify({detail,savedAt:new Date().toISOString()}));}catch{}return detail;}catch(error){if(cached?.detail)return cached.detail;throw error;}
+ try{const detail=await fetchJSON(`${ENCORE_BASE}/en/weapon/${encodeURIComponent(gameId)}`);if(String(detail.ItemId)!==String(gameId))throw Error('Invalid weapon ID');try{localStorage.setItem(key,JSON.stringify({detail,gameVersion:catalogState.gameVersion,savedAt:new Date().toISOString()}));}catch{}return detail;}catch(error){if(cached?.detail)return cached.detail;throw error;}
 }
 function planningActual(character,goal){
  const state=CompanionStore.get();if(!goal?.prefarm||state.roster?.includes(character.id))return state.characters[character.id]||{};

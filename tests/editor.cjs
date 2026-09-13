@@ -14,12 +14,12 @@ const server=http.createServer((req,res)=>{const name=new URL(req.url,'http://lo
   for(const language of ['fr','en']){
    const context=await browser.newContext({viewport:{width:720,height:1122},serviceWorkers:'block'}),page=await context.newPage(),errors=[];let detailRequests=0;
    page.on('pageerror',e=>errors.push(e.message));
-   await page.route('https://**/*',route=>{if(route.request().url().includes('/character/'))detailRequests++;return route.fulfill({contentType:'application/json',body:JSON.stringify(route.request().url().includes('/character/')?fixture:{GameVer:'test',ResVer:'test'})});});
+   await page.route('https://**/*',route=>{if(route.request().url().includes('/character/'))detailRequests++;return route.fulfill({contentType:'application/json',body:JSON.stringify(route.request().url().includes('/character/')?{...fixture,Id:Number(route.request().url().split('/').pop())}:{GameVer:'test',ResVer:'test'})});});
    await page.addInitScript(({characters,weapons,progress,fixture,language})=>{
     if(localStorage.getItem('test-seeded'))return;localStorage.setItem('test-seeded','1');localStorage.setItem('wwc_lang',language);
     localStorage.setItem('wwc_catalog_canonical_v050',JSON.stringify({characters,weapons,state:{gameVersion:'test',resourceVersion:'test'}}));
     localStorage.setItem('wwc_owned_ids','["resonator:1"]');localStorage.setItem('wwc_account_data',JSON.stringify({Qingxiao:progress}));
-    localStorage.setItem('wwc_character_detail_v4:1',JSON.stringify({detail:fixture}));
+    localStorage.setItem('wwc_character_detail_v4:1',JSON.stringify({gameVersion:'test',detail:{...fixture,Id:1}}));
    },{characters,weapons,progress,fixture,language});
    await page.goto(base);await page.locator('.res-row').waitFor();
    const open=async()=>{await page.locator('.edit-chevron').click();await page.locator('dialog#accountEditor[open]').waitFor();};

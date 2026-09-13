@@ -54,14 +54,15 @@ function characterDetailCacheKey(gameId){return CHARACTER_DETAIL_CACHE_PREFIX+St
 function readCharacterDetailCache(gameId){
  try{
    const x=JSON.parse(localStorage.getItem(characterDetailCacheKey(gameId))||"null");
-   return x?.detail||null;
+   return x?.gameVersion===catalogState.gameVersion&&String(x.detail?.Id)===String(gameId)?x.detail:null;
  }catch(e){return null}
 }
 
 const ROVER_SKILL_SIBLING={
  "1406":"1408","1408":"1406",
  "1501":"1502","1502":"1501",
- "1604":"1605","1605":"1604"
+ "1604":"1605","1605":"1604",
+ "1309":"1310","1310":"1309"
 };
 function coreSkillCount(detail){
  const defs=normalizeSkillDefsRaw(detail);
@@ -81,6 +82,7 @@ async function backfillRoverDetail(gameId,detail){
  if(!sibling || (coreSkillCount(detail)>=5&&detail.SkillTree?.length))return detail;
  try{
    const sib=await fetchJSON(`${ENCORE_BASE}/en/character/${encodeURIComponent(sibling)}`);
+   if(String(sib?.Id)!==String(sibling))return detail;
    const merged={...detail};
    if((!Array.isArray(merged.Skills)||coreSkillCount(merged)<5)&&Array.isArray(sib?.Skills))merged.Skills=sib.Skills;
    if((!Array.isArray(merged.SkillTree)||!merged.SkillTree.length)&&Array.isArray(sib?.SkillTree))merged.SkillTree=sib.SkillTree;
@@ -94,8 +96,9 @@ async function getCharacterDetail(gameId,{background=false}={}){
  const cached=readCharacterDetailCache(gameId);
  if(cached && !background)return {detail:cached,fromCache:true};
  let detail=await fetchJSON(`${ENCORE_BASE}/en/character/${encodeURIComponent(gameId)}`);
+ if(String(detail?.Id)!==String(gameId))throw Error('Invalid character identity');
  detail=await backfillRoverDetail(gameId,detail);
- try{localStorage.setItem(characterDetailCacheKey(gameId),JSON.stringify({savedAt:new Date().toISOString(),detail}));}catch{/* Optional cache failure must not hide successfully fetched data. */}
+ try{localStorage.setItem(characterDetailCacheKey(gameId),JSON.stringify({gameVersion:catalogState.gameVersion,savedAt:new Date().toISOString(),detail}));}catch{/* Optional cache failure must not hide successfully fetched data. */}
  return {detail,fromCache:false};
 }
 

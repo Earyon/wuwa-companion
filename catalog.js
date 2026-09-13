@@ -88,7 +88,7 @@ function normalizeCharacter(r){
 function isRover(r){
  return /^rover(?:\s*:|\s*$)/i.test(String(r?.name||"").trim());
 }
-const VERIFIED_MALE_ROVER_IDS=new Set(["1406","1501","1605"]);
+const VERIFIED_MALE_ROVER_IDS=new Set(["1406","1501","1605","1309"]);
 function keepPlayableMaleRovers(chars){
  const groups=new Map(), others=[];
  for(const r of chars){

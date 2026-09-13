@@ -1,6 +1,7 @@
 'use strict';
 let teamDraft=null,teamOriginal=null,teamQuery='',onlyFavoriteTeams=false;
 let buildDraft=null,buildOriginal=null;
+const buildStatSlots=b=>(b.costPattern==='44111'?[['main4',4],['main4b',4],['main1',1]]:[['main4',4],['main3',3],['main3b',3],['main1',1]]);
 function characterName(id){return DATA.find(c=>c.id===id)?.name||id;}
 function teamsPage(){
  const s=CompanionStore.get(),draft=teamDraft||{id:crypto.randomUUID(),name:'',members:['','',''],favorite:false,builds:{}};
@@ -13,7 +14,7 @@ function readTeamForm(form){const f=new FormData(form),members=[0,1,2].map(i=>f.
 function buildField(label,key,options,value){return `<label>${label}<select name="${key}"><option value="">—</option>${options.map(([id,name])=>`<option value="${esc(id)}" ${value===id?'selected':''}>${esc(name)}</option>`).join('')}</select></label>`;}
 function buildProfilesHTML(character){
  const s=CompanionStore.get(),profiles=s.builds.filter(b=>b.characterId===character.id);
- const list=`<h3>${tr('Mes profils de build','My build profiles')}</h3><div class="companion-list">${profiles.map(b=>`<article class="activity-card"><div><h3>${esc(b.name)}</h3><p>${esc(b.context)}</p><small>${esc(WEAPONS.find(w=>w.id===b.weaponId)?.name||b.weaponId||'—')} · ${Object.values(b.stats).filter(Boolean).map(statLabel).map(esc).join(' · ')}</small><p class="source-description">${esc(b.notes)}</p></div><div class="companion-actions">${companionButton('edit-build',tr('Modifier','Edit'),b.id)}${companionButton('remove-build',tr('Retirer','Remove'),b.id)}</div></article>`).join('')||`<p>${tr('Un profil conserve tes choix pour un contexte ou une équipe. Il ne remplace pas ton équipement actuel.','A profile keeps your choices for a context or team. It does not replace your current equipment.')}</p>`}</div>${companionButton('new-build',tr('Créer un profil personnel','Create a personal profile'),character.id)}`;
+ const list=`<h3>${tr('Mes profils de build','My build profiles')}</h3><div class="companion-list">${profiles.map(b=>`<article class="activity-card"><div><h3>${esc(b.name)}</h3><p>${esc(b.context)}</p><small>${esc(WEAPONS.find(w=>w.id===b.weaponId)?.name||b.weaponId||'—')} · ${buildStatSlots(b).map(([k])=>b.stats[k]).filter(Boolean).map(statLabel).map(esc).join(' · ')}</small><p class="source-description">${esc(b.notes)}</p></div><div class="companion-actions">${companionButton('edit-build',tr('Modifier','Edit'),b.id)}${companionButton('remove-build',tr('Retirer','Remove'),b.id)}</div></article>`).join('')||`<p>${tr('Un profil conserve tes choix pour un contexte ou une équipe. Il ne remplace pas ton équipement actuel.','A profile keeps your choices for a context or team. It does not replace your current equipment.')}</p>`}</div>${companionButton('new-build',tr('Créer un profil personnel','Create a personal profile'),character.id)}`;
  if(!buildDraft||buildDraft.characterId!==character.id)return list;
  const b=buildDraft;
  if(!extendedCatalog.echo.length&&!extendedCatalog.loading.echo&&!extendedCatalog.errors.echo)queueMicrotask(()=>loadExtended('echo'));
@@ -21,15 +22,16 @@ function buildProfilesHTML(character){
  const options=(rows,selected)=>{const result=rows.map(r=>[r.id,r.label||r.name]);if(selected&&!result.some(([id])=>id===selected))result.push([selected,tr('Référence conservée : ','Preserved reference: ')+selected]);return result;};
  return list+`<form id="buildForm" class="companion-form"><label>${tr('Nom du profil','Profile name')}<input name="name" maxlength="80" required value="${esc(b.name)}"></label><label>${tr('Contexte / équipe','Context / team')}<input name="context" maxlength="200" value="${esc(b.context)}"></label>${buildField(tr('Rôle','Role'),'role',[['dps',tr('Dégâts principaux','Main damage')],['hybrid',tr('Dégâts et soutien','Damage and support')],['support',tr('Soutien','Support')]],b.role)}
  <label class="wide">${tr('Arme (recherche dans le catalogue)','Weapon (search the catalogue)')}<input name="weapon" list="buildWeapons" value="${esc(b.weaponText??(b.weaponId?(WEAPONS.find(w=>w.id===b.weaponId)?.name||'')+' · #'+b.weaponId:''))}"><datalist id="buildWeapons">${WEAPONS.filter(w=>w.type===character.weapon).map(w=>`<option value="${esc(w.name+' · #'+w.id)}"></option>`).join('')}</datalist></label>
- ${buildField(tr('Sonate','Sonata'),'setId',options(sets,b.setId),b.setId)}${buildField(tr('Écho principal','Main Echo'),'echoId',options(extendedCatalog.echo,b.echoId),b.echoId)}
- ${[['main4',4],['main3',3],['main3b',3],['main1',1]].map(([k,cost],i)=>buildField(tr('Statistique principale','Main stat')+' · '+cost+(i===2?' (2)':''),k,EchoRules.mainTypes(cost).map(k=>[k,statLabel(k)]),b.stats[k])).join('')}
+ ${buildField(tr('Pièces par ensemble','Pieces per set'),'setPieces',[['5','5'],['3','3 + 2'],['1','1 + 2 + 2']],String(b.setPieces??5))}${buildField(tr('Sonate principale','Primary Sonata'),'setId',options(sets,b.setId),b.setId)}${(b.setPieces??5)<5?buildField(tr('Deuxième Sonate (2 pièces)','Second Sonata (2 pieces)'),'secondarySetId',options(sets,b.secondarySetId),b.secondarySetId):''}${b.setPieces===1?buildField(tr('Troisième Sonate (2 pièces)','Third Sonata (2 pieces)'),'tertiarySetId',options(sets,b.tertiarySetId),b.tertiarySetId):''}${buildField(tr('Écho principal','Main Echo'),'echoId',options(extendedCatalog.echo,b.echoId),b.echoId)}
+ ${buildField(tr('Répartition des coûts','Cost arrangement'),'costPattern',[['43311','4 · 3 · 3 · 1 · 1'],['44111','4 · 4 · 1 · 1 · 1']],b.costPattern||'43311')}
+ ${buildStatSlots(b).map(([k,cost],i)=>buildField(tr('Statistique principale','Main stat')+' · '+cost+(i===2?' (2)':''),k,EchoRules.mainTypes(cost).map(k=>[k,statLabel(k)]),b.stats[k])).join('')}
  <fieldset class="wide build-substats"><legend>${tr('Sous-statistiques prioritaires (jusqu’à 5)','Priority substats (up to 5)')}</legend>${EchoRules.subTypes.map(k=>`<label class="check-label"><input type="checkbox" name="sub:${k}" ${b.substats.includes(k)?'checked':''}>${esc(statLabel(k))}</label>`).join('')}</fieldset>
  <label class="wide">${tr('Notes de rotation / conditions','Rotation notes / conditions')}<textarea name="notes" maxlength="2000">${esc(b.notes)}</textarea></label><div class="companion-actions wide"><button class="companion-button">${tr('Enregistrer le profil','Save profile')}</button>${companionButton('cancel-build',tr('Annuler','Cancel'))}</div></form>`;
 }
 function readBuildForm(form,validate=false){
  const f=new FormData(form),weapon=f.get('weapon'),id=weapon?weapon.slice(weapon.lastIndexOf(' · #')+4):null;
  const row=WEAPONS.find(w=>w.id===id);if(validate&&weapon&&weapon!==((row?.name||'')+' · #'+id))throw Error('Choose a catalogue weapon');
- return {...buildDraft,name:f.get('name').trim(),context:f.get('context').trim(),role:f.get('role'),weaponId:id,weaponText:weapon,echoId:f.get('echoId')||null,setId:f.get('setId')||null,stats:Object.fromEntries(['main4','main3','main3b','main1'].map(k=>[k,f.get(k)||null])),substats:EchoRules.subTypes.filter(k=>f.get('sub:'+k)==='on'),notes:f.get('notes')};
+ return {...buildDraft,name:f.get('name').trim(),context:f.get('context').trim(),role:f.get('role'),weaponId:id,weaponText:weapon,echoId:f.get('echoId')||null,setId:f.get('setId')||null,setPieces:Number(f.get('setPieces')||5),secondarySetId:f.get('secondarySetId')||buildDraft.secondarySetId||null,tertiarySetId:f.get('tertiarySetId')||buildDraft.tertiarySetId||null,costPattern:f.get('costPattern')||'43311',stats:{...buildDraft.stats,...Object.fromEntries(buildStatSlots(buildDraft).map(([k])=>[k,f.get(k)||null]))},substats:EchoRules.subTypes.filter(k=>f.get('sub:'+k)==='on'),notes:f.get('notes')};
 }
 Object.assign(companionActions,{
  'edit-team':id=>{teamOriginal=CompanionStore.get().teams.find(t=>t.id===id);if(!teamOriginal)return;teamDraft=structuredClone(teamOriginal);render();document.getElementById('teamForm')?.scrollIntoView({block:'center'});},
@@ -52,5 +54,7 @@ document.addEventListener('submit',event=>{
 document.addEventListener('catalogue-ready',event=>{if(event.detail==='echo'&&buildDraft&&document.getElementById('buildForm')){
  // Refresh only catalogue selectors, preserving all text fields and focus.
  const source=document.createElement('template');source.innerHTML=buildProfilesHTML(DATA.find(c=>c.id===buildDraft.characterId));
- for(const name of ['echoId','setId']){const target=document.querySelector(`#buildForm [name="${name}"]`),fresh=source.content.querySelector(`[name="${name}"]`);if(target&&fresh)target.replaceChildren(...fresh.childNodes);}
+ for(const name of ['echoId','setId','secondarySetId','tertiarySetId']){const target=document.querySelector(`#buildForm [name="${name}"]`),fresh=source.content.querySelector(`[name="${name}"]`);if(target&&fresh)target.replaceChildren(...fresh.childNodes);}
 }});
+
+document.addEventListener('change',e=>{if(e.target.form?.id==='buildForm'&&['setPieces','costPattern'].includes(e.target.name)){buildDraft=readBuildForm(e.target.form);renderProfileSection();document.querySelector('#buildForm [name="'+e.target.name+'"]')?.focus();}});

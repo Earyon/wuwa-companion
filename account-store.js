@@ -3,7 +3,7 @@
 const CompanionStore=(()=>{
  const KEY='wwc_companion_v1';
  const PERSONAL=[KEY,'wwc_owned_ids','wwc_owned','wwc_account_data','wwc_lang'];
- const blank=()=>({version:6,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],achievements:{},settings:{},builds:[],journal:[]});
+ const blank=()=>({version:7,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],achievements:{},settings:{},builds:[],journal:[]});
  const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
  const number=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  function parse(raw){return JSON.parse(raw,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw Error('Invalid key');return value;});}
@@ -21,10 +21,10 @@ const CompanionStore=(()=>{
   validate(data);
   const next=data.version===1?{...data,roster:null,characters:{},legacyProgress:{}}:{...data};
   if(data.version<4)next.echoes=data.echoes.map(e=>({id:e.id,catalogId:e.catalogId,name:e.catalogId,owner:e.owner,slot:e.slot,level:e.level,quality:null,cost:null,setId:null,main:null,secondary:null,substats:[],legacyStats:{mainStat:e.mainStat,mainValue:e.mainValue,substats:e.substats}}));
-  next.achievements??={};next.settings??={};next.builds??=[];next.version=6;validate(next);return next;
+  next.achievements??={};next.settings??={};next.builds??=[];next.version=7;validate(next);return next;
  }
  function validate(data){
-  if(!object(data)||![1,2,3,4,5,6].includes(data.version))throw Error('Unsupported account format');
+  if(!object(data)||![1,2,3,4,5,6,7].includes(data.version))throw Error('Unsupported account format');
   if(data.version>=2){
    if(data.roster!==null&&(!Array.isArray(data.roster)||data.roster.some(id=>typeof id!=='string')||new Set(data.roster).size!==data.roster.length))throw Error('Invalid roster');
    if(!object(data.characters)||!object(data.legacyProgress))throw Error('Invalid progress');
@@ -78,7 +78,10 @@ const CompanionStore=(()=>{
    for(const b of data.builds){
     if(!object(b)||typeof b.id!=='string'||!b.id||typeof b.characterId!=='string'||typeof b.name!=='string'||!b.name.trim()||b.name.length>80||!['dps','hybrid','support'].includes(b.role)||typeof b.context!=='string'||b.context.length>200||typeof b.notes!=='string'||b.notes.length>2000)throw Error('Invalid build');
     for(const k of ['weaponId','echoId','setId'])if(b[k]!==null&&typeof b[k]!=='string')throw Error('Invalid build reference');
-    if(!object(b.stats)||Object.entries(b.stats).some(([k,v])=>!['main4','main3','main3b','main1'].includes(k)||v!==null&&!EchoRules.mainTypes(k==='main4'?4:k==='main1'?1:3).includes(v)))throw Error('Invalid build stats');
+    if(!object(b.stats)||Object.entries(b.stats).some(([k,v])=>!['main4','main4b','main3','main3b','main1'].includes(k)||v!==null&&!EchoRules.mainTypes(k.startsWith('main4')?4:k==='main1'?1:3).includes(v)))throw Error('Invalid build stats');
+    if(b.costPattern!==undefined&&!['43311','44111'].includes(b.costPattern)||b.setPieces!==undefined&&![1,3,5].includes(b.setPieces))throw Error('Invalid build layout');
+    for(const k of ['secondarySetId','tertiarySetId'])if(b[k]!=null&&typeof b[k]!=='string')throw Error('Invalid mixed set');
+    const chosenSets=[b.setId,...((b.setPieces??5)<5?[b.secondarySetId]:[]),...(b.setPieces===1?[b.tertiarySetId]:[])].filter(Boolean);if(new Set(chosenSets).size!==chosenSets.length)throw Error('Duplicate set');
     if(!Array.isArray(b.substats)||b.substats.length>5||new Set(b.substats).size!==b.substats.length||b.substats.some(k=>!EchoRules.subTypes.includes(k)))throw Error('Invalid build priorities');
    }
   }
