@@ -1,7 +1,7 @@
 'use strict';
 const CACHE_PREFIX='wuwa-companion-shell-';
-const CACHE_NAME=CACHE_PREFIX+'057-pwa-15';
-const SHELL=['./','./index.html','./styles.css','./layout.css','./companion.css','./catalog.js','./dialogs.js','./editor-view.js','./app.js','./skills.js','./account-editor.js','./bootstrap.js','./echo-rules.js', './echoes.js', './account-store.js','./companion-ui.js','./inventory.js','./planning.js','./cost-engine.js','./progression-data.js','./resources.js','./data/progression.json','./forte.js','./manifest.webmanifest','./pwa.js','./assets/icon-192.png','./assets/icon-512.png'];
+const CACHE_NAME=CACHE_PREFIX+'057-pwa-16';
+const SHELL=['./','./index.html','./styles.css','./layout.css','./companion.css','./catalog.js','./dialogs.js','./editor-view.js','./app.js','./skills.js','./account-editor.js','./bootstrap.js','./echo-rules.js', './echoes.js', './account-store.js','./companion-ui.js','./inventory.js','./planning.js','./cost-engine.js','./progression-data.js','./resources.js','./data/progression.json','./activity-rules.js','./activities.js','./data/achievements.json','./data/events.json','./teams.js','./profiles.js','./recommendations.js','./data/recommendations.json','./forte.js','./manifest.webmanifest','./pwa.js','./assets/icon-192.png','./assets/icon-512.png'];
 const shellURLs=new Set(SHELL.map(p=>new URL(p,self.registration.scope).href));
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(SHELL)));

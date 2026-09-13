@@ -15,7 +15,10 @@ function companionDownload(data,name){
  const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 let pendingBackup=null;
-function companionMore(){
+let moreTab='settings';
+const moreViews={settings:()=>settingsPage(),achievements:()=>achievementsPage(),events:()=>activitiesPage()};
+function companionMore(){return `<nav class="section-tabs" aria-label="${tr('Rubriques complémentaires','More sections')}">${Object.keys(moreViews).map(key=>`<button type="button" data-action="more-tab" data-value="${key}" aria-current="${moreTab===key?'page':'false'}">${({settings:tr('Réglages','Settings'),achievements:tr('Succès','Achievements'),events:tr('Activités','Activities'),teams:tr('Équipes','Teams'),wishes:tr('Souhaits','Wishlist'),optimize:tr('Optimiser','Optimize'),tracker:tr('Invocations','Convenes')})[key]}</button>`).join('')}</nav>`+(moreViews[moreTab]||moreViews.settings)();}
+function settingsPage(){
  const state=CompanionStore.get();
  return companionPanel(tr('Paramètres','Settings'),`<div class="companion-actions">${companionButton('language','Français','fr')}${companionButton('language','English','en')}</div>`)+
  companionPanel(tr('Import & sauvegarde','Import & backup'),`
@@ -28,6 +31,7 @@ function companionMore(){
  companionPanel(tr('Sources & mises à jour','Sources & updates'),`<p>${esc(catalogState.source||'Encore')} · ${esc(catalogState.gameVersion||'?')}<br>${DATA.length} ${tr('Résonateurs','Resonators')} · ${WEAPONS.length} ${tr('armes','weapons')}</p><p><a href="https://www.encore.moe/about" target="_blank" rel="noopener">Encore / WW_Data</a> · <a href="https://www.prydwen.gg/wuthering-waves/" target="_blank" rel="noopener">Prydwen</a> · <a href="https://game8.co/games/Wuthering-Waves" target="_blank" rel="noopener">Game8</a></p><p class="companion-note">${tr('Outil communautaire non officiel. Les noms et visuels du jeu appartiennent à leurs détenteurs. Les recommandations ne sont pas encore intégrées.','Unofficial community tool. Game names and artwork belong to their owners. Recommendations are not yet integrated.')}</p>`);
 }
 const companionActions={
+ 'more-tab':value=>{if(!moreViews[value])return;moreTab=value;currentView='more';render();},
  language:value=>setLang(value),
  export:()=>companionDownload(CompanionStore.exportData(),`wuwa-companion-${new Date().toISOString().slice(0,10)}.json`),
  'restore-backup':()=>{
@@ -41,7 +45,7 @@ const companionActions={
   CompanionStore.restore(backup);location.reload();
  }
 };
-document.querySelector('#view').addEventListener('click',event=>{
+document.addEventListener('click',event=>{
  const button=event.target.closest('[data-action]');if(!button)return;
  const action=companionActions[button.dataset.action];if(!action)return;
  Promise.resolve().then(()=>action(button.dataset.value,button)).catch(error=>{console.error(error);companionMessage(tr('Action non enregistrée. Vérifie les valeurs ou l’espace disponible.','Action was not saved. Check the values or available storage.'),true);});

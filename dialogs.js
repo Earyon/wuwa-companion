@@ -13,6 +13,6 @@ function closeDialog(id){
  const dialog=document.getElementById(id);
  dialog.querySelector('#companionMessage')?.remove();dialog.close();dialog.classList.remove('open');syncDialogScroll();
 }
-for(const dialog of document.querySelectorAll('dialog.selector-overlay')){
+for(const dialog of document.querySelectorAll('dialog')){
  dialog.addEventListener('close',()=>{if(!dialog.open){dialog.classList.remove('open');dialog.querySelector('#companionMessage')?.remove();}syncDialogScroll();});
 }

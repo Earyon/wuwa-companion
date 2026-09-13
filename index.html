@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="./layout.css">
 <link rel="stylesheet" href="./companion.css">
 <script src="./echo-rules.js" defer></script>
+<script src="./activity-rules.js" defer></script>
 <script src="./cost-engine.js" defer></script>
 <script src="./account-store.js" defer></script>
 <link rel="manifest" href="./manifest.webmanifest">
@@ -122,12 +123,12 @@
 </dialog>
 <dialog class="selector-overlay" id="echoPicker" aria-labelledby="echoPickerTitle"><div class="selector-sheet echo-picker-sheet"><div class="selector-head"><h2 id="echoPickerTitle">Écho</h2><button class="closebtn" id="echoPickerClose" aria-label="Fermer / Close">✕</button></div><input class="selector-search" id="echoPickerQuery" aria-label="Rechercher / Search"><button class="companion-button" id="echoPickerAdd"></button><div id="echoPickerList" class="companion-list"></div></div></dialog>
 <dialog class="selector-overlay" id="echoForm" aria-labelledby="echoFormTitle"><div class="selector-sheet echo-form-sheet"><div class="selector-head"><h2 id="echoFormTitle">Écho</h2><button class="closebtn" id="echoFormClose" aria-label="Fermer / Close">✕</button></div><div id="echoFormContent"></div></div></dialog>
-<section class="detail" id="detail">
+<dialog class="profile-dialog" id="detail" aria-labelledby="profileName">
  <div class="detail-inner">
   <button class="back" id="back"><span class="arrow"><svg viewBox="0 0 24 24" width="15" height="15"><path d="M15.5 5 8.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="backLabel">Retour</span></button>
   <div id="detailContent"></div>
  </div>
-</section>
+</dialog>
 
 <script src="./catalog.js" defer></script>
 <script src="./dialogs.js" defer></script>
@@ -142,6 +143,10 @@
 <script src="./progression-data.js" defer></script>
 <script src="./resources.js" defer></script>
 <script src="./planning.js" defer></script>
+<script src="./activities.js" defer></script>
+<script src="./teams.js" defer></script>
+<script src="./profiles.js" defer></script>
+<script src="./recommendations.js" defer></script>
 <script src="./bootstrap.js" defer></script>
 </body>
 </html>

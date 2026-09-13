@@ -2,7 +2,7 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Avancement : 8 / 14 lots vérifiés
+## Avancement : 10 / 14 lots vérifiés
 
 - [x] Catalogue Résonateurs / armes, compte et niveaux, cinq compétences et passifs.
 - [x] Mise en page consolidée, publication Pages et mises à jour PWA.
@@ -13,8 +13,8 @@ Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue
 - [x] Objectifs personnels et priorités, un seul personnage actif, tâches dérivées.
 - [x] Coûts réels de montée : niveau, ascension, arme, compétences, passifs.
 - [ ] Fiches complètes, builds contextualisés, recommandations sourcées et datées.
-- [ ] Équipes de trois, favoris et profils de builds.
-- [ ] Succès, activités / événements / resets et historique utile.
+- [x] Équipes de trois, favoris et profils de builds.
+- [x] Succès, activités / événements / resets et historique utile.
 - [ ] Wishlist et Pull Planner, historique Tracker et imports contrôlés.
 - [ ] Optimisation globale fondée sur le compte et ses équipes.
 - [ ] Revue finale des parcours FR/EN, tactile, hors ligne, migrations et données absentes.
@@ -125,3 +125,23 @@ Contrôles indépendants : personnage Qingxiao du niveau 1 à 90, cinq compéten
 Références consultées le 13 septembre 2026 : [WW_Data 3.6](https://github.com/Arikatsu/WutheringWaves_Data/tree/353f2eaed119bc9f680eab92807d20ac75a79b40), [Encore](https://api-v2.encore.moe/openapi.json), [totaux Qingxiao](https://hthgaming.com/wuthering-waves-qingxiao-ascension-materials/), [EXP de Résonateur](https://wutheringwaves.fandom.com/wiki/Resonator/Leveling). Les conseils Waveplates portent sur les manques confirmés, sans inventer de rendement de donjon ou de nombre de runs.
 
 Avancement : **8 / 14 lots fonctionnels vérifiés**, refonte globale **2 / 3**. Les fiches, builds et équipes constituent les lots suivants.
+
+## Équipes et activités — lots 10 et 11 vérifiés
+
+Les équipes enregistrent trois Résonateurs possédés distincts, un favori et le profil choisi pour chaque membre. Plusieurs formes de Rover ne peuvent pas être enregistrées ensemble. Retirer un membre du compte conserve la composition comme référence et la signale incomplète. Les profils personnels décrivent le rôle, contexte, arme, Sonate, Écho principal, statistiques et notes, sans modifier l’équipement réel. Les références de profil sont contrôlées ; supprimer un profil retire ses liens dans les équipes. Conflits et erreurs de stockage ne sont pas annoncés comme des sauvegardes réussies.
+
+Le catalogue de succès contient 1 207 entrées en français et anglais, 35 groupes, conditions et récompenses Astrites. La projection WW_Data exclut 102 entrées provenant de groupes désactivés ou sans texte utilisable. Elle se régénère avec `scripts/refresh-achievements.cjs` (même révision et cache source que la progression). Les états inconnus/à faire/terminés, recherche, catégories, filtre et révélation des succès cachés sont disponibles. Marquer un succès terminé ne crédite pas automatiquement le stock.
+
+Les activités quotidiennes et hebdomadaires suivent le serveur explicitement choisi : réinitialisation à 04 h serveur, semaine le lundi. Les frontières UTC, l’absence de serveur et l’indépendance des changements d’heure de l’appareil sont testées. Un nouveau cycle présente un état inconnu en conservant la déclaration précédente et le journal. Les événements 3.6 sont datés d’après les notes publiées de Kuro, relayées par WutheringWaves.gg. Le calendrier indique sa date de vérification ; aucune mise à jour automatique des futures annonces n’est prétendue. Les événements expirés ou marqués terminés cessent d’être proposés. Les échéances locales sont converties depuis l’heure du serveur ; une activité personnelle peut compléter le calendrier.
+
+La version personnelle 6 migre les formats précédents sans effacement. Nouveaux tests du stockage pour équipes/profils, doublons, Rover, liens incompatibles, conflits, quota, activités et succès. Parcours navigateur FR/EN : recherche de succès, rechargement, transitions de cycles, exclusion des événements expirés, activité personnelle, profils, favoris, liens/suppression et textes échappés. Captures sur 320/720/1152 CSS px inspectées. Responsive (42 cas), features (36 écrans) et PWA depuis 98ba5bb passent, y compris le catalogue de succès hors ligne. Pas de validation physique sur tablette.
+
+Sources : [WW_Data 3.6](https://github.com/Arikatsu/WutheringWaves_Data/tree/353f2eaed119bc9f680eab92807d20ac75a79b40), [notes 3.6 relayant Kuro](https://wutheringwaves.gg/patch-notes-for-version-3-6-lamplight-in-mirage-swords-resolve-in-heart/), [horaires détaillés des serveurs](https://wutheringwaves.gg/server/), [réinitialisations Game8](https://game8.co/games/Wuthering-Waves/archives/454085), consultés le 13 septembre 2026. La ligne récapitulative Europe du premier guide est contradictoire avec sa section détaillée ; la valeur quotidienne 03 h UTC et le lundi à 04 h serveur sont recoupés, pas déduits de cette ligne erronée.
+
+## Fiches et recommandations — lot 9 toujours en cours
+
+La fiche publique utilise maintenant un dialogue natif : aperçu, build, Forte, séquence et équipes. Des descriptions réellement françaises sont disponibles via Encore ; les données du détail sont projetées dans un cache facultatif séparé. Les textes distants et les notes personnelles ne sont jamais insérés comme HTML actif. Le catalogue comporte aussi des vues armes et Échos avec recherche. Les valeurs de compétences affichées aux niveaux 1 et 10 proviennent des lignes explicitement nommées par la source. Les effets chiffrés de Sonates restent écartés car des incohérences d’identifiants ont été constatées dans cette source.
+
+Huit recommandations initiales sont rattachées aux identifiants du jeu, avec références et date de consultation. Le classement général des armes reste indépendant du compte et indique les rangs utilisés par le guide. Les objectifs préparés depuis une recommandation demeurent des brouillons à enregistrer ; ils ne changent pas la progression. Les autres recommandations et les contextes restent à compléter : le lot 9 n’est pas compté comme terminé. Les nouveaux parcours de fiches, navigation, absence de requêtes répétées entre rubriques, brouillons et création de profils passent leurs tests FR/EN.
+
+Avancement : **10 / 14 lots vérifiés** (1 à 8, 10 et 11), refonte **2 / 3**. Restent les recommandations complètes, souhaits/Pull Planner/Tracker, optimisation globale et revue finale de l’ensemble.

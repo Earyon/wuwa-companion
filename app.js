@@ -183,7 +183,8 @@ function account(){
 function encyclopedia(){
  setHeader(t("ency"),lang==="fr"?"Résonateurs, armes et Échos de Wuthering Waves.":"Resonators, weapons and Echoes from Wuthering Waves.");
  document.querySelector("#accountTabs").innerHTML="";
- return `<div class="content-panel">
+ if(encyKind!=="character")return encyclopediaTabs()+libraryPage();
+ return encyclopediaTabs()+`<div class="content-panel">
    <div class="panel-head"><div><h2>${lang==="fr"?"Résonateurs":"Resonators"}</h2><p>${DATA.length} ${lang==="fr"?"entrées":"entries"}</p></div><div class="tools"><div class="searchbox"><input id="q" placeholder="${lang==="fr"?"Rechercher un Résonateur…":"Search a Resonator…"}" oninput="drawCards()"></div></div></div>
    <div class="filter-sort-row ency-filter-sort"><div class="filters">${["All","Aero","Electro","Fusion","Glacio","Havoc","Spectro"].map(x=>`<button class="${element===x?"active":""}" onclick="setEncyElement('${x}')">${x==="All"?(lang==="fr"?"Tous":"All"):x}</button>`).join("")}</div>${sortDropdownHTML("ency")}</div>
    <div class="card-grid" id="grid"></div>
@@ -199,6 +200,7 @@ function toggleEncySort(kind){
 }
 
 function drawCards(){
+ if(!document.getElementById("grid"))return;
  const q=(document.querySelector("#q")?.value||"").toLowerCase().trim();
  const a=DATA
    .filter(x=>(element==="All"||x.element===element)&&x.name.toLowerCase().includes(q))
@@ -213,7 +215,7 @@ function drawCards(){
 }
 function daily(){
  setHeader(t("daily"),lang==="fr"?"Votre tableau de bord personnel.":"Your personal dashboard.");document.querySelector("#accountTabs").innerHTML="";
- return personalDaily();
+ return personalDaily()+dailyActivities();
 }
 function planner(){
  setHeader(t("planner"),lang==="fr"?"Préparez un seul objectif actif à la fois.":"Prepare one active goal at a time.");document.querySelector("#accountTabs").innerHTML="";
@@ -320,11 +322,6 @@ function confirmOwned(name){
  if(r&&!ownedIds.includes(r.id)&&!changeOwnership(r.id,true))return;
  closeDialog('selector');render();
 }
-function openDetail(name){
- const x=DATA.find(v=>v.name===name);if(!x)return;
- document.querySelector("#detailContent").innerHTML=`<div class="detailhero">${x.image?`<img src="${x.image}" alt="${esc(x.name)}">`:""}<div class="detailcopy"><div style="color:#f0d48b">${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</div><h1>${esc(x.name)}</h1><p>${ownedIds.includes(x.id)?(lang==="fr"?"Possédé":"Owned"):name==="Hiyuki"?(lang==="fr"?"Souhait · non possédée":"Wishlist · not owned"):(lang==="fr"?"Statut inconnu":"Unknown status")}</p></div></div><div class="actions"><button class="action wish"><svg viewBox="0 0 24 24"><path d="M12 20.4 4.2 13C.8 9.8 2.4 4.5 6.8 4.5c2.1 0 3.7 1.2 5.2 3 1.5-1.8 3.1-3 5.2-3 4.4 0 6 5.3 2.6 8.5L12 20.4Z"/></svg>${lang==="fr"?"Souhait":"Wishlist"}</button><button class="action primary"><svg viewBox="0 0 24 24"><path d="M12 2.5 18.2 19 12 15.8 5.8 19 12 2.5Z" fill="currentColor"/></svg>${lang==="fr"?"Améliorer":"Improve"}</button></div>`;
- document.querySelector("#detail").classList.add("open");
-}
 function setLang(v){lang=v;localStorage.setItem("wwc_lang",v);render()}
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{currentView=b.dataset.view;render()});
 document.querySelector("#selectorClose").onclick=()=>closeDialog('selector');
@@ -332,7 +329,7 @@ document.querySelector("#editorClose").onclick=()=>closeDialog('accountEditor');
 document.querySelector("#levelPickerClose").onclick=()=>closeDialog('levelPicker');
 document.querySelector("#weaponPickerClose").onclick=()=>closeDialog('weaponPicker');
 document.querySelector("#weaponLevelClose").onclick=()=>closeDialog('weaponLevelPicker');
-document.querySelector("#back").onclick=()=>document.querySelector("#detail").classList.remove("open");
+document.querySelector("#back").onclick=()=>closeDialog("detail");
 
 function auditCompanionData(){
  const allowed=new Set(["Broadblade","Gauntlets","Pistols","Rectifier","Sword"]);

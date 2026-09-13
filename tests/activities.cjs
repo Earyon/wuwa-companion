@@ -1,0 +1,20 @@
+const {chromium}=require('playwright'),assert=require('node:assert/strict'),path=require('node:path');
+const {startServer,seedPage,root}=require('./support.cjs');
+(async()=>{const {server,base}=await startServer(),browser=await chromium.launch({headless:true,channel:'msedge'});
+try{for(const lang of ['fr','en']){
+ const context=await browser.newContext({viewport:{width:720,height:1122},serviceWorkers:'block'}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await seedPage(page,lang);await page.clock.setFixedTime(new Date('2026-09-13T12:00:00Z'));await page.goto(base);await page.locator('.res-row').first().waitFor();
+ const nav=async view=>page.locator(`[data-view="${view}"]:visible`).click(),tab=async value=>{await nav('more');await page.locator(`[data-action="more-tab"][data-value="${value}"]`).click();};
+ await tab('achievements');await page.locator('#achievementSearch').waitFor();assert.equal(await page.locator('.activity-card').count(),30);
+ await page.locator('#achievementSearch [name="query"]').fill('300101');await page.locator('#achievementSearch button').click();assert.equal(await page.locator('.activity-card').count(),1);assert.match(await page.locator('.activity-card').innerText(),lang==='fr'?/Vainquez/:/Defeat/);
+ await page.locator('[data-status-action="achievement"]').selectOption('done');assert.equal(await page.evaluate(()=>CompanionStore.get().achievements['300101']),'done');assert.deepEqual(await page.evaluate(()=>CompanionStore.get().resources),{});
+ await page.reload();await tab('achievements');await page.locator('#achievementSearch').waitFor();assert.equal(await page.evaluate(()=>CompanionStore.get().achievements['300101']),'done');
+ await tab('events');await page.waitForFunction(()=>eventData);await page.locator('#activityServer').selectOption('europe');
+ await page.locator('[data-id="daily-activity"]').selectOption('done');assert.equal(await page.locator('[data-id="daily-activity"]').count(),0);
+ await nav('daily');assert.equal(await page.locator('[data-id="daily-activity"]').count(),0,'Completed tasks are not suggested');assert.ok(await page.locator('[data-id="event:3.6-solaris"]').count());
+ await page.clock.setFixedTime(new Date('2026-09-14T03:00:00Z'));await nav('account');await nav('daily');assert.equal(await page.locator('[data-id="daily-activity"]').inputValue(),'unknown');assert.equal(await page.locator('[data-id="event:3.6-solaris"]').count(),0,'Expired events are not suggested');assert.equal(await page.evaluate(()=>CompanionStore.get().activities.find(a=>a.id==='daily-activity').status),'done');
+ await tab('events');await page.locator('#activityForm [name="name"]').fill(lang==='fr'?'Tour personnelle':'Personal tower');await page.locator('#activityForm [name="end"]').fill('2026-09-20T03:59');await page.locator('#activityForm button').click();assert.equal(await page.locator('[data-id^="custom:"]').count(),1);
+ await page.locator('[data-id^="custom:"]').selectOption('done');assert.equal(await page.locator('[data-id^="custom:"]').count(),0);await page.locator('#activityFilter').selectOption('all');assert.equal(await page.locator('[data-id^="custom:"]').inputValue(),'done');
+ for(const width of [320,720,1152]){await page.setViewportSize({width,height:900});assert.equal(await page.locator('#view').evaluate(e=>e.scrollWidth>e.clientWidth+1),false);assert.ok(await page.locator('.status-control select').evaluateAll(es=>es.every(e=>e.getBoundingClientRect().height>=44)));if(lang==='fr')await page.screenshot({path:path.join(root,`test-results/activities-${width}.png`)});}
+ const original=await page.evaluate(()=>CompanionStore.exportData());assert.equal(await page.evaluate(b=>CompanionStore.validateBackup(JSON.stringify(b)).format,original),'wuwa-companion-backup');assert.deepEqual(errors,[]);await context.close();
+}console.log('PASS: FR/EN achievements search/state/reload, regional activity reset, expired/done exclusions, custom deadline, backups and touch layouts.');}
+finally{await browser.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

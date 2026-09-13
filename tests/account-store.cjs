@@ -12,7 +12,7 @@ function fixture(seed={}){
 const resolve=name=>['Old name','Alias','Renamed'].includes(name)?{id:'resonator:1'}:null;
 const legacy={'wwc_owned_ids':'[]','wwc_owned':'["Old name"]','wwc_account_data':JSON.stringify({'Old name':{level:70,forteNodes:{'node:999':true}},Alias:{level:20},Missing:{level:50}})};
 let f=fixture(legacy);f.store.migrate(resolve);
-assert.equal(f.store.get().version,5);assert.equal(f.store.get().roster.length,0);
+assert.equal(f.store.get().version,6);assert.equal(f.store.get().roster.length,0);
 assert.equal(f.store.get().characters['resonator:1'].level,70);
 assert.equal(f.store.get().legacyProgress.Alias.level,20);assert.equal(f.store.get().legacyProgress.Missing.level,50);
 for(const [k,v] of Object.entries(legacy))assert.equal(f.values.get(k),v,'Migration never rewrites legacy records');
@@ -86,3 +86,18 @@ const echoMigration=fixture({[key]:JSON.stringify(oldEchoState)});const migrated
 echoMigration.store.saveEcho({...migratedEcho,level:10},migratedEcho,[]);assert.equal(echoMigration.store.get().echoes[0].level,10,'Missing catalogue copy stays editable');
 const beforeDelete=echoes.values.get(key);echoes.fail(true);assert.throws(()=>echoes.store.removeEcho('unknown',unknownEcho));assert.equal(echoes.values.get(key),beforeDelete);echoes.fail(false);
 console.log('PASS: Echo copy migration, replacement without deletion, slot integrity, atomic stale-draft rejection, unrelated updates retained, cost/stat limits, unknown values and quota failure.');
+
+const planning=fixture();planning.store.migrate(()=>null);planning.store.update(s=>{s.roster=['a','b','c','r1','r2'];});
+const build={id:'build',characterId:'a',name:'Support',context:'Tower',notes:'',role:'support',weaponId:'sword',echoId:null,setId:null,stats:{main4:'healing',main1:'atkPct'},substats:['energy']};
+planning.store.saveBuild(build,null,catalog);assert.throws(()=>planning.store.saveBuild({...build,stats:{main1:'energy'}},build,catalog),/build stats/);
+assert.throws(()=>planning.store.saveBuild({...build,weaponId:'pistol'},build,catalog),/Incompatible/);
+const team={id:'team',name:'Test',members:['a','b','c'],favorite:true,builds:{a:'build'}};planning.store.saveTeam(team,null);
+assert.throws(()=>planning.store.saveTeam({...team,members:['a','b','missing']},team),/owned/);
+assert.throws(()=>planning.store.saveTeam({...team,members:['a','a','c']},team));
+assert.throws(()=>planning.store.saveTeam({...team,members:['a','r1','r2']},team,'',[{id:'r1',name:'Rover: Aero'},{id:'r2',name:'Rover: Havoc'}]),/one Rover/);
+assert.throws(()=>planning.store.update(s=>{s.teams[0].builds={b:'build'};}),/build reference/);
+planning.store.saveTeam({...team,name:'Newer'},team);assert.throws(()=>planning.store.saveTeam({...team,name:'Stale'},team),/changed/);
+const beforePlan=planning.values.get(key);planning.fail(true);assert.throws(()=>planning.store.saveBuild({...build,name:'Lost'},build,catalog));assert.equal(planning.values.get(key),beforePlan);planning.fail(false);
+planning.store.update(s=>{s.achievements['300101']='done';s.settings.server='europe';s.activities=[{id:'daily',name:'Daily',status:'done',period:'daily',cycle:'europe:2026-09-13'}];});
+planning.store.validateBackup(JSON.stringify(planning.store.exportData()));assert.throws(()=>planning.store.update(s=>{s.settings.server='unknown';}));assert.throws(()=>planning.store.update(s=>{s.achievements.x=true;}));
+console.log('PASS: owned/distinct teams, one Rover per team, profile ownership/weapon/stats constraints, conflicts/quota, regional activity and achievement backup validation.');

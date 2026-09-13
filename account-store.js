@@ -3,7 +3,7 @@
 const CompanionStore=(()=>{
  const KEY='wwc_companion_v1';
  const PERSONAL=[KEY,'wwc_owned_ids','wwc_owned','wwc_account_data','wwc_lang'];
- const blank=()=>({version:5,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
+ const blank=()=>({version:6,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],achievements:{},settings:{},builds:[],journal:[]});
  const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
  const number=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  function parse(raw){return JSON.parse(raw,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw Error('Invalid key');return value;});}
@@ -21,10 +21,10 @@ const CompanionStore=(()=>{
   validate(data);
   const next=data.version===1?{...data,roster:null,characters:{},legacyProgress:{}}:{...data};
   if(data.version<4)next.echoes=data.echoes.map(e=>({id:e.id,catalogId:e.catalogId,name:e.catalogId,owner:e.owner,slot:e.slot,level:e.level,quality:null,cost:null,setId:null,main:null,secondary:null,substats:[],legacyStats:{mainStat:e.mainStat,mainValue:e.mainValue,substats:e.substats}}));
-  next.version=5;validate(next);return next;
+  next.achievements??={};next.settings??={};next.builds??=[];next.version=6;validate(next);return next;
  }
  function validate(data){
-  if(!object(data)||![1,2,3,4,5].includes(data.version))throw Error('Unsupported account format');
+  if(!object(data)||![1,2,3,4,5,6].includes(data.version))throw Error('Unsupported account format');
   if(data.version>=2){
    if(data.roster!==null&&(!Array.isArray(data.roster)||data.roster.some(id=>typeof id!=='string')||new Set(data.roster).size!==data.roster.length))throw Error('Invalid roster');
    if(!object(data.characters)||!object(data.legacyProgress))throw Error('Invalid progress');
@@ -66,6 +66,21 @@ const CompanionStore=(()=>{
   }
   for(const activity of data.activities)if(!object(activity)||typeof activity.id!=='string'||typeof activity.name!=='string'||!['unknown','todo','done'].includes(activity.status))throw Error('Invalid activity');
   if(!data.wishlist.every(id=>typeof id==='string'))throw Error('Invalid wishlist');
+  if(data.achievements!==undefined&&(!object(data.achievements)||Object.values(data.achievements).some(v=>!['unknown','todo','done'].includes(v))))throw Error('Invalid achievements');
+  if(data.settings!==undefined){if(!object(data.settings))throw Error('Invalid settings');if(data.settings.server!=null&&!['america','europe','asia','sea','hmt'].includes(data.settings.server))throw Error('Invalid server');}
+  for(const a of data.activities){if(a.name.length>160||a.id.length>160||(a.period!=null&&!['once','daily','weekly'].includes(a.period))||(a.cycle!=null&&typeof a.cycle!=='string')||(a.end!=null&&(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}Z)?$/.test(a.end)||!Number.isFinite(Date.parse(a.end.endsWith('Z')?a.end:a.end+'Z')))))throw Error('Invalid activity schedule');}
+  if(new Set(data.activities.map(a=>a.id)).size!==data.activities.length)throw Error('Duplicate activity');
+  if(data.builds!==undefined){
+   if(!Array.isArray(data.builds)||new Set(data.builds.map(b=>b.id)).size!==data.builds.length)throw Error('Invalid builds');
+   for(const b of data.builds){
+    if(!object(b)||typeof b.id!=='string'||!b.id||typeof b.characterId!=='string'||typeof b.name!=='string'||!b.name.trim()||b.name.length>80||!['dps','hybrid','support'].includes(b.role)||typeof b.context!=='string'||b.context.length>200||typeof b.notes!=='string'||b.notes.length>2000)throw Error('Invalid build');
+    for(const k of ['weaponId','echoId','setId'])if(b[k]!==null&&typeof b[k]!=='string')throw Error('Invalid build reference');
+    if(!object(b.stats)||Object.entries(b.stats).some(([k,v])=>!['main4','main3','main3b','main1'].includes(k)||v!==null&&!EchoRules.mainTypes(k==='main4'?4:k==='main1'?1:3).includes(v)))throw Error('Invalid build stats');
+    if(!Array.isArray(b.substats)||b.substats.length>5||new Set(b.substats).size!==b.substats.length||b.substats.some(k=>!EchoRules.subTypes.includes(k)))throw Error('Invalid build priorities');
+   }
+  }
+  if(new Set(data.teams.map(t=>t.id)).size!==data.teams.length)throw Error('Duplicate team');
+  for(const team of data.teams){if(team.favorite!==undefined&&typeof team.favorite!=='boolean')throw Error('Invalid favorite');if(team.builds!==undefined){if(!object(team.builds))throw Error('Invalid team builds');for(const [id,ref]of Object.entries(team.builds)){if(!team.members.includes(id)||ref!==null&&!data.builds?.some(b=>b.id===ref&&b.characterId===id))throw Error('Invalid team build reference');}}}
   for(const entry of data.journal)if(!object(entry)||typeof entry.id!=='string'||typeof entry.label!=='string'||typeof entry.at!=='string'||!Number.isFinite(Date.parse(entry.at)))throw Error('Invalid journal');
   return data;
  }
@@ -179,6 +194,8 @@ const CompanionStore=(()=>{
  function removeEcho(id,expected,label){return update(next=>{if(!expected||id!==expected.id)throw Error('Missing Echo');applyEchoChanges(next,[expected],[]);},label);}
  function saveGoal(id,goal,expected,activate,label){return update(next=>{if(!same(next.goals[id]||null,expected))throw Error('Goal changed in another window');if(!next.roster?.includes(id))throw Error('Character is not owned');next.goals[id]=goal;if(activate)next.active=id;},label);}
  function saveResources(changes,expected,label){return update(next=>{for(const [id,value] of Object.entries(changes)){if((next.resources[id]??null)!==(expected[id]??null))throw Error('Stock changed in another window');next.resources[id]=value;}},label);}
+ function saveTeam(team,expected,label,catalog=[]){return update(s=>{const current=s.teams.find(t=>t.id===team.id)||null;if(!same(current,expected))throw Error('Team changed in another window');if(team.members.some(id=>!s.roster?.includes(id)))throw Error('Team members must be owned');const identities=team.members.map(id=>{const c=catalog.find(c=>c.id===id);return /^rover(?:\s*:|\s*$)/i.test(c?.name||'')?'rover':id;});if(new Set(identities).size!==3)throw Error('Only one Rover per team');if(current)s.teams[s.teams.indexOf(current)]=team;else s.teams.push(team);},label);}
+ function saveBuild(build,expected,catalog,label){return update(s=>{const current=s.builds.find(b=>b.id===build.id)||null;if(!same(current,expected))throw Error('Build changed in another window');if(build.weaponId&&build.weaponId!==current?.weaponId)compatible(catalog,build.characterId,build.weaponId);if(current)s.builds[s.builds.indexOf(current)]=build;else s.builds.push(build);},label);}
  function migrate(resolve){
   if(error)throw error;
   if(state.roster!==null)return;
@@ -230,5 +247,5 @@ const CompanionStore=(()=>{
    throw e;
   }
  }
- return {get:()=>structuredClone(state),update,migrate,saveCharacter,saveWeapon,removeWeapon,weaponOwner,saveEcho,removeEcho,saveGoal,saveResources,exportData,validateBackup,restore,error:()=>error,parse};
+ return {get:()=>structuredClone(state),update,migrate,saveCharacter,saveWeapon,removeWeapon,weaponOwner,saveEcho,removeEcho,saveGoal,saveResources,saveTeam,saveBuild,exportData,validateBackup,restore,error:()=>error,parse};
 })();
