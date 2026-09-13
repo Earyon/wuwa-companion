@@ -27,11 +27,15 @@ La directive permanente `QUALITY.md`, référencée par `AGENTS.md`, s'applique 
 
 Point de départ : version fonctionnelle `8401350`, avec ses tests de référence. L'amorce non terminée du lien inventaire/équipement a été retirée avant cette refonte ; elle n'a pas été publiée ni comptée comme terminée.
 
-1. Cartographier les dépendances et séparer les responsabilités encore regroupées dans le script de `index.html` : catalogue, état personnel, navigation et éditeurs. Garantir un démarrage explicite une fois tous les composants disponibles.
+1. **Vérifié — refonte 1 / 3.** Cartographier les dépendances et séparer les responsabilités encore regroupées dans le script de `index.html` : catalogue, état personnel, navigation et éditeurs. Garantir un démarrage explicite une fois tous les composants disponibles.
 2. Unifier la progression et l'équipement autour des identifiants stables. Éviter deux mécanismes concurrents ; prévoir une migration conservant les données existantes et des tests d'échec de stockage/restauration.
 3. Reprendre les composants d'interface et leurs événements, réduire le couplage et préserver le rendu validé. Mesurer démarrage/requêtes, vérifier FR/EN et les parcours tactiles, puis exécuter les tests de non-régression et de mise à jour PWA.
 
 Les nouvelles fonctions continuent ensuite sur le socle refondu. Aucune réécriture graphique, nouvelle dépendance ou réinitialisation du compte n'est implicite dans cette autorisation.
+
+Première étape : `catalog.js` porte les données du jeu et leur chargement, `app.js` la navigation et les vues existantes, `skills.js` les données de compétences, `account-editor.js` les éditeurs, `bootstrap.js` le démarrage. Les scripts classiques restent provisoirement liés par leurs interfaces globales existantes ; leur découpage n'est pas présenté comme la fin de la réduction du couplage. Les cinq extractions correspondent exactement au code publié `8401350`, hors fins de ligne. Les nouveaux fichiers sont inclus dans le même cache PWA.
+
+Vérifications : suites responsive, features et mise à jour PWA réussies après extraction. HTML réduit de 57 432 à 6 047 octets ; HTML + scripts extraits : 57 663 octets. Il s'agit d'un contrôle de volume, pas d'une mesure de vitesse sur tablette. Les scripts sont téléchargés sans bloquer l'analyse HTML et exécutés dans l'ordre déclaré grâce à [`defer`, documenté par MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script#defer).
 
 Le résumé historique de l'autre conversation est du contexte, pas une preuve de réalisation. Aucun inventaire personnel ne sera déduit d'anciennes captures. Les dates de bannières, taux, coûts et recommandations exigent une source vérifiée ; une valeur indisponible reste inconnue.
 

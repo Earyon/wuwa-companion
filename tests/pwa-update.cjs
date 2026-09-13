@@ -4,9 +4,9 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {execFileSync}=require('node:child_process');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-const previous='5da557a';
+const previous='8401350';
 let latest=false;
-const oldFiles=Object.fromEntries(['index.html','styles.css','layout.css','forte.js','pwa.js','sw.js'].map(f=>[f,execFileSync('git',['show',`${previous}:${f}`],{cwd:root})]));
+const oldFiles=Object.fromEntries(['index.html','styles.css','layout.css','companion.css','account-store.js','companion-ui.js','inventory.js','planning.js','forte.js','pwa.js','sw.js'].map(f=>[f,execFileSync('git',['show',`${previous}:${f}`],{cwd:root})]));
 const server=http.createServer((req,res)=>{
  let file=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';
  if(file==='blank'){res.setHeader('Content-Type','text/html');res.end('<title>Test origin</title>');return;}
@@ -30,7 +30,7 @@ const server=http.createServer((req,res)=>{
   latest=true;
   await p.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.update();});
   await p.waitForFunction(async()=>!!(await navigator.serviceWorker.getRegistration()).waiting);
-  assert.equal(await p.locator('script[src="./account-store.js"]').count(),0,'Old open tab must remain on old shell');
+  assert.equal(await p.locator('script[src="./bootstrap.js"]').count(),0,'Old open tab must remain on old shell');
   await p.close();await second.close();
   const probe=await context.newPage();await probe.goto(base+'/blank');
   // waiting disappears as activation starts; wait for activation AND cleanup,
@@ -38,13 +38,13 @@ const server=http.createServer((req,res)=>{
   await probe.waitForFunction(async()=>{
    const registration=await navigator.serviceWorker.getRegistration();
    const keys=(await caches.keys()).filter(k=>k.startsWith('wuwa-companion-shell-'));
-   return !registration.waiting&&registration.active?.state==='activated'&&keys.length===1&&keys[0]==='wuwa-companion-shell-057-pwa-9';
+   return !registration.waiting&&registration.active?.state==='activated'&&keys.length===1&&keys[0]==='wuwa-companion-shell-057-pwa-10';
   });
-  await probe.goto(base);await probe.locator('script[src="./account-store.js"]').waitFor({state:'attached'});
+  await probe.goto(base);await probe.locator('script[src="./bootstrap.js"]').waitFor({state:'attached'});
   assert.equal(await probe.evaluate(()=>localStorage.getItem('wwc_account_data')),'{"Qingxiao":{"level":90}}');
   assert.ok(await probe.evaluate(()=>caches.has('unrelated-cache')));
   const keys=await probe.evaluate(()=>caches.keys());
-  assert.deepEqual(keys.filter(k=>k.startsWith('wuwa-companion-shell-')),['wuwa-companion-shell-057-pwa-9']);
+  assert.deepEqual(keys.filter(k=>k.startsWith('wuwa-companion-shell-')),['wuwa-companion-shell-057-pwa-10']);
   await context.setOffline(true);await probe.reload();
   assert.equal(await probe.evaluate(()=>document.styleSheets.length),3);
   assert.equal(await probe.evaluate(()=>typeof normalizeForteDefs),'function','New feature script works offline');
