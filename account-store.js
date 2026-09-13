@@ -69,6 +69,7 @@ const CompanionStore=(()=>{
   if(!data.wishlist.every(id=>typeof id==='string'))throw Error('Invalid wishlist');
   if(data.achievements!==undefined&&(!object(data.achievements)||Object.values(data.achievements).some(v=>!['unknown','todo','done'].includes(v))))throw Error('Invalid achievements');
   if(data.settings!==undefined){if(!object(data.settings))throw Error('Invalid settings');if(data.settings.server!=null&&!['america','europe','asia','sea','hmt'].includes(data.settings.server))throw Error('Invalid server');
+   if(data.settings.startView!==undefined&&!['daily','account','ency','planner','more'].includes(data.settings.startView))throw Error('Invalid start screen');
    const p=data.settings.pullBudget;if(p!==undefined){if(!object(p)||!Number.isInteger(p.characters)||!number(p.characters,0,7)||!Number.isInteger(p.weapons)||!number(p.weapons,0,5)||p.guaranteed!==null&&typeof p.guaranteed!=='boolean')throw Error('Invalid pull budget');for(const key of ['characterPity','weaponPity'])if(p[key]!==null&&(!Number.isInteger(p[key])||!number(p[key],0,79)))throw Error('Invalid pity');}
   }
   for(const a of data.activities){if(a.name.length>160||a.id.length>160||(a.period!=null&&!['once','daily','weekly'].includes(a.period))||(a.cycle!=null&&typeof a.cycle!=='string')||(a.end!=null&&(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}Z)?$/.test(a.end)||!Number.isFinite(Date.parse(a.end.endsWith('Z')?a.end:a.end+'Z')))))throw Error('Invalid activity schedule');}

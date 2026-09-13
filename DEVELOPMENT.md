@@ -2,7 +2,7 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Avancement : 13 / 14 lots vérifiés
+## Avancement : 14 / 14 lots vérifiés
 
 - [x] Catalogue Résonateurs / armes, compte et niveaux, cinq compétences et passifs.
 - [x] Mise en page consolidée, publication Pages et mises à jour PWA.
@@ -17,7 +17,7 @@ Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue
 - [x] Succès, activités / événements / resets et historique utile.
 - [x] Wishlist et Pull Planner, historique Tracker et imports contrôlés.
 - [x] Optimisation globale fondée sur le compte et ses équipes.
-- [ ] Revue finale des parcours FR/EN, tactile, hors ligne, migrations et données absentes.
+- [x] Revue finale des parcours FR/EN, tactile, hors ligne, migrations et données absentes.
 
 ## Contraintes
 
@@ -29,7 +29,7 @@ Point de départ : version fonctionnelle `8401350`, avec ses tests de référenc
 
 1. **Vérifié — refonte 1 / 3.** Cartographier les dépendances et séparer les responsabilités encore regroupées dans le script de `index.html` : catalogue, état personnel, navigation et éditeurs. Garantir un démarrage explicite une fois tous les composants disponibles.
 2. **Vérifié — refonte 2 / 3.** Unifier la progression et l'équipement autour des identifiants stables. Éviter deux mécanismes concurrents ; prévoir une migration conservant les données existantes et des tests d'échec de stockage/restauration. Les anciens équipements sans correspondance certaine restent conservés jusqu’au choix explicite d’un exemplaire.
-3. Reprendre les composants d'interface et leurs événements, réduire le couplage et appliquer `DESIGN.md` à tous les écrans, y compris ceux déjà modélisés. Conserver les comportements validés. Mesurer démarrage/requêtes, vérifier FR/EN et les parcours tactiles, puis exécuter les tests de non-régression et de mise à jour PWA.
+3. **Vérifié — refonte 3 / 3.** Reprendre les composants d'interface et leurs événements, réduire le couplage et appliquer `DESIGN.md` à tous les écrans, y compris ceux déjà modélisés. Conserver les comportements validés. Mesurer démarrage/requêtes, vérifier FR/EN et les parcours tactiles, puis exécuter les tests de non-régression et de mise à jour PWA.
 
 Les nouvelles fonctions continuent ensuite sur le socle refondu. Aucune réécriture graphique, nouvelle dépendance ou réinitialisation du compte n'est implicite dans cette autorisation.
 
@@ -177,3 +177,21 @@ Les caches de personnages et d’armes vérifient désormais l’identité et la
 Validation : 80 contextes contrôlés (identifiants, cinq priorités, statistiques autorisées, rangs et équipes), profils FR/EN 44111 et Sonates combinées réellement créés/enregistrés, changement de variante, rejet du cache d’une autre identité et effets de Sonate affichés. Les suites account-store, editor (80 cas), responsive (42 cas), planning, profiles-teams, features et PWA passent. PWA 18 testée depuis ee54e28, avec les 34 Sonates disponibles hors ligne. Captures des nouvelles fiches examinées ; aucune validation matérielle sur tablette n’est prétendue.
 
 Avancement : **13 / 14 lots vérifiés**, refonte **2 / 3**. Reste la revue finale de l’ensemble, incluant les écrans historiques et les parcours de démarrage/réglages.
+
+## Revue finale — lot 14 et refonte 3 vérifiés
+
+L’orientation visuelle commune couvre les écrans historiques : typographie système, panneaux sobres, navigation dorée, commandes tactiles et fiches par rubriques. Les cartes compactes réservent la première ligne au portrait et à l’identité ; progression et actions restent regroupées dessous. Au-delà de 620 pixels de panneau, la progression reprend sa place à droite. Les règles propriétaires sont modifiées, sans couches CSS concurrentes. La version 320 px a été corrigée après examen de capture : agrandir les boutons sans réorganiser la ligne fragmentait inutilement le nom. Le visuel de remplacement local évite les portraits cassés ; les traitements d’image spécifiques existants restent prioritaires.
+
+Les cartes de l’encyclopédie sont des boutons natifs utilisables au clavier. Focus visible, lien d’accès au contenu, langue du document, noms accessibles des recherches et état de navigation sont harmonisés. Les réglages conservent le choix d’écran initial et expliquent le stockage local, les deux exports et le fonctionnement hors ligne. La mise à jour PWA est visible dans les réglages et attend toujours la fermeture des fenêtres ; aucune activation forcée ni perte de brouillon. Les informations personnelles codées en dur du prototype et les marqueurs de possession supposée ont été retirés, sans toucher au stockage du compte.
+
+Le budget d’invocations apparaît en premier. Un assistant calcule les copies supplémentaires depuis une séquence S0–S6 et un rang R1–R5 visés ; une situation inconnue n’est pas assimilée à S0/R0. La recherche des Sonates/Échos préserve le choix courant et les autres champs du build. Un défaut de déplacement des options entre sélecteurs a été reproduit : retirer les options d’un sélecteur temporaire peut changer leur état sélectionné. La valeur du sélecteur réel est maintenant conservée explicitement après remplacement, avec test de régression.
+
+Durcissement de fin de revue : détails facultatifs de structure invalide rejetés, attributs d’images échappés, imports asynchrones protégés contre les réponses arrivant dans le désordre ou après navigation, catalogue tardif ne remplaçant plus une saisie en cours, requêtes JSON annulées après 15 secondes, première ouverture sans connexion permettant encore l’accès aux réglages. Une erreur du cache facultatif ne fait plus échouer le chargement de données valides. Aucun nouveau framework, abonnement, API payante ou réinitialisation n’a été nécessaire.
+
+**Validation exécutée : 16 suites réussies** via `node scripts/test.cjs` : account-store, activity-rules, convene-rules, progression, responsive (42 cas), features (36 écrans), editor (80 cas), echoes (16 dispositions remplies), planning, activities, profiles-teams, recommendations (80 contextes), convenes, optimization, final-review et pwa-update. Les derniers durcissements d’attributs ont ensuite repassé les parcours éditeur et la revue finale ; la PWA a été revérifiée. Syntaxe de tous les scripts, présence des ressources dans le shell et `git diff --check` contrôlées. Captures FR/EN et 320/720/1152 px inspectées. Les scénarios tactiles sont simulés dans Edge isolé, pas sur l’appareil physique.
+
+Mesure locale finale : cinq démarrages avec catalogue synthétique validé en cache, DOM prêt en **94 à 101 ms**, 30 scripts différés, **une seule requête externe de vérification de version**. Le passage entre les rubriques d’une fiche ne recharge pas les détails. Ces chiffres ne mesurent ni le réseau réel ni la tablette et ne prouvent pas une accélération par rapport à une version antérieure. Le cache PWA 19 est testé depuis `58fe0e8` : deux fenêtres maintiennent la version précédente, leur fermeture permet l’activation, puis les scripts, références et données personnelles sont disponibles comme prévu hors ligne.
+
+Sources techniques complémentaires consultées le 13 septembre 2026 : [AbortController, MDN](https://developer.mozilla.org/en-US/docs/Web/API/AbortController), [boutons natifs, MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button). Sources visuelles et périmètre juridique documentés dans `DESIGN.md` ; une identité communautaire n’est pas présentée comme une autorisation de Kuro.
+
+**Bilan : 14 / 14 lots fonctionnels vérifiés ; refonte 3 / 3.** Le périmètre développé est prêt pour la revue utilisateur des usages, partie par partie. Restent des limites déclarées, pas des validations prétendues : aucune vérification sur tablette physique, pas de synchronisation cloud, pas de simulateur de dégâts, données/recommandations/événements datés 3.6, coûts partiels lorsque les données nécessaires manquent. Le README expose ces limites et les procédures de maintenance.

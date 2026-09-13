@@ -4,7 +4,13 @@ const profileSources=new Map(),profilePending=new Map();
 function sourceText(value){const raw=content(value).replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'');const text=document.createElement('textarea');text.innerHTML=raw;return text.value.trim();}
 function profileRow(){return profileSelection?.kind==='character'?DATA.find(c=>c.id===profileSelection.id):profileSelection?.kind==='weapon'?WEAPONS.find(w=>w.id===profileSelection.id):extendedCatalog.echo.find(e=>e.id===profileSelection?.id);}
 const profileKey=(selection,language=lang)=>language+':'+selection.kind+':'+selection.id;
+function validProfileShape(kind,data){
+ if(!data||typeof data!=='object'||Array.isArray(data))return false;
+ const fields=kind==='character'?['Properties','Skills','ResonantChain']:kind==='weapon'?['Properties']:[];
+ return fields.every(key=>data[key]===undefined||Array.isArray(data[key])&&data[key].every(value=>value&&typeof value==='object'&&!Array.isArray(value)));
+}
 function projectProfileDetail(kind,data){
+ if(!validProfileShape(kind,data))throw Error('Invalid detail shape');
  if(kind==='character')return {Id:data.Id,Introduction:data.Introduction,Properties:(data.Properties||[]).map(p=>({Name:p.Name,BaseValue:p.BaseValue})),Skills:(data.Skills||[]).map(s=>({SkillId:s.SkillId,SkillType:s.SkillType,SkillName:s.SkillName,SkillDescribe:s.SkillDescribe,SkillAttributes:s.SkillAttributes,SkillDetailNum:s.SkillDetailNum})),ResonantChain:data.ResonantChain||[]};
  if(kind==='weapon')return {ItemId:data.ItemId,Desc:data.Desc,ResonName:data.ResonName,Properties:(data.Properties||[]).map(p=>({Name:p.Name,BaseValue:p.BaseValue}))};
  return {Id:data.MonsterId,Name:data.MonsterName,Description:data.Skill?.SimplyDescription||data.AttributesDescription};
@@ -14,7 +20,7 @@ async function loadProfileSource(selection,{refresh=false}={}){
  if(profilePending.has(key))return profilePending.get(key);if(profileSources.has(key)&&!refresh)return;
  const promise=(async()=>{
   const cacheKey='wwc_profile_detail_v1:'+key;let cached=null;try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch{}
-  if(cached?.data&&String(selection.kind==='weapon'?cached.data.ItemId:cached.data.Id)!==String(row.gameId||row.id))cached=null;
+  if(cached?.data&&(!validProfileShape(selection.kind,cached.data)||String(selection.kind==='weapon'?cached.data.ItemId:cached.data.Id)!==String(row.gameId||row.id)))cached=null;
   if(cached?.data&&cached.version===catalogState.gameVersion&&!refresh){profileSources.set(key,{data:cached.data});return;}
   try{
    let raw;if(language==='en'&&selection.kind==='character')raw=(await getCharacterDetail(row.gameId,{background:refresh})).detail;

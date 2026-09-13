@@ -4,10 +4,10 @@
 const PullStore=(()=>{
  let opening=null;
  function open(){if(opening)return opening;opening=new Promise((resolve,reject)=>{
-  const request=indexedDB.open('wuwa-companion-history',1);
+  const request=indexedDB.open('wuwa-companion-history',1);let blocked=false;
   request.onupgradeneeded=()=>request.result.createObjectStore('accounts',{keyPath:'owner'});
-  request.onerror=()=>reject(request.error);request.onblocked=()=>reject(Error('History open in another window'));
-  request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{db.close();opening=null;};resolve(db);};
+  request.onerror=()=>reject(request.error);request.onblocked=()=>{blocked=true;reject(Error('History open in another window'));};
+  request.onsuccess=()=>{const db=request.result;if(blocked){db.close();return;}db.onversionchange=()=>{db.close();opening=null;};resolve(db);};
  }).catch(e=>{opening=null;throw e;});return opening;}
  async function all(){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction('accounts','readonly'),req=tx.objectStore('accounts').getAll();tx.oncomplete=()=>resolve(req.result);tx.onabort=()=>reject(tx.error);});}
  async function merge(accounts){const db=await open();return new Promise((resolve,reject)=>{

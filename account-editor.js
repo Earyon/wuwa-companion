@@ -12,7 +12,7 @@ function accountStatus(name){
    const wl=d.weapon.level?`${lang==="fr"?"Niv.":"Lv."}${d.weapon.level}`:"";
    const wr=d.weapon.rank?`R${d.weapon.rank}`:"";
    const sub=[wl,wr].filter(Boolean).join(" · ");
-   return `<div class="status-main">${top}</div><div class="status-weapon"><span class="status-weapon-icon"><img src="${w?.image||""}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></span><span class="status-weapon-copy"><b>${esc(d.weapon.name)}</b>${sub?`<small>${sub}</small>`:""}</span></div>`;
+   return `<div class="status-main">${top}</div><div class="status-weapon"><span class="status-weapon-icon"><img src="${esc(w?.image||"")}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></span><span class="status-weapon-copy"><b>${esc(d.weapon.name)}</b>${sub?`<small>${sub}</small>`:""}</span></div>`;
  }
  return `<div class="status-main">${top}</div>`;
 }
@@ -55,7 +55,7 @@ function updateEditorControls(){
  if(editingWeapon){
    const w=WEAPONS.find(x=>x.name===editingWeapon);
    wc.classList.remove("empty");
-   wc.innerHTML=`<div class="equipped-img-wrap"><img src="${w?.image||""}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(editingWeapon)}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
+   wc.innerHTML=`<div class="equipped-img-wrap"><img src="${esc(w?.image||"")}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(editingWeapon)}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
    if(editingEquipment.mode==='keep'){
     ws.innerHTML=`<p class="companion-note">${lang==='fr'?'Équipement ancien conservé. Choisis un exemplaire existant ou ajoute un exemplaire depuis le catalogue pour le modifier.':'Previous equipment preserved. Choose its inventory copy or add a copy from the catalogue to edit it.'} · ${editingWeaponLevel||'?'} · R${editingWeaponRank||'?'}</p>`;
    }else ws.innerHTML=`<button class="weapon-setting" id="weaponLevelCurrent" onclick="openWeaponLevelPicker()"><b>${lang==="fr"?"Niveau":"Level"}</b>${editingWeaponLevel||"—"}</button><div class="weapon-setting"><b>${lang==="fr"?"Syntonisation":"Syntony"}</b><div class="rank-row">${[1,2,3,4,5].map(n=>`<button class="rank-btn ${editingWeaponRank===n?"active":""}" aria-pressed="${editingWeaponRank===n}" data-weapon-rank="${n}">R${n}</button>`).join("")}</div></div>`;

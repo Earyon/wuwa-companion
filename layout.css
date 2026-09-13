@@ -2,13 +2,13 @@
    not screen orientation or physical screenshot pixels. Compact is the
    safe fallback when container queries are unavailable. */
 .main{min-width:0;max-width:1250px;margin:auto;padding:calc(20px + env(safe-area-inset-top,0px)) 14px calc(95px + env(safe-area-inset-bottom,0px))}
-.page-head{position:relative;min-height:130px;padding:10px 4px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:26px;overflow:hidden}
+.page-head{position:relative;min-height:130px;padding:10px 4px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:12px;overflow:hidden}
 .page-head h1{position:relative;z-index:1;margin:4px 0 6px;font-size:30px;font-weight:500;color:#e6edf8;overflow-wrap:anywhere}
 .page-head p{position:relative;z-index:1;margin:0;color:#9eb0c5;font-size:15px}
 .head-art{position:absolute;right:0;top:0;width:160px;height:110px;opacity:.22;pointer-events:none;background:radial-gradient(circle at 65% 50%,rgba(69,126,185,.25),transparent 55%)}
 .head-art:after{content:"";position:absolute;right:18px;top:28px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(159,198,225,.08);box-shadow:0 0 70px rgba(52,110,167,.16)}
 .quote{display:none}
-.content-panel{min-width:0;margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px;background:linear-gradient(180deg,rgba(7,20,33,.87),rgba(7,17,29,.94));box-shadow:var(--shadow);container:panel / inline-size}
+.content-panel{min-width:0;margin-top:18px;border:1px solid var(--line);border-radius:8px;padding:16px;background:linear-gradient(180deg,rgba(7,20,33,.87),rgba(7,17,29,.94));box-shadow:var(--shadow);container:panel / inline-size}
 .panel-head{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:16px 24px;margin-bottom:18px;min-width:0}
 .panel-head>div:first-child{min-width:0}
 .panel-head h2{margin:0;font-size:28px;font-weight:500;overflow-wrap:anywhere}
@@ -24,13 +24,13 @@
 .filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0;margin:0}
 .filter-sort-row .filters{flex:1 1 550px}
 .filter-sort-row .sort-dropdown{flex:0 0 auto;margin-left:auto}
-.filters button{flex:0 0 auto;white-space:nowrap;border:1px solid #29445e;background:#0c1e30;color:#9eb0c4;padding:8px 12px;border-radius:999px}
+.filters button{flex:0 0 auto;white-space:nowrap;border:1px solid #29445e;background:#0c1e30;color:#9eb0c4;padding:10px 12px;min-height:44px;border-radius:999px}
 .filters button.active{color:#1a1a18;border-color:#efd27d;background:linear-gradient(180deg,#ffe6a8,#e8c66f);box-shadow:0 0 18px rgba(239,205,119,.12)}
 .sort-direction{display:inline-grid;grid-template-columns:1fr 14px 1fr;align-items:center;gap:5px;line-height:1.2;text-align:center}
 .sort-flow-arrow{display:block;width:14px;height:14px}
 .sort-caret{display:block;width:12px;height:12px;opacity:.8}
 .res-list{display:grid;gap:14px;min-width:0}
-.res-row{display:grid;grid-template-columns:64px minmax(0,1fr) 34px 38px;grid-template-areas:"portrait identity remove edit" "progress progress progress progress";align-items:center;gap:12px 10px;padding:12px;min-width:0;min-height:124px;border:1px solid #253d56;border-radius:12px;background:linear-gradient(180deg,rgba(10,25,40,.78),rgba(7,19,31,.86));cursor:default}
+.res-row{display:grid;grid-template-columns:64px minmax(0,1fr) 44px 44px;grid-template-areas:"portrait identity identity identity" "progress progress remove edit";align-items:center;gap:12px 10px;padding:12px;min-width:0;min-height:124px;border:1px solid #253d56;border-radius:12px;background:linear-gradient(180deg,rgba(10,25,40,.78),rgba(7,19,31,.86));cursor:default}
 .res-row>img{grid-area:portrait;width:64px;height:82px;object-fit:contain;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(239,207,128,.55)}
 .res-main{grid-area:identity;min-width:0}
 .res-main>b{display:block;font-size:23px;font-weight:500;margin-bottom:9px;overflow-wrap:anywhere}
@@ -45,18 +45,18 @@
 .status-weapon-icon .weapon-fallback{position:absolute;inset:0;font-size:12px}
 .status-weapon-copy{display:block;min-width:0;line-height:1.2}
 .status-weapon-copy b{display:block;font-size:11px;font-weight:500;color:#d4dfec;overflow-wrap:anywhere}
-.status-weapon-copy small{display:block;margin-top:3px;font:9px/1.2 system-ui;color:#8297b0}
-.trash-btn{grid-area:remove;display:grid;place-items:center;justify-self:center;width:34px;height:34px;padding:0;border-radius:50%;border:1px solid rgba(214,81,91,.35);background:rgba(91,24,33,.28);color:#e8757d;cursor:pointer}
+.status-weapon-copy small{display:block;margin-top:3px;font:11px/1.3 system-ui;color:#8297b0}
+.trash-btn{grid-area:remove;display:grid;place-items:center;justify-self:center;width:44px;height:44px;padding:0;border-radius:50%;border:1px solid rgba(214,81,91,.35);background:rgba(91,24,33,.28);color:#e8757d;cursor:pointer}
 .trash-btn svg{width:17px;height:17px;fill:currentColor}
 .trash-btn:hover{color:#ff9ba2;border-color:rgba(255,115,125,.65);background:rgba(111,28,39,.42)}
-.edit-chevron{grid-area:edit;display:grid;place-items:center;justify-self:center;width:38px;min-height:44px;border:0;background:transparent;color:#9fb3c7;font:25px/1 system-ui;cursor:pointer;padding:12px 6px;border-radius:8px}
+.edit-chevron{grid-area:edit;display:grid;place-items:center;justify-self:center;width:44px;min-height:44px;border:0;background:transparent;color:#9fb3c7;font:25px/1 system-ui;cursor:pointer;padding:12px 6px;border-radius:8px}
 .edit-chevron:hover{color:#f2d57d;background:rgba(242,213,125,.08)}
 .trash-btn:focus-visible,.edit-chevron:focus-visible,.sort-trigger:focus-visible,.filters button:focus-visible,.searchbox input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @container panel (min-width:760px){
  .panel-head{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
 }
 @container panel (min-width:620px){
- .res-row{grid-template-columns:74px minmax(0,1fr) minmax(155px,220px) 34px 38px;grid-template-areas:"portrait identity progress remove edit"}
+ .res-row{grid-template-columns:74px minmax(0,1fr) minmax(155px,220px) 44px 44px;grid-template-areas:"portrait identity progress remove edit"}
  .res-row>img{width:74px;height:94px}
  .status{justify-self:end}
  .status-main{text-align:center}

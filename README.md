@@ -1,78 +1,69 @@
-# WuWa Companion — paquet PWA pour Earyon/wuwa-companion
+# WuWa Companion
 
-## Provenance
+Companion communautaire FR/EN pour Wuthering Waves, utilisable sur ordinateur, tablette et mobile. Application statique, sans compilation, serveur de compte, abonnement ou service payant.
 
-Source : conversation Wuwa, https://chatgpt.com/c/6a9d7145-437c-83ed-9dd6-52100af8f81c, message V0.5.7 du 9 septembre 2026.
-HTML récupéré depuis la vue Code de wuwa-companion-v0.5.7-intro-icon-layout.html.
-SHA-256 du texte HTML original : d4a2507e96e2c4c3556d62bc12dc22b98d970b5e53e70e6de241ad0e4007d88f.
+**Site : https://earyon.github.io/wuwa-companion/**
 
-La conversation annonce ensuite une V0.5.8 PWA. Son bouton de téléchargement était visible mais ne livrait aucun fichier pendant la récupération. Aucun artefact ultérieur n'a été trouvé dans les messages postérieurs. Ce paquet est donc une adaptation documentée de la V0.5.7 récupérée, et NON l'archive originale V0.5.8.
+## Utilisation
 
-## Adaptation initiale
+- **Mon compte** : Résonateurs possédés, niveaux, ascensions, cinq compétences, passifs, séquences, exemplaires d’armes et Échos équipés, stocks connus ou inconnus.
+- **Encyclopédie** : Résonateurs, armes et Échos, descriptions FR/EN lorsqu’elles sont disponibles, Forte, séquences, effets de Sonate, builds contextualisés et profils personnalisables.
+- **Planner** : objectifs séparés de la progression actuelle, coûts de montée et besoins nets. Un seul Résonateur possédé actif ; pré-farm uniquement sur demande explicite depuis les souhaits.
+- **Accueil** : objectif actif, tâches, activités quotidiennes/hebdomadaires et échéances du serveur choisi.
+- **Plus** : équipes favorites de trois, succès, événements et activités personnelles, souhaits, invocations et optimisation des ressources partagées. Réglages de langue et d’écran initial.
 
-- HTML, CSS et logique de la V0.5.7 conservés, y compris leurs sections encore en attente de développement.
-- Ajout de 20 px sous la ligne filtres/tri dans les deux listes, conformément au dernier retour validé (la valeur exacte n'était pas précisée).
-- Ajout du manifeste, de l'enregistrement du service worker et du cache des seuls fichiers de l'interface.
-- Icônes d'installation créées à partir du nom et des couleurs de l'interface ; aucune icône d'application d'origine récupérable.
-- Clés de stockage, données et logique de validation d'origine conservées.
+Les recommandations livrées couvrent les **58 Résonateurs canoniques de la version 3.6**, avec **80 contextes** vérifiés le 13 septembre 2026. Chaque fiche cite ses guides. Les 34 groupes de Sonate et 1 207 succès sont des projections bilingues de WW_Data. Les références datées ne constituent pas une mise à jour automatique des futures versions du jeu.
 
-## Développement et publication
+## Données personnelles et sauvegarde
 
-Le site reste statique, sans compilation ni dépendance à installer pour son utilisation. GitHub Pages publie la branche `main`. Les corrections demandées peuvent être vérifiées, commitées et envoyées directement depuis Codex, conformément au cadre décrit dans `AGENTS.md`.
+Les données restent dans le navigateur de chaque appareil. Le compte compact utilise `wwc_companion_v1`, format 7 ; les anciennes versions et les clés historiques sont conservées ou migrées sans réinitialisation. Les valeurs inconnues ne deviennent pas automatiquement zéro. Les équipements par exemplaire et leurs propriétaires utilisent des identifiants stables.
 
-La directive permanente `QUALITY.md` est obligatoire pour les interventions. La refonte demandée inclut aussi le code déjà fonctionnel. Depuis sa première étape, `index.html` porte la structure de page ; `catalog.js`, `app.js`, `skills.js` et `account-editor.js` séparent les responsabilités auparavant réunies dans son script. `bootstrap.js` démarre l'application après chargement des composants. Le comportement et le design de référence sont conservés et testés.
+**Deux exports distincts** permettent de changer d’appareil :
 
-Depuis la consolidation du 10 septembre 2026, `styles.css` contient les styles généraux et `layout.css` possède la disposition des listes, cartes et filtres. Les anciennes règles concurrentes de ces composants ont été supprimées. La disposition des cartes dépend de la largeur réelle du panneau ; sur un petit panneau, le niveau et l'arme passent ensemble sous l'identité. Les autres fonctions et les clés de stockage sont conservées.
+1. Plus → Réglages → Exporter ma sauvegarde : compte, possessions, équipements, objectifs, équipes, ressources et réglages.
+2. Plus → Invocations → Exporter tous mes historiques : historiques volumineux stockés dans IndexedDB.
 
-## Hébergement
+La restauration du compte propose un aperçu et conserve l’état antérieur. Les imports JSON WuWa Tracker acceptent ExportProfile (stocks et succès) et ExportPullHistory (historique). Les objectifs Tracker ne prouvent pas l’inventaire actuel. Les profils d’historique restent séparés ; un même export réimporté ne crée pas de doublons, sans supprimer les répétitions d’un tirage multiple. Aucun journal du jeu, token ou lien d’authentification n’est nécessaire.
 
-Pour GitHub Pages : publier la branche main, dossier / (root). Le paquet utilise des chemins relatifs compatibles avec /wuwa-companion/.
-Pour Cloudflare Pages : projet statique sans commande de compilation, répertoire publié à la racine du dépôt. _headers concerne Cloudflare ; GitHub Pages l'ignore.
-L'installation PWA exige HTTPS ou localhost. Ouvrir index.html directement ne permet pas d'installer le service worker.
+Il n’y a pas de synchronisation distante. Les protections contre les modifications obsolètes réduisent les conflits entre fenêtres ; une simultanéité exacte entre processus reste une limite de Web Storage. Les historiques utilisent une transaction IndexedDB pour une fusion atomique.
 
-## Cache et mises à jour
+## Démarrage et mises à jour
 
-Le premier lancement des données du jeu nécessite Internet. Le cache local validé de l'application est conservé. Les images distantes et les fiches non encore consultées ne sont pas garanties hors ligne.
-Les nouvelles versions du service worker attendent la fermeture de toutes les fenêtres de l'application avant de s'activer. Modifier CACHE_NAME dans sw.js à chaque livraison des fichiers de l'interface.
-Les données personnelles restent dans le navigateur et dépendent de l'adresse utilisée : un ancien fichier HTML local et un site HTTPS ne partagent pas automatiquement leur stockage.
+Servir le dossier par HTTP local ou HTTPS ; ne pas ouvrir directement `index.html` comme fichier. Le premier chargement des catalogues distants nécessite Internet. Les lancements suivants utilisent le dernier catalogue valide avec vérification de sa version. Une source indisponible ne provoque pas de réinitialisation du compte.
 
-Sur tablette, ouvrir l'application avec Internet pour télécharger la mise à jour, fermer tous ses onglets et fenêtres (y compris dans les applications récentes), puis la rouvrir. Cette procédure a été confirmée par l'utilisateur. Ne pas désinstaller ni effacer les données pour actualiser l'interface.
+Le service worker met en cache les écrans et les références livrées. Les images et détails distants non consultés ne sont pas garantis hors ligne. Les réglages indiquent si une mise à jour attend : enregistrer les modifications et fermer **toutes** les fenêtres de Companion permet son activation à la prochaine ouverture. Ne pas effacer le stockage pour actualiser le site.
 
-## Passifs Forte
+GitHub Pages publie `main`, dossier racine, avec des chemins relatifs compatibles avec `/wuwa-companion/`. `_headers` est une configuration historique Cloudflare, ignorée par GitHub Pages. Une livraison modifiant le shell doit incrémenter `CACHE_NAME` et inclure ses nouvelles ressources dans `SHELL` de `sw.js`.
 
-`forte.js` ajoute le suivi des déblocages dans l'éditeur existant. Il lit les bonus de `SkillTree` et les compétences `Inherent Skill` ayant un coût de déblocage dans `Consumes`. Les bonus automatiques sans coût ne sont pas proposés comme déblocages. Cette distinction a été vérifiée sur Sanhua, Qingxiao et les Rover Spectro/Aero à partir des fiches publiques Encore le 10 septembre 2026.
+## Développement et vérification
 
-Les cases sont enregistrées uniquement avec **Enregistrer**, dans le champ additionnel `forteNodes` de chaque Résonateur, avec les clés `node:<Id>` et `skill:<SkillId>`. Les champs précédents et les identifiants momentanément absents de la source sont conservés. Fermer sans enregistrer annule les modifications. Les noms/descriptions restent ceux de la source anglaise déjà utilisée par l'application ; les contrôles existent en FR/EN. Les numéros affichés servent à distinguer les bonus identiques, sans prétendre reproduire leur position dans l'arbre du jeu.
+Lire [AGENTS.md](AGENTS.md), [QUALITY.md](QUALITY.md) et [DESIGN.md](DESIGN.md). Le suivi des lots et les preuves de validation sont dans [DEVELOPMENT.md](DEVELOPMENT.md).
 
-Les priorités, niveaux recommandés et objectifs personnalisés constituent des étapes suivantes, non implémentées ici. Source : [documentation Encore](https://api-v2.encore.moe/_docs/scalar).
+La séparation des responsabilités conserve des scripts classiques sans framework : catalogue, stockage personnel, règles de calcul pures, vues et éditeurs. `layout.css` possède les listes historiques et leur géométrie ; `styles.css` les composants généraux ; `companion.css` les parcours complémentaires. Modifier la règle propriétaire plutôt qu’empiler des correctifs.
 
-## Vérifications reproductibles
+Les tests utilisent Node.js, Playwright et Edge installé. Playwright est une dépendance de développement seulement (présente dans l’environnement Codex de cette livraison). Sur un autre poste, installer une version compatible de Playwright et Edge avant de lancer :
 
-Les tests utilisent Node.js, Playwright 1.62.1 et Microsoft Edge installé. Playwright est déjà disponible dans l'environnement Codex utilisé pour cette livraison ; ailleurs, installer cette dépendance de développement avec `npm install --no-save playwright@1.62.1`. L'application publiée n'en dépend pas.
-
-```
-node tests/account-store.cjs
-node tests/responsive.cjs
-node tests/features.cjs
-node tests/editor.cjs
-node tests/echoes.cjs
-node tests/pwa-update.cjs
+```text
+node scripts/test.cjs
 git diff --check
 ```
 
-- `responsive.cjs` exécute les vrais scripts de l'application avec un catalogue synthétique dans un navigateur isolé : 42 cas de dimensions/langue, rotations, noms longs, placement et absence de chevauchement, tri, filtres, recherche, édition et conservation après rechargement. Il utilise aussi un extrait réel des champs de passifs de Sanhua pour vérifier les identifiants, doublons, données absentes, annulation, sauvegarde, rafraîchissement et isolation entre Résonateurs. Les captures sont produites dans `test-results/`, exclu de Git.
-- `features.cjs` vérifie les nouveaux parcours réels FR/EN : exemplaires d'armes, Échos équipés, ressources inconnues/zéro, objectifs séparés de l'état actuel, export téléchargé puis réimporté, rejet des fichiers invalides, retour arrière sur erreur de stockage, données illisibles conservées et retrait durable d'un Résonateur.
-- `pwa-update.cjs` vérifie le passage du commit `5ce27ea` au shell courant avec deux anciennes fenêtres ouvertes, l'attente de fin d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne incluant tous les scripts extraits.
-- Examiner les captures, la syntaxe JavaScript et le diff avant publication. Après publication, comparer les fichiers réellement servis par Pages avec les fichiers livrés.
+Le lanceur exécute 16 suites : stockage/migrations, cycles, invocations, coûts, responsive, inventaires, éditeurs, Échos, Planner, activités, fiches/équipes, recommandations, imports, optimisation, revue finale et mise à jour PWA. Les tests de navigateur utilisent des comptes synthétiques isolés, des fixtures identifiées et aucune donnée du navigateur utilisateur. Ils couvrent FR/EN, clavier, interactions tactiles simulées, 320 à 1536 pixels CSS selon les parcours, changements de largeur, erreurs de stockage, requêtes indisponibles, import/export, rechargement et hors ligne. Les captures et mesures sont dans `test-results/`, exclu de Git.
 
-Ces essais ne constituent pas une validation sur la tablette physique et ne vérifient pas l'exactitude des données des services de jeu. Ils ne modifient jamais le navigateur ni les données de l'utilisateur.
+Le test PWA indique dans son en-tête le commit de départ (actuellement `58fe0e8`) et vérifie deux fenêtres ouvertes, attente d’activation, fermeture, nouveau shell et données préservées. Après publication, comparer aussi les empreintes des fichiers réellement servis. Un push seul ne prouve pas le déploiement.
 
-Le développement complet et ses fonctions restant à terminer sont suivis dans `DEVELOPMENT.md`. Les nouvelles interfaces d'inventaire et de Planner sont une première étape fonctionnelle ; elles ne constituent pas encore l'ensemble du produit prévu.
+Les projections de données sont reproductibles avec `scripts/refresh-progression.cjs`, `scripts/refresh-achievements.cjs` et `scripts/refresh-sonatas.cjs`. Elles identifient la révision source WW_Data utilisée. `--check` compare avec les fichiers livrés ; `WUWA_SOURCE_CACHE` réutilise les téléchargements pour éviter les requêtes répétées. Les recommandations sont une synthèse éditoriale sourcée, à revoir à chaque évolution significative du jeu.
 
-Références des choix techniques : [container queries, MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Container_queries) et [cycle de vie du service worker, web.dev](https://web.dev/articles/service-worker-lifecycle).
+## Limites explicites
 
-La progression et les équipements utilisent le stockage personnel commun (format 4). Les exemplaires d’armes peuvent être équipés et modifiés depuis le compte ; déséquiper ne supprime pas l’exemplaire. Les anciens équipements ambigus sont conservés en attendant un rattachement explicite. La direction visuelle de tous les écrans, y compris existants, est définie dans [DESIGN.md](DESIGN.md).
+- Aucun simulateur de dégâts du compte : les recommandations donnent des repères contextualisés, et l’optimisation répartit les stocks connus entre objectifs sans les dépenser.
+- Les coûts partent du début du niveau actuel ; l’EXP déjà acquise dans ce niveau n’est pas déduite. Les données manquantes rendent le calcul partiel. Le pré-farm d’un Résonateur sans arme équipée n’établit pas les coûts d’une future arme inconnue.
+- Le budget vise les bannières régulières en vedette. Le maximum garanti est distinct d’un modèle médian prudent sans soft pity, explicitement différent des probabilités réelles du jeu. Les compteurs ambigus de l’historique restent des intervalles.
+- Les événements intégrés sont datés de la version 3.6. Les activités personnelles complètent le calendrier ; aucune annonce future n’est inventée.
+- Les essais automatisés et captures ne remplacent pas une validation sur tablette physique ni une certification d’accessibilité. La revue finale utilisateur porte sur l’usage et le rendu, pas sur le contrôle technique du code.
 
-La fiche de progression propose désormais Aperçu, Arme, Échos, Forte et Séquence. Les panneaux conservent les saisies jusqu’à l’enregistrement commun. Les sélecteurs utilisent des dialogues natifs ; `tests/editor.cjs` vérifie 80 combinaisons rubrique/écran/langue, le clavier, le focus, les changements de rubrique, l’annulation et l’enregistrement.
+## Sources et interface
 
-Les Échos sont suivis par exemplaire avec Sonate et statistiques structurées, puis équipés dans les cinq emplacements du Résonateur. Remplacer conserve l’ancien exemplaire ; fermer la fiche annule les modifications. `tests/echoes.cjs` couvre les parcours FR/EN, les noms ambigus, les catalogues retardés ou indisponibles, les limites de saisie, les conflits, la restauration, le hors ligne et 16 dispositions remplies. Les anciennes statistiques libres restent consultables après migration.
+Catalogues/détails : [Encore](https://www.encore.moe/about) et [son schéma public](https://api-v2.encore.moe/openapi.json). Projections : [WW_Data, révision 353f2ea](https://github.com/Arikatsu/WutheringWaves_Data/tree/353f2eaed119bc9f680eab92807d20ac75a79b40). Guides : [Prydwen](https://www.prydwen.gg/wuthering-waves/), Game8 et références détaillées dans les fiches et le suivi de développement.
+
+L’organisation des fiches s’inspire des menus du jeu ; les composants, ornements et visuels de remplacement sont dessinés en HTML/CSS/SVG. Aucune nouvelle police, piste audio ou ressource graphique extraite du jeu n’a été intégrée. Les anciens portraits distants restent attribués à leurs détenteurs ; leur présence sur un service public ne constitue pas une licence. Le projet n’est ni affilié ni approuvé par Kuro. Voir l’analyse de provenance et les limites dans [DESIGN.md](DESIGN.md).

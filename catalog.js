@@ -138,9 +138,11 @@ function validateCanonical(chars,weapons){
   if(errors.length) throw new Error(errors.slice(0,12).join(" | ")+(errors.length>12?` | +${errors.length-12} more`:""));
 }
 async function fetchJSON(url){
-  const res=await fetch(url,{cache:"no-store"});
-  if(!res.ok)throw new Error(`HTTP ${res.status} — ${url}`);
-  return res.json();
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);
+  try{const res=await fetch(url,{cache:"no-store",signal:controller.signal});
+   if(!res.ok)throw new Error(`HTTP ${res.status} — ${url}`);
+   return await res.json();
+  }finally{clearTimeout(timeout);}
 }
 
 async function fetchCanonicalLists(newPayload=null){
@@ -161,9 +163,9 @@ async function fetchCanonicalLists(newPayload=null){
     resourceVersion:first(newPayload,["ResVer","resourceVersion"])||null,
     updatedAt:new Date().toISOString()
   };
-  localStorage.setItem(CATALOG_CACHE_KEY,JSON.stringify({
+  try{localStorage.setItem(CATALOG_CACHE_KEY,JSON.stringify({
     savedAt:new Date().toISOString(),state:catalogState,characters:DATA,weapons:WEAPONS
-  }));
+  }));}catch{catalogState.cacheUnavailable=true;}
   updateHealth();
 }
 function restoreValidatedCache(){
@@ -216,11 +218,17 @@ async function refreshCanonicalCatalog({force=false}={}){
   }
 }
 async function bootstrapCanonicalCatalog(){
+  setActiveNav();
   const hadCache=restoreValidatedCache();
   if(hadCache){
     render(); // immediate startup from last validated catalogue
     // Non-blocking freshness check. Only rerender if the canonical dataset changed.
-    refreshCanonicalCatalog().then(r=>{if(r.changed)render()}).catch(()=>{});
+    refreshCanonicalCatalog().then(r=>{
+      // A background refresh must not replace a form while someone is editing.
+      // The next explicit navigation will render the new catalogue normally.
+      const focused=document.activeElement;
+      if(r.changed&&!document.querySelector('dialog[open]')&&!focused?.closest('form')&&!['INPUT','TEXTAREA','SELECT'].includes(focused?.tagName))render();
+    }).catch(()=>{});
     return;
   }
   loadingScreen();
@@ -239,9 +247,8 @@ function dataErrorScreen(err){
    lang==="fr"?"Base de données indisponible":"Game database unavailable"
  }</b><br><br>${
    lang==="fr"
-    ?"WuWa Companion refuse d’utiliser l’ancienne base manuelle ou des données incomplètes. Vérifie la connexion puis recharge la page."
-    :"WuWa Companion refuses to use the old manual catalogue or incomplete data. Check the connection and reload."
- }</div></div>`;
+    ?"Le premier chargement nécessite une connexion. Tes données personnelles restent conservées et les réglages restent accessibles."
+    :"The first load needs a connection. Personal data remains preserved and settings are still accessible."
+ }</div><div class="companion-actions">${companionButton('retry-start',tr('Réessayer','Retry'))}${companionButton('more-tab',tr('Ouvrir les réglages','Open settings'),'settings')}</div></div>`;
  console.error("Canonical catalogue rejected:",err);
 }
-

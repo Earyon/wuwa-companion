@@ -137,7 +137,7 @@ function drawSkillsEditor(state="ready"){
  box.innerHTML=`<div class="skill-grid-edit">${editingSkillDefs.map(def=>{
    const lv=editingSkills[def.type]??null;
    return `<div class="skill-edit-row">
-     ${def.icon?`<span class="skill-icon-wrap"><img src="${def.icon}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="skill-icon-fallback">✦</span></span>`:`<span class="skill-icon-wrap"><span class="skill-icon-fallback" style="display:grid">✦</span></span>`}
+     ${def.icon?`<span class="skill-icon-wrap"><img src="${esc(def.icon)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="skill-icon-fallback">✦</span></span>`:`<span class="skill-icon-wrap"><span class="skill-icon-fallback" style="display:grid">✦</span></span>`}
      <div class="skill-edit-copy"><b>${esc(SKILL_LABELS[lang][def.type]||def.type)}</b><label>${lang==='fr'?'Niveau actuel':'Current level'}
        <select data-skill-level="${esc(def.type)}" aria-label="${esc(SKILL_LABELS[lang][def.type]||def.type)}"><option value="" ${lv===null?'selected':''}>?</option>${Array.from({length:10},(_,i)=>i+1).map(n=>`<option value="${n}" ${lv===n?'selected':''}>${n} / 10</option>`).join('')}</select></label>
      </div>

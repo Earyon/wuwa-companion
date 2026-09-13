@@ -1,5 +1,3 @@
-const PROFILE={name:"Earyon",uid:"534230812",playerId:"601844929",unionLevel:68,sol3Rank:7,birthday:"13/12"};
-const detected=new Set(["Aalto","Aemeath","Baizhi","Buling","Calcharo","Changli","Chixia","Danjin","Denia","Encore","Jianxin","Lingyang","Lumi","Luuk Herssen","Lynae","Mortefi","Qingxiao","Sanhua","Suisui","Taoqi","Verina","Yangyang","Youhu","Yuanwu"]);
 const personalReadErrors=[];
 function canWritePersonalData(){
  if(!personalReadErrors.length&&!CompanionStore.error()&&CompanionStore.get().roster!==null)return true;
@@ -48,13 +46,13 @@ function changeOwnership(id,add){
   syncPersonalViews();return true;
  }catch(error){companionMessage(lang==='fr'?'Modification non enregistrée. Vérifie l’espace de stockage.':'Change not saved. Check available storage.',true);return false;}
 }
-let lang=localStorage.getItem("wwc_lang")||"fr";
+let lang='fr';try{if(localStorage.getItem('wwc_lang')==='en')lang='en';}catch{}
 let encySort="alpha";
 let encySortDir=1;
 let ownedSort="alpha";
 let ownedSortDir=1;
 let ownedElement="All";
-let currentView="account", accountTab="res", element="All";
+let currentView=CompanionStore.get().settings.startView||"account", accountTab="res", element="All";
 
 const I18N={
  fr:{daily:"Tâches quotidiennes",ency:"Encyclopédie",account:"Mon compte",planner:"Planner",more:"Plus",back:"Retour",res:"Mes Résonateurs",weap:"Mes Armes",echo:"Mes Échos",resources:"Mes Ressources"},
@@ -70,9 +68,13 @@ function setHeader(title,sub){
  document.querySelector("#pageSub").textContent=sub;
 }
 function setActiveNav(){
- document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===currentView));
+ document.documentElement.lang=lang;
+ document.getElementById('skipLink').textContent=lang==='fr'?'Aller au contenu':'Skip to content';
+ document.querySelectorAll('.closebtn').forEach(b=>b.setAttribute('aria-label',lang==='fr'?'Fermer':'Close'));
+ document.querySelectorAll('input[placeholder]').forEach(input=>{if(!input.labels?.length&&!input.hasAttribute('aria-label'))input.setAttribute('aria-label',input.placeholder);});
+ document.querySelectorAll("[data-view]").forEach(b=>{const active=b.dataset.view===currentView;b.classList.toggle("active",active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
  const labs=[t("daily"),t("ency"),t("account"),t("planner"),t("more")];
- document.querySelectorAll(".bottom-nav small").forEach((x,i)=>x.textContent=labs[i]);
+ document.querySelectorAll(".bottom-nav small").forEach((x,i)=>x.textContent=i===0?(lang==='fr'?'Accueil':'Home'):labs[i]);
  document.querySelectorAll(".side-nav button span:last-child").forEach((x,i)=>x.textContent=labs[i]);
 }
 function accountTabs(){
@@ -211,7 +213,7 @@ function drawCards(){
      return rarity||alpha;
    });
  document.querySelectorAll(".filters button").forEach(b=>b.classList.toggle("active",(element==="All"&&(b.textContent==="Tous"||b.textContent==="All"))||b.textContent===element));
- document.querySelector("#grid").innerHTML=a.map(x=>`<article class="char-card" onclick='openDetail(${esc(JSON.stringify(x.name))})'><div class="pic">${x.image?`<img src="${x.image}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">`:""}</div><div class="info"><b>${esc(x.name)}</b><small>${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</small></div></article>`).join("");
+ document.querySelector("#grid").innerHTML=a.map(x=>`<button type="button" class="char-card" onclick='openDetail(${esc(JSON.stringify(x.name))})'><span class="pic">${x.image?`<img src="${esc(x.image)}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">`:""}</span><span class="info"><b>${esc(x.name)}</b><small>${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</small></span></button>`).join("");
 }
 function daily(){
  setHeader(t("daily"),lang==="fr"?"Votre tableau de bord personnel.":"Your personal dashboard.");document.querySelector("#accountTabs").innerHTML="";
@@ -261,13 +263,15 @@ function auditOrderingAndOwnership(){
 function render(){
  syncPersonalViews();
  if(DATA.length){auditOrderingAndOwnership();auditRoverUniqueness();}
- setActiveNav();
  const html=currentView==="account"?account():currentView==="ency"?encyclopedia():currentView==="daily"?daily():currentView==="planner"?planner():more();
  document.querySelector("#view").innerHTML=html;
+ setActiveNav();
  if(currentView==="ency")drawCards();
  if(currentView==="account"&&accountTab==="res")renderOwnedList();
  const bl=document.querySelector("#backLabel");if(bl)bl.textContent=t("back");
 }
+// Broken remote artwork must keep its reserved space and a usable local fallback.
+document.addEventListener('error',event=>{const img=event.target;if(img instanceof HTMLImageElement&&!img.onerror&&!img.dataset.fallback){img.dataset.fallback='true';img.src='./assets/portrait-placeholder.svg';}},true);
 
 
 function renderOwnedList(){
@@ -283,7 +287,7 @@ function renderOwnedList(){
    return rarity||alpha;
  });
  listEl.innerHTML=rows.length?rows.map(x=>`<div class="res-row" style="--element:${x.element==="Fusion"?"#ff826d":x.element==="Aero"?"#6ce1d2":x.element==="Spectro"?"#ffe08a":x.element==="Glacio"?"#76d7ff":x.element==="Electro"?"#b99aff":"#d676ff"}">
-   <img src="${x.image||""}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">
+   <img src="${esc(x.image||'./assets/portrait-placeholder.svg')}" alt="" loading="lazy" decoding="async" fetchpriority="low">
    <div class="res-main"><b>${esc(x.name)}</b><div class="res-meta"><span class="element">✦ ${x.element}</span><span>${weaponLabel(x.weapon)}</span></div><div class="rarity-stars">${"★".repeat(x.rarity)}</div></div>
    <div class="status">${accountStatus(x.name)}</div>
    <button class="remove-res trash-btn" title="${lang==="fr"?"Retirer":"Remove"}" aria-label="${lang==="fr"?"Retirer "+esc(x.name):"Remove "+esc(x.name)}" onclick='event.stopPropagation();removeOwned(${esc(JSON.stringify(x.name))})'>
@@ -314,7 +318,7 @@ function drawSelector(){
  const list=DATA
    .filter(x=>!ownedIds.includes(x.id)&&x.name.toLowerCase().includes(q))
    .sort((a,b)=>(Number(b.rarity)-Number(a.rarity))||a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"}));
- document.querySelector("#selectorGrid").innerHTML=list.map(x=>`<button class="select-card ${detected.has(x.name)?"detected":""}" onclick='confirmOwned(${esc(JSON.stringify(x.name))})'>${x.image?`<img src="${x.image}" alt="${esc(x.name)}">`:""}<span>${esc(x.name)}</span></button>`).join("");
+ document.querySelector("#selectorGrid").innerHTML=list.map(x=>`<button class="select-card" onclick='confirmOwned(${esc(JSON.stringify(x.name))})'>${x.image?`<img src="${esc(x.image)}" alt="${esc(x.name)}">`:""}<span>${esc(x.name)}</span></button>`).join("");
 }
 function confirmOwned(name){
  if(!canWritePersonalData())return;
@@ -322,7 +326,7 @@ function confirmOwned(name){
  if(r&&!ownedIds.includes(r.id)&&!changeOwnership(r.id,true))return;
  closeDialog('selector');render();
 }
-function setLang(v){lang=v;localStorage.setItem("wwc_lang",v);render()}
+function setLang(v){if(!['fr','en'].includes(v))return;localStorage.setItem("wwc_lang",v);lang=v;render()}
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{currentView=b.dataset.view;render()});
 document.querySelector("#selectorClose").onclick=()=>closeDialog('selector');
 document.querySelector("#editorClose").onclick=()=>closeDialog('accountEditor');
@@ -343,6 +347,4 @@ function auditCompanionData(){
  return window.__WWC_AUDIT__;
 }
 auditCompanionData();
-
-
 

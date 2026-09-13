@@ -69,3 +69,5 @@
 .optimization-card{padding:18px;border:1px solid var(--line);background:#0a1a2a;border-radius:8px;overflow-wrap:anywhere}.optimization-card h3{margin:0;color:var(--gold)}.optimization-card summary{min-height:44px;cursor:pointer;padding:10px 0}
 
 .section-tabs button[aria-pressed="true"]{color:var(--gold);border-color:var(--gold)}
+
+#pullTargetForm{padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--line)}
