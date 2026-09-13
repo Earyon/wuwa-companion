@@ -1,3 +1,4 @@
+let editingAscension=null,editingWeaponAscension=null;
 let editingEquipment={mode:"keep"},weaponPickerMode="inventory";
 let editingOriginal={},editingName=null, editingLevel=null, editingSeq=0, editingWeapon=null, editingWeaponLevel=null, editingWeaponRank=1;
 function accountStatus(name){
@@ -22,8 +23,9 @@ function openAccountEditor(name,section='overview'){
  editingName=name;
  const d=accountData[name]||{};
  const state=CompanionStore.get();
- editingOriginal=structuredClone(state.characters[x.id]||{});
+ editingOriginal=structuredClone(state.characters[x.id]||{});editingAscension=editingOriginal.ascension??null;
  const copy=state.weapons.find(w=>w.id===editingOriginal.weaponCopyId);
+ editingWeaponAscension=copy?.ascension??null;
  editingEquipment=copy?{mode:'copy',id:copy.id,expected:copy}:{mode:'keep'};
  editingLevel=d.level||null;
  editingSeq=(d.sequence!==undefined?d.sequence:0);
@@ -46,6 +48,7 @@ function updateEditorControls(){
  const focusId=document.activeElement?.id==='weaponLevelCurrent'?'weaponLevelCurrent':null;
  const focusRank=document.activeElement?.dataset.weaponRank;
  updateEditorSummary();
+ document.getElementById('ascensionControl').innerHTML=ascensionField('currentAscension',editingAscension);
  document.querySelector("#levelCurrent").textContent=editingLevel ? `${lang==="fr"?"Niveau":"Level"} ${editingLevel}` : (lang==="fr"?"Choisir un niveau":"Choose a level");
  document.querySelector("#seqRow").innerHTML=[0,1,2,3,4,5,6].map(n=>`<button class="seq-btn ${editingSeq===n?"active":""} ${n>0&&n<=editingSeq?"unlocked":""}" aria-pressed="${editingSeq===n}" data-sequence="${n}">S${n}</button>`).join("");
  const wc=document.querySelector("#weaponCurrent"), ws=document.querySelector("#weaponSettings");
@@ -56,6 +59,7 @@ function updateEditorControls(){
    if(editingEquipment.mode==='keep'){
     ws.innerHTML=`<p class="companion-note">${lang==='fr'?'Équipement ancien conservé. Choisis un exemplaire existant ou ajoute un exemplaire depuis le catalogue pour le modifier.':'Previous equipment preserved. Choose its inventory copy or add a copy from the catalogue to edit it.'} · ${editingWeaponLevel||'?'} · R${editingWeaponRank||'?'}</p>`;
    }else ws.innerHTML=`<button class="weapon-setting" id="weaponLevelCurrent" onclick="openWeaponLevelPicker()"><b>${lang==="fr"?"Niveau":"Level"}</b>${editingWeaponLevel||"—"}</button><div class="weapon-setting"><b>${lang==="fr"?"Syntonisation":"Syntony"}</b><div class="rank-row">${[1,2,3,4,5].map(n=>`<button class="rank-btn ${editingWeaponRank===n?"active":""}" aria-pressed="${editingWeaponRank===n}" data-weapon-rank="${n}">R${n}</button>`).join("")}</div></div>`;
+   if(editingEquipment.mode!=='keep')ws.innerHTML+=`<div class="companion-form">${ascensionField('currentWeaponAscension',editingWeaponAscension)}</div>`;
    ws.innerHTML+=`<button class="companion-button" onclick="clearEditingWeapon()">${lang==='fr'?'Déséquiper':'Unequip'}</button>`;
  } else {
    wc.classList.add("empty");
@@ -159,13 +163,13 @@ function drawWeapons(){
 function selectWeaponByIndex(index){
  const row=WEAPONS[index];if(!row||row.type!==currentResonatorWeaponType())return;
  const previous=editingOriginal.weapon?.name===row.name?editingOriginal.weapon:null;
- editingEquipment={mode:'new',catalogId:row.id};editingWeapon=row.name;editingWeaponLevel=previous?.level??null;editingWeaponRank=previous?previous.rank??null:1;
+ editingWeaponAscension=null;editingEquipment={mode:'new',catalogId:row.id};editingWeapon=row.name;editingWeaponLevel=previous?.level??null;editingWeaponRank=previous?previous.rank??null:1;
  closeDialog('weaponPicker');updateEditorControls();
 }
 function selectWeaponCopy(id){
  const state=CompanionStore.get(),copy=state.weapons.find(w=>w.id===id),row=WEAPONS.find(w=>w.id===copy?.catalogId),owner=CompanionStore.weaponOwner(state,id);
  if(!copy||!row||row.type!==currentResonatorWeaponType()||(owner&&owner!==resolveResonatorRef(editingName)?.id))return;
- editingEquipment={mode:'copy',id,expected:copy};editingWeapon=row.name;editingWeaponLevel=copy.level;editingWeaponRank=copy.rank;
+ editingWeaponAscension=copy.ascension??null;editingEquipment={mode:'copy',id,expected:copy};editingWeapon=row.name;editingWeaponLevel=copy.level;editingWeaponRank=copy.rank;
  closeDialog('weaponPicker');updateEditorControls();
 }
 function clearEditingWeapon(){editingEquipment={mode:'none'};editingWeapon=null;editingWeaponLevel=null;editingWeaponRank=null;updateEditorControls();document.getElementById('weaponCurrent').focus();}
@@ -179,7 +183,7 @@ function openWeaponLevelPicker(){
 function drawWeaponLevels(){
  const q=(document.querySelector("#weaponLevelQ").value||"").trim();
  const nums=Array.from({length:90},(_,i)=>i+1).filter(n=>!q||String(n).includes(q));
- document.querySelector("#weaponLevelGrid").innerHTML=nums.map(n=>`<button class="level-btn ${editingWeaponLevel===n?"active":""}" onclick="editingWeaponLevel=${n};closeDialog('weaponLevelPicker');updateEditorControls()">${n}</button>`).join("");
+ document.querySelector("#weaponLevelGrid").innerHTML=nums.map(n=>`<button class="level-btn ${editingWeaponLevel===n?"active":""}" onclick="setEditorLevel(${n},true);closeDialog('weaponLevelPicker');updateEditorControls()">${n}</button>`).join("");
 }
 function openLevelPicker(){
  document.querySelector("#levelPickerTitle").textContent=lang==="fr"?"Choisir le niveau":"Choose level";
@@ -191,15 +195,26 @@ function openLevelPicker(){
 function drawLevels(){
  const q=(document.querySelector("#levelQ").value||"").trim();
  const nums=Array.from({length:90},(_,i)=>i+1).filter(n=>!q||String(n).includes(q));
- document.querySelector("#levelGrid").innerHTML=nums.map(n=>`<button class="level-btn ${editingLevel===n?"active":""}" onclick="editingLevel=${n};closeDialog('levelPicker');updateEditorControls()">${n}</button>`).join("");
+ document.querySelector("#levelGrid").innerHTML=nums.map(n=>`<button class="level-btn ${editingLevel===n?"active":""}" onclick="setEditorLevel(${n});closeDialog('levelPicker');updateEditorControls()">${n}</button>`).join("");
 }
 function saveAccountEditor(){
  if(!editingName||!canWritePersonalData())return;
  const progress={...editingOriginal,level:editingLevel,sequence:editingSeq,skills:{...editingSkills}};
+ if(editingAscension!==null||Object.hasOwn(editingOriginal,'ascension'))progress.ascension=editingAscension;
  if(editingForteChanged)progress.forteNodes={...editingForteNodes};
  const character=resolveResonatorRef(editingName);if(!character)return;
- try{CompanionStore.saveCharacter(character.id,progress,editingOriginal,lang==='fr'?'Progression enregistrée':'Progress saved',{...editingEquipment,level:editingWeaponLevel,rank:editingWeaponRank},{characters:DATA,weapons:WEAPONS},editingEchoes);}
+ try{CompanionStore.saveCharacter(character.id,progress,editingOriginal,lang==='fr'?'Progression enregistrée':'Progress saved',{...editingEquipment,level:editingWeaponLevel,rank:editingWeaponRank,ascension:editingWeaponAscension},{characters:DATA,weapons:WEAPONS},editingEchoes);}
  catch(error){if(error.message==='Echo cost exceeds 12'){selectEditorSection('echo');companionMessage(tr('Le coût total des Échos équipés dépasse 12. Modifie la sélection avant d’enregistrer.','Total equipped Echo cost exceeds 12. Adjust the selection before saving.'),true);return;}companionMessage(lang==='fr'?'Progression non enregistrée. Tes modifications restent ouvertes ; vérifie le stockage ou une modification dans un autre onglet.':'Progress not saved. Your edits remain open; check storage or changes in another tab.',true);return;}
  closeDialog('accountEditor');
  render();
+}
+
+function ascensionField(name,value,label=tr('Ascension débloquée','Unlocked ascension')){return '<label>'+label+'<select name="'+name+'"><option value="">?</option>'+[20,40,50,60,70,80,90].map((cap,i)=>'<option value="'+i+'" '+(value===i?'selected':'')+'>'+i+' · '+tr('plafond niv. ','level cap ')+cap+'</option>').join('')+'</select></label>';}
+document.getElementById('accountEditor').addEventListener('change',event=>{if(event.target.name==='currentAscension')editingAscension=event.target.value===''?null:Number(event.target.value);if(event.target.name==='currentWeaponAscension')editingWeaponAscension=event.target.value===''?null:Number(event.target.value);});
+
+function setEditorLevel(level,weapon=false){
+ const asc=weapon?editingWeaponAscension:editingAscension;
+ const compatible=asc==null||(level>=[1,20,40,50,60,70,80][asc]&&level<=[20,40,50,60,70,80,90][asc]);
+ if(weapon){editingWeaponLevel=level;if(!compatible)editingWeaponAscension=null;}
+ else{editingLevel=level;if(!compatible)editingAscension=null;}
 }

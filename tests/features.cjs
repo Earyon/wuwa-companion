@@ -64,14 +64,14 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(new
    await openCharacter('Qingxiao');await page.locator('#weaponSettings button').filter({hasText:language==='fr'?'Déséquiper':'Unequip'}).click();await page.locator('#editorSave').click();
    assert.equal(await page.evaluate(()=>CompanionStore.get().weapons.length),2,'Unequipping retains the inventory copy');
    await page.evaluate(b=>CompanionStore.restore(b),beforeEquipment);await page.reload();await page.locator('.res-row').first().waitFor();
-   await tab('resources');await page.locator('[name="item:2"]').waitFor();await page.locator('[name="item:2"]').fill('0');await page.locator('#resourcesForm button').click();
-   assert.deepEqual(await page.evaluate(()=>CompanionStore.get().resources),{'2':0,'3':null});
+   await tab('resources');await page.locator('[name="item:2"]').waitFor();await page.locator('[name="item:2"]').fill('0');await page.locator('#resourcesForm button:not([type="button"])').click();
+   assert.deepEqual(await page.evaluate(()=>CompanionStore.get().resources),{'2':0});
    await tab('echo');await page.locator('[data-echo-action="add"]').click();await page.locator('#echoCatalogue option').waitFor({state:'attached'});await page.locator('[name="echo"]').fill('Test Echo');await page.locator('[name="mainType"]').selectOption('atkPct');await page.locator('[name="sub0Type"]').selectOption('critRate');await page.locator('[name="sub0Value"]').fill('8.1');await page.locator('#echoInventoryForm [type="submit"]').click();
    assert.equal(await page.evaluate(()=>CompanionStore.get().echoes.length),1);
-   await nav('planner');await page.locator('[name="level"]').fill('80');await page.locator('[name="skill:4"]').fill('7');await page.locator('[name="priority:4"]').selectOption('3');await page.locator('#goalForm button:not([type="button"])').click();
+   await nav('planner');await page.locator('[name="level"]').fill('80');await page.locator('[name="skill:4"]').fill('7');await page.locator('[name="priority:4"]').selectOption('3');await page.locator('#goalForm [value="activate"]').click();
    assert.equal(await page.evaluate(()=>CompanionStore.get().active),'resonator:1');assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data'))),seed);
    await nav('daily');assert.match(await page.locator('#view').innerText(),/3 → 7/);
-   await nav('planner');await page.locator('#planningCharacter').selectOption('resonator:2');await page.locator('#goalForm button:not([type="button"])').click();assert.equal(await page.evaluate(()=>CompanionStore.get().active),'resonator:2');
+   await nav('planner');await page.locator('#planningCharacter').selectOption('resonator:2');await page.locator('#goalForm [value="activate"]').click();assert.equal(await page.evaluate(()=>CompanionStore.get().active),'resonator:2');
    await page.locator('[data-action="pause-plan"]').click();assert.equal(await page.evaluate(()=>CompanionStore.get().active),null);
    await nav('more');
    const downloadPromise=page.waitForEvent('download');await page.locator('[data-action="export"]').click();const download=await downloadPromise;

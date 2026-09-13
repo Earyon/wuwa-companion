@@ -3,13 +3,15 @@
 const CompanionStore=(()=>{
  const KEY='wwc_companion_v1';
  const PERSONAL=[KEY,'wwc_owned_ids','wwc_owned','wwc_account_data','wwc_lang'];
- const blank=()=>({version:4,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
+ const blank=()=>({version:5,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
  const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
  const number=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  function parse(raw){return JSON.parse(raw,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw Error('Invalid key');return value;});}
+ function validateAscension(level,ascension){if(ascension==null)return;const caps=[20,40,50,60,70,80,90],mins=[1,20,40,50,60,70,80];if(!Number.isInteger(ascension)||ascension<0||ascension>6||(level!=null&&(level>caps[ascension]||level<mins[ascension])))throw Error('Invalid ascension');}
  function validateProgress(records){
     for(const p of Object.values(records)){
      if(!object(p)||(p.level!=null&&(!Number.isInteger(p.level)||!number(p.level,1,90)))||(p.sequence!=null&&(!Number.isInteger(p.sequence)||!number(p.sequence,0,6))))throw Error('Invalid character progress');
+     validateAscension(p.level,p.ascension);
      if(p.skills){if(!object(p.skills))throw Error('Invalid skills');for(const v of Object.values(p.skills))if(!Number.isInteger(v)||!number(v,1,10))throw Error('Invalid skill level');}
      if(p.forteNodes&&(!object(p.forteNodes)||Object.values(p.forteNodes).some(v=>typeof v!=='boolean')))throw Error('Invalid passive');
      if(p.weapon!=null&&(!object(p.weapon)||typeof p.weapon.name!=='string'||(p.weapon.level!=null&&(!Number.isInteger(p.weapon.level)||!number(p.weapon.level,1,90)))||(p.weapon.rank!=null&&(!Number.isInteger(p.weapon.rank)||!number(p.weapon.rank,1,5)))))throw Error('Invalid equipped weapon');
@@ -19,10 +21,10 @@ const CompanionStore=(()=>{
   validate(data);
   const next=data.version===1?{...data,roster:null,characters:{},legacyProgress:{}}:{...data};
   if(data.version<4)next.echoes=data.echoes.map(e=>({id:e.id,catalogId:e.catalogId,name:e.catalogId,owner:e.owner,slot:e.slot,level:e.level,quality:null,cost:null,setId:null,main:null,secondary:null,substats:[],legacyStats:{mainStat:e.mainStat,mainValue:e.mainValue,substats:e.substats}}));
-  next.version=4;validate(next);return next;
+  next.version=5;validate(next);return next;
  }
  function validate(data){
-  if(!object(data)||![1,2,3,4].includes(data.version))throw Error('Unsupported account format');
+  if(!object(data)||![1,2,3,4,5].includes(data.version))throw Error('Unsupported account format');
   if(data.version>=2){
    if(data.roster!==null&&(!Array.isArray(data.roster)||data.roster.some(id=>typeof id!=='string')||new Set(data.roster).size!==data.roster.length))throw Error('Invalid roster');
    if(!object(data.characters)||!object(data.legacyProgress))throw Error('Invalid progress');
@@ -34,6 +36,7 @@ const CompanionStore=(()=>{
   const ids=new Set();
   for(const w of data.weapons){
    if(!object(w)||typeof w.id!=='string'||!w.id||ids.has(w.id)||typeof w.catalogId!=='string'||!w.catalogId||(w.name!=null&&typeof w.name!=='string')||(w.level!==null&&(!number(w.level,1,90)||!Number.isInteger(w.level)))||(w.rank!==null&&(!number(w.rank,1,5)||!Number.isInteger(w.rank))))throw Error('Invalid weapon');
+   validateAscension(w.level,w.ascension);
    ids.add(w.id);
   }
   const equipped=new Set();
@@ -43,7 +46,10 @@ const CompanionStore=(()=>{
   }
   for(const value of Object.values(data.resources))if(value!==null&&(!Number.isInteger(value)||!number(value,0,1e12)))throw Error('Invalid quantity');
   for(const goal of Object.values(data.goals)){
-   if(!object(goal)||!Number.isInteger(goal.level)||!number(goal.level,1,90)||!object(goal.skills)||!object(goal.priorities))throw Error('Invalid goal');
+   if(!object(goal)||(goal.level!==null&&(!Number.isInteger(goal.level)||!number(goal.level,1,90)))||!object(goal.skills)||!object(goal.priorities))throw Error('Invalid goal');
+   validateAscension(goal.level,goal.ascension);validateAscension(goal.weaponLevel,goal.weaponAscension);
+   if(goal.weaponLevel!=null&&(!Number.isInteger(goal.weaponLevel)||!number(goal.weaponLevel,1,90)))throw Error('Invalid weapon goal');
+   if(goal.forteNodes&&(!object(goal.forteNodes)||Object.values(goal.forteNodes).some(v=>typeof v!=='boolean')))throw Error('Invalid passive target');
    for(const value of Object.values(goal.skills))if(!Number.isInteger(value)||!number(value,1,10))throw Error('Invalid skill target');
    for(const value of Object.values(goal.priorities))if(!Number.isInteger(value)||!number(value,0,3))throw Error('Invalid priority');
   }
@@ -111,7 +117,7 @@ const CompanionStore=(()=>{
       copy={id:crypto.randomUUID(),catalogId:row.id,name:row.name,level:null,rank:null};
       next.weapons.push(copy);
      }
-     copy.level=equipment.level;copy.rank=equipment.rank;
+     copy.level=equipment.level;copy.rank=equipment.rank;if(Object.hasOwn(equipment,'ascension'))copy.ascension=equipment.ascension;
      progress.weapon=null;progress.weaponCopyId=copy.id;
     }else if(equipment.mode==='none'){
      progress.weapon=null;delete progress.weaponCopyId;
@@ -171,6 +177,8 @@ const CompanionStore=(()=>{
   },label);
  }
  function removeEcho(id,expected,label){return update(next=>{if(!expected||id!==expected.id)throw Error('Missing Echo');applyEchoChanges(next,[expected],[]);},label);}
+ function saveGoal(id,goal,expected,activate,label){return update(next=>{if(!same(next.goals[id]||null,expected))throw Error('Goal changed in another window');if(!next.roster?.includes(id))throw Error('Character is not owned');next.goals[id]=goal;if(activate)next.active=id;},label);}
+ function saveResources(changes,expected,label){return update(next=>{for(const [id,value] of Object.entries(changes)){if((next.resources[id]??null)!==(expected[id]??null))throw Error('Stock changed in another window');next.resources[id]=value;}},label);}
  function migrate(resolve){
   if(error)throw error;
   if(state.roster!==null)return;
@@ -222,5 +230,5 @@ const CompanionStore=(()=>{
    throw e;
   }
  }
- return {get:()=>structuredClone(state),update,migrate,saveCharacter,saveWeapon,removeWeapon,weaponOwner,saveEcho,removeEcho,exportData,validateBackup,restore,error:()=>error,parse};
+ return {get:()=>structuredClone(state),update,migrate,saveCharacter,saveWeapon,removeWeapon,weaponOwner,saveEcho,removeEcho,saveGoal,saveResources,exportData,validateBackup,restore,error:()=>error,parse};
 })();

@@ -44,12 +44,7 @@ function personalInventory(){
   ${edit?companionButton('cancel-inventory',tr('Annuler','Cancel')):''}${inventorySearch()}<div class="companion-list">${filtered.map(w=>{const row=WEAPONS.find(x=>x.id===w.catalogId),owner=CompanionStore.weaponOwner(data,w.id);return inventoryCard(row,`<b>${esc(row?.name||w.name||w.catalogId)} · #${data.weapons.indexOf(w)+1}</b><small>${tr('Niveau','Level')} ${w.level??'?'} · R${w.rank??'?'} · ${esc(row?weaponLabel(row.type):'?')}<br>${owner?esc(DATA.find(c=>c.id===owner)?.name||owner):tr('Non équipée','Unequipped')}</small>`,companionButton('edit-weapon',tr('Modifier','Edit'),w.id)+companionButton('remove-weapon',tr('Retirer','Remove'),w.id)+(owner&&DATA.some(c=>c.id===owner)?companionButton('edit-weapon-owner',tr('Voir le Résonateur','View Resonator'),owner):''));}).join('')||`<p>${tr('Aucun exemplaire enregistré.','No copies recorded.')}</p>`}</div>`);
  }
  if(accountTab==='echo')return echoInventory();
- const kind='item';
- if(!extendedCatalog[kind].length&&!extendedCatalog.loading[kind]&&!extendedCatalog.errors[kind])queueMicrotask(()=>loadExtended(kind));
- const rows=extendedCatalog[kind],filtered=rows.filter(r=>r.name.toLowerCase().includes(inventoryQuery.toLowerCase()));
- const notice=extendedCatalog.errors[kind]?`<p class="companion-note">${tr('Catalogue distant indisponible. Les données personnelles sont conservées.','Remote catalogue unavailable. Personal data is preserved.')}</p>${companionButton('reload-catalogue',tr('Réessayer','Retry'),kind)}`:rows.length?'':`<p>${tr('Chargement du catalogue…','Loading catalogue…')}</p>`;
- return companionPanel(t('resources'),`${notice}<p>${tr('Laisse la quantité vide si elle est inconnue. Zéro signifie un stock confirmé vide.','Leave quantity blank when unknown. Zero means confirmed empty stock.')}</p>${inventorySearch()}
- <form id="resourcesForm"><div class="companion-list">${filtered.slice(0,40).map(row=>inventoryCard(row,`<b>${esc(row.name)}</b><small>${esc(row.type)}</small><label class="companion-form"><input aria-label="${esc(row.name)}" name="item:${row.id}" type="number" min="0" max="1000000000000" step="1" placeholder="?" value="${data.resources[row.id]??''}"></label>`)).join('')}</div><p>${Math.min(40,filtered.length)} / ${filtered.length} · ${tr('Affiner la recherche pour accéder aux autres matériaux.','Refine search to access other materials.')}</p><button class="companion-button">${tr('Enregistrer les quantités affichées','Save displayed quantities')}</button></form>`);
+ return resourcesInventory();
 }
 
 Object.assign(companionActions,{
@@ -64,7 +59,7 @@ Object.assign(companionActions,{
  'reload-catalogue':kind=>loadExtended(kind,{refresh:true})
 });
 document.querySelector('#view').addEventListener('submit',event=>{
- const form=event.target;if(!['weaponInventoryForm','resourcesForm','inventorySearch'].includes(form.id))return;
+ const form=event.target;if(!['weaponInventoryForm','inventorySearch'].includes(form.id))return;
  event.preventDefault();const values=new FormData(form);
  try{
   if(form.id==='inventorySearch'){inventoryQuery=String(values.get('query')||'');render();return;}
@@ -73,8 +68,6 @@ document.querySelector('#view').addEventListener('submit',event=>{
    const catalogId=row?.id||(original&&(values.get('weapon')===(original.name||original.catalogId))?original.catalogId:null);if(!catalogId)throw Error('Select a catalogue weapon');
    const record={id:inventoryEdit||crypto.randomUUID(),catalogId,level:values.get('level')===''?null:Number(values.get('level')),rank:values.get('rank')===''?null:Number(values.get('rank'))};
    CompanionStore.saveWeapon(record,original,{characters:DATA,weapons:WEAPONS},tr('Exemplaire d’arme enregistré','Weapon copy saved'));
-  }else if(form.id==='resourcesForm'){
-   CompanionStore.update(s=>{for(const [key,value] of values)if(key.startsWith('item:'))s.resources[key.slice(5)]=value===''?null:Number(value);},tr('Inventaire de ressources mis à jour','Resource inventory updated'));
   }
   inventoryEdit=null;render();companionMessage(tr('Enregistré sur cet appareil.','Saved on this device.'));
  }catch(error){console.error(error);companionMessage(tr('Non enregistré : vérifie la sélection et les valeurs.','Not saved: check the selection and values.'),true);}

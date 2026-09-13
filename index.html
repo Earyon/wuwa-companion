@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="./layout.css">
 <link rel="stylesheet" href="./companion.css">
 <script src="./echo-rules.js" defer></script>
+<script src="./cost-engine.js" defer></script>
 <script src="./account-store.js" defer></script>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./assets/icon-192.png">
@@ -71,7 +72,7 @@
       <div class="resonator-portrait"><div class="resonator-orbit" aria-hidden="true"></div><img id="editorPortrait" alt=""><span class="portrait-fallback" id="editorPortraitFallback" aria-hidden="true"></span></div>
       <div class="overview-details"><p class="editor-eyebrow" id="overviewLabel">Aperçu</p><h3 id="overviewName"></h3><p id="overviewElement"></p>
        <div class="editor-block"><div class="editor-label" id="levelLabel">Niveau</div><button class="level-current" id="levelCurrent" onclick="openLevelPicker()">À définir</button></div>
-       <dl class="overview-summary" id="editorSummary"></dl><p class="editor-hint" id="overviewHint"></p>
+       <div class="companion-form" id="ascensionControl"></div><dl class="overview-summary" id="editorSummary"></dl><p class="editor-hint" id="overviewHint"></p>
       </div>
      </div>
     </section>
@@ -138,6 +139,8 @@
 <script src="./companion-ui.js" defer></script>
 <script src="./inventory.js" defer></script>
 <script src="./echoes.js" defer></script>
+<script src="./progression-data.js" defer></script>
+<script src="./resources.js" defer></script>
 <script src="./planning.js" defer></script>
 <script src="./bootstrap.js" defer></script>
 </body>

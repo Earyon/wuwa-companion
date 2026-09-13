@@ -38,7 +38,7 @@ function drawForteEditor(state='ready'){
  }
  const fr=lang==='fr';
  box.innerHTML=`<div class="forte-heading"><b>${fr?'Nœuds passifs':'Passive nodes'}</b><span id="forteCount" aria-live="polite">${forteCountLabel()}</span></div>
- <p class="forte-note">${fr?'Coche les nœuds déjà débloqués en jeu, puis Enregistrer. Noms et descriptions de la source en anglais.':'Check the nodes already unlocked in game, then Save.'}</p>
+ <button type="button" class="companion-button" id="confirmForteStates">${fr?'Confirmer les états cochés / non cochés':'Confirm checked / unchecked states'}</button><p class="forte-note">${fr?'Coche les nœuds déjà débloqués en jeu, puis Enregistrer. Noms et descriptions de la source en anglais.':'Check the nodes already unlocked in game, then Save.'}</p>
  ${['skill','node'].map(kind=>{
   const defs=editingForteDefs.filter(def=>def.kind===kind);if(!defs.length)return '';
   return `<fieldset class="forte-group"><legend>${kind==='skill'?(fr?'Compétences inhérentes':'Inherent skills'):(fr?'Bonus de statistiques':'Stat bonuses')}</legend><div class="forte-nodes">${defs.map((def,index)=>`<label class="forte-node">
@@ -57,3 +57,5 @@ document.querySelector('#forteEditor').addEventListener('change',event=>{
  editingForteChanged=true;
  document.querySelector('#forteCount').textContent=forteCountLabel();
 });
+
+document.getElementById('forteEditor').addEventListener('click',event=>{if(event.target.id!=='confirmForteStates')return;for(const def of editingForteDefs)editingForteNodes[def.key]=document.querySelector('[data-forte-key="'+CSS.escape(def.key)+'"]').checked;editingForteChanged=true;drawForteEditor();document.getElementById('confirmForteStates').focus();});

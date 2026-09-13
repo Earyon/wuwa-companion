@@ -48,3 +48,8 @@
 .echo-stats{border:1px solid var(--line);border-radius:10px;padding:14px;margin:0;min-width:0;display:grid;gap:14px}.echo-stats legend{color:var(--gold);font-size:14px;padding:0 6px}
 .echo-stat-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(70px,1fr);gap:10px}
 #echoFormError:empty{display:none}
+
+.plan-passives{border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}.plan-passives legend{color:var(--gold)}
+#goalPassives{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}.companion-form label.plan-passive{display:flex;align-items:center;gap:12px;min-height:44px}.plan-passive input[type=checkbox]{width:24px;min-height:24px;height:24px;flex-shrink:0}.resource-symbol{font-size:32px;color:var(--gold);text-align:center}
+
+.goal-skill{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px;align-items:end}

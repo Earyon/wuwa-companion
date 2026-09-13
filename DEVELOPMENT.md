@@ -2,16 +2,16 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Avancement : 5 / 14 lots vérifiés
+## Avancement : 8 / 14 lots vérifiés
 
 - [x] Catalogue Résonateurs / armes, compte et niveaux, cinq compétences et passifs.
 - [x] Mise en page consolidée, publication Pages et mises à jour PWA.
 - [x] Protection des données, export/import vérifié et retrait durable d'un Résonateur.
 - [x] Inventaire d'armes par exemplaire, recherche, modification et équipement compatible.
 - [x] Catalogue Échos et suivi des Échos équipés.
-- [ ] Ressources connues / inconnues, inventaire et besoins nets.
-- [ ] Objectifs personnels et priorités, un seul personnage actif, tâches dérivées.
-- [ ] Coûts réels de montée : niveau, ascension, arme, compétences, passifs.
+- [x] Ressources connues / inconnues, inventaire et besoins nets.
+- [x] Objectifs personnels et priorités, un seul personnage actif, tâches dérivées.
+- [x] Coûts réels de montée : niveau, ascension, arme, compétences, passifs.
 - [ ] Fiches complètes, builds contextualisés, recommandations sourcées et datées.
 - [ ] Équipes de trois, favoris et profils de builds.
 - [ ] Succès, activités / événements / resets et historique utile.
@@ -111,3 +111,17 @@ Le catalogue inspecté contient 311 identifiants, dont des variantes homonymes. 
 Vérifications : tests du stockage et migrations ; parcours Échos FR/EN avec saisie partielle, homonymes, catalogue retardé/corrompu/indisponible, remplacement, déplacement, annulation, enregistrement, autre propriétaire, conflit d’édition, sauvegarde et édition hors ligne ; 16 dispositions remplies sur 320/720/1152 pixels CSS, dont paysage court. Les suites editor (80 cas), responsive (42 cas) et features (36 écrans) passent. Le test PWA part de 5ce27ea, préserve un ancien Écho et vérifie le nouveau shell et ses scripts hors ligne. Captures examinées et détails visuels corrigés. Pas de validation sur tablette physique.
 
 Avancement : **5 / 14 lots fonctionnels vérifiés**, **2 / 3 étapes de refonte complètes**. Les ressources, besoins nets et coûts de progression constituent la prochaine partie du travail restant.
+
+## Ressources, objectifs et coûts — lots 6 à 8 vérifiés
+
+Les stocks inconnus restent distincts de zéro. Recherche, pagination et filtre des besoins utilisent le catalogue partagé ; seules les saisies modifiées sont enregistrées, après contrôle des conflits. Les brouillons restent présents pendant la navigation. Les objectifs de niveau, ascension, arme, compétences et passifs sont indépendants des données actuelles. Un seul objectif possédé est actif ; annuler les modifications permet aussi de repartir de la version récente après un conflit.
+
+Le moteur pur centralise les sommes et besoins nets. Les coûts d’ascension, d’arme, des cinq compétences et des déblocages proviennent des détails Encore. Les courbes d’EXP proviennent d’une projection reproductible de WW_Data 3.6 (révision 353f2eaed119bc9f680eab92807d20ac75a79b40). `scripts/refresh-progression.cjs --check` compare le résultat à la projection livrée ; `WUWA_SOURCE_CACHE` permet d’utiliser les fichiers source déjà téléchargés. La version personnelle 5 accepte les anciens formats et les objectifs partiellement renseignés.
+
+Les tables de personnage indexent l’EXP par niveau d’arrivée, celles d’arme par niveau de départ : cette différence est testée. Les types de compétence de la source passent par la normalisation existante. Un palier d’ascension ambigu ou un passif non renseigné produit un calcul partiel explicite. Les quantités invalides ne sont pas interprétées comme gratuites. Les potions/tubes connus sont convertis en EXP sans considérer les stocks inconnus comme nuls ; un stock confirmé suffisant couvre toutefois le besoin. L’EXP déjà acquise dans le niveau actuel n’est pas déduite, limite indiquée à l’écran. Une version majeure/mineure du jeu différente désactive les anciennes courbes d’EXP.
+
+Contrôles indépendants : personnage Qingxiao du niveau 1 à 90, cinq compétences 1 à 10 et passifs, 3 053 300 crédits ; arme 5 étoiles testée, 2 692 400 EXP et 1 406 960 crédits. Les cas intermédiaires, frontières, données manquantes/incorrectes et anciennes sauvegardes sont testés. Parcours réels FR/EN du Planner, ressources, conseils quotidiens, conflits et écrans 320/720/1152 CSS px. Suites stockage, progression, editor (80 cas), Échos, features et responsive (42 cas) réussies. PWA depuis 954e145, hors ligne et données préservées. Captures inspectées, regroupement compétence/priorité corrigé. Aucune vérification sur appareil physique.
+
+Références consultées le 13 septembre 2026 : [WW_Data 3.6](https://github.com/Arikatsu/WutheringWaves_Data/tree/353f2eaed119bc9f680eab92807d20ac75a79b40), [Encore](https://api-v2.encore.moe/openapi.json), [totaux Qingxiao](https://hthgaming.com/wuthering-waves-qingxiao-ascension-materials/), [EXP de Résonateur](https://wutheringwaves.fandom.com/wiki/Resonator/Leveling). Les conseils Waveplates portent sur les manques confirmés, sans inventer de rendement de donjon ou de nombre de runs.
+
+Avancement : **8 / 14 lots fonctionnels vérifiés**, refonte globale **2 / 3**. Les fiches, builds et équipes constituent les lots suivants.

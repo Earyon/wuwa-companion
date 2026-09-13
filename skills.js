@@ -78,7 +78,7 @@ function normalizeSkillDefsRaw(detail){
 }
 async function backfillRoverDetail(gameId,detail){
  const sibling=ROVER_SKILL_SIBLING[String(gameId)];
- if(!sibling || coreSkillCount(detail)>=5)return detail;
+ if(!sibling || (coreSkillCount(detail)>=5&&detail.SkillTree?.length))return detail;
  try{
    const sib=await fetchJSON(`${ENCORE_BASE}/en/character/${encodeURIComponent(sibling)}`);
    const merged={...detail};
@@ -95,7 +95,7 @@ async function getCharacterDetail(gameId,{background=false}={}){
  if(cached && !background)return {detail:cached,fromCache:true};
  let detail=await fetchJSON(`${ENCORE_BASE}/en/character/${encodeURIComponent(gameId)}`);
  detail=await backfillRoverDetail(gameId,detail);
- localStorage.setItem(characterDetailCacheKey(gameId),JSON.stringify({savedAt:new Date().toISOString(),detail}));
+ try{localStorage.setItem(characterDetailCacheKey(gameId),JSON.stringify({savedAt:new Date().toISOString(),detail}));}catch{/* Optional cache failure must not hide successfully fetched data. */}
  return {detail,fromCache:false};
 }
 
