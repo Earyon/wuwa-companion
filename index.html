@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="./styles.css">
 <link rel="stylesheet" href="./layout.css">
 <link rel="stylesheet" href="./companion.css">
+<script src="./echo-rules.js" defer></script>
 <script src="./account-store.js" defer></script>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./assets/icon-192.png">
@@ -78,6 +79,7 @@
      <div class="editor-panel-heading"><p class="editor-eyebrow" id="weaponEyebrow">Équipement</p><h3 id="weaponLabel">Arme équipée</h3><p class="editor-hint" id="weaponHint"></p></div>
      <div class="editor-block"><button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button><div class="weapon-settings" id="weaponSettings"></div></div>
     </section>
+    <section class="editor-panel" id="editor-echo" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-echo" hidden></section>
     <section class="editor-panel" id="editor-forte" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-forte" hidden>
      <div class="editor-panel-heading skill-head"><h3 id="skillsLabel">Compétences / Forte</h3><small id="skillsSource"></small></div>
      <div id="skillsEditor"><div class="skill-loading">Chargement…</div></div><div id="forteEditor"></div>
@@ -117,6 +119,8 @@
   <div class="level-grid" id="levelGrid"></div>
  </div>
 </dialog>
+<dialog class="selector-overlay" id="echoPicker" aria-labelledby="echoPickerTitle"><div class="selector-sheet echo-picker-sheet"><div class="selector-head"><h2 id="echoPickerTitle">Écho</h2><button class="closebtn" id="echoPickerClose" aria-label="Fermer / Close">✕</button></div><input class="selector-search" id="echoPickerQuery" aria-label="Rechercher / Search"><button class="companion-button" id="echoPickerAdd"></button><div id="echoPickerList" class="companion-list"></div></div></dialog>
+<dialog class="selector-overlay" id="echoForm" aria-labelledby="echoFormTitle"><div class="selector-sheet echo-form-sheet"><div class="selector-head"><h2 id="echoFormTitle">Écho</h2><button class="closebtn" id="echoFormClose" aria-label="Fermer / Close">✕</button></div><div id="echoFormContent"></div></div></dialog>
 <section class="detail" id="detail">
  <div class="detail-inner">
   <button class="back" id="back"><span class="arrow"><svg viewBox="0 0 24 24" width="15" height="15"><path d="M15.5 5 8.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="backLabel">Retour</span></button>
@@ -133,6 +137,7 @@
 <script src="./forte.js" defer></script>
 <script src="./companion-ui.js" defer></script>
 <script src="./inventory.js" defer></script>
+<script src="./echoes.js" defer></script>
 <script src="./planning.js" defer></script>
 <script src="./bootstrap.js" defer></script>
 </body>

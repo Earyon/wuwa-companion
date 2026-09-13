@@ -31,7 +31,7 @@ const server=http.createServer((req,res)=>{const name=new URL(req.url,'http://lo
    const initialRequests=detailRequests;
    for(const [width,height] of [[320,700],[360,640],[720,1122],[819,650],[820,650],[1152,690],[1536,960],[720,450]]){
     await page.setViewportSize({width,height});
-    for(const name of ['overview','weapon','forte','sequence']){
+    for(const name of ['overview','weapon','echo','forte','sequence']){
      await section(name);
      const geometry=await page.evaluate(()=>{
       const dialog=document.getElementById('accountEditor'),sheet=dialog.querySelector('.account-editor-sheet'),stage=document.getElementById('editorStage'),footer=dialog.querySelector('.editor-actions'),panel=dialog.querySelector('.editor-panel:not([hidden])');
@@ -46,8 +46,8 @@ const server=http.createServer((req,res)=>{const name=new URL(req.url,'http://lo
     assert.equal(await page.locator('#editor-tab-weapon').getAttribute('aria-selected'),'true');
     await page.keyboard.press('End');assert.equal(await page.locator('#editor-tab-sequence').getAttribute('aria-selected'),'true');
    }
-   const tabNavigationRequests=detailRequests-initialRequests;
-   assert.equal(tabNavigationRequests,0,'Tab navigation makes no game requests');
+   const tabCharacterRequests=detailRequests-initialRequests;
+   assert.equal(tabCharacterRequests,0,'Tab navigation does not refetch character details');
    assert.deepEqual(await page.evaluate(()=>CompanionStore.exportData().records),before,'Tabs do not save');
    await page.setViewportSize({width:720,height:1122});await section('overview');await page.locator('#levelCurrent').click();
    await page.keyboard.press('Escape');assert.equal(await page.locator('dialog[open]').count(),1);assert.equal(await page.locator('#levelCurrent').evaluate(e=>e===document.activeElement),true);
@@ -69,10 +69,10 @@ const server=http.createServer((req,res)=>{const name=new URL(req.url,'http://lo
    // Missing data stays unknown; changes in all sections still save together.
    await open();await section('forte');await page.locator('[data-skill-level="Intro"]').selectOption('');await page.locator('#editorSave').click();assert.equal(await page.evaluate(()=>accountData.Qingxiao.skills.Intro),undefined);
    const timings=[];for(let i=0;i<5;i++){timings.push(await page.evaluate(async()=>{const start=performance.now();openAccountEditor('Qingxiao');await new Promise(requestAnimationFrame);return performance.now()-start;}));await page.locator('#editorClose').click();}
-   metrics.push({language,warmOpenUntilNextFrameMs:timings,tabNavigationRequests});
+   metrics.push({language,warmOpenUntilNextFrameMs:timings,tabCharacterRequests});
    assert.deepEqual(errors,[]);await context.close();
   }
   fs.writeFileSync(path.join(out,'editor-metrics.json'),JSON.stringify(metrics,null,2));
-  console.log(`PASS: ${geometryCases} editor section/viewport/language cases; keyboard tabs, modal focus, nested Escape, cancel/save across sections, unknown skills, copy linkage and zero requests from tab switching.`);
+  console.log(`PASS: ${geometryCases} editor section/viewport/language cases; keyboard tabs, modal focus, nested Escape, cancel/save across sections, unknown skills, copy linkage and no repeated character-detail requests from tabs.`);
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

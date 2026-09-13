@@ -2,13 +2,13 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Avancement : 4 / 14 lots vérifiés
+## Avancement : 5 / 14 lots vérifiés
 
 - [x] Catalogue Résonateurs / armes, compte et niveaux, cinq compétences et passifs.
 - [x] Mise en page consolidée, publication Pages et mises à jour PWA.
 - [x] Protection des données, export/import vérifié et retrait durable d'un Résonateur.
 - [x] Inventaire d'armes par exemplaire, recherche, modification et équipement compatible.
-- [ ] Catalogue Échos et suivi des Échos équipés.
+- [x] Catalogue Échos et suivi des Échos équipés.
 - [ ] Ressources connues / inconnues, inventaire et besoins nets.
 - [ ] Objectifs personnels et priorités, un seul personnage actif, tâches dérivées.
 - [ ] Coûts réels de montée : niveau, ascension, arme, compétences, passifs.
@@ -74,7 +74,7 @@ Les anciens équipements décrits uniquement par nom restent visibles et conserv
 
 Vérifications : tests du stockage (liens, doublons, compatibilité, échecs d’écriture, données absentes), parcours réels FR/EN (annuler, équiper, modifier depuis les deux écrans, refuser une édition obsolète, retirer, créer, déséquiper et restaurer), contrôles du sélecteur à 320/720/1152 pixels CSS et captures examinées. Suites responsive (42 cas), features et PWA validées. Le test PWA part de `e649d13`. Aucune validation sur appareil physique n’est revendiquée.
 
-Avancement actuel : **4 / 14 lots fonctionnels**, **2 / 3 étapes de refonte du socle**. Les paragraphes précédents décrivent les étapes historiques et leurs anciens compteurs.
+À l’issue de cette étape : **4 / 14 lots fonctionnels**, **2 / 3 étapes de refonte du socle**. Les paragraphes précédents décrivent les étapes historiques et leurs anciens compteurs.
 
 La nouvelle direction visuelle est inscrite dans `DESIGN.md` et `AGENTS.md` : elle couvre aussi tous les écrans existants. La refonte graphique complète vers les menus du jeu reste à réaliser et à vérifier ; les présentes modifications d’équipement ne sont pas présentées comme son achèvement.
 
@@ -95,3 +95,19 @@ La refonte des autres écrans reste à réaliser. Compteurs inchangés : **4 / 1
 Autorisation complémentaire de l’utilisateur : une remise à zéro de ses saisies peut être utilisée si elle simplifie réellement la refonte. Elle n’a pas été nécessaire pour cette étape et n’a pas été effectuée.
 
 Références techniques : [onglets accessibles, W3C APG](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) et [dialogue natif, MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog). Les recherches d’images de menus Forte ont fourni des exemples historiques ; elles ne prouvent pas la correspondance exacte avec la toute dernière version du jeu. L’objectif d’une interface inspirée des menus actuels reste à affiner lors des étapes suivantes.
+
+## Échos — lot vérifié
+
+L’inventaire suit désormais chaque exemplaire, équipé ou disponible : qualité, coût, niveau, Sonate, deux statistiques principales et cinq sous-statistiques structurées. Chaque champ peut rester inconnu. La fiche Résonateur possède cinq emplacements, avec un Écho principal ; déplacer ou remplacer un exemplaire conserve les autres. Un exemplaire affecté à un autre personnage est indisponible dans le sélecteur. Les modifications et les nouveaux exemplaires créés depuis la fiche restent provisoires jusqu’à l’enregistrement commun.
+
+Le format personnel 4 conserve les clés et importe les versions 1 à 3. Les anciennes statistiques libres restent consultables telles quelles dans « Anciennes saisies conservées », sans interprétation automatique ambiguë. Les modifications touchent uniquement les exemplaires concernés, gardent leur ordre et refusent une version obsolète ; l’édition du Résonateur et des Échos s’enregistre dans une seule écriture. Aucune remise à zéro effectuée. La limite de simultanéité exacte du stockage local, documentée plus haut, reste applicable.
+
+Causes corrigées : remplacement supprimant l’ancien Écho ; sélection par nom seul malgré plusieurs identifiants homonymes ; cache facultatif corrompu empêchant la requête ; arrivée tardive du catalogue effaçant la saisie. Les libellés des variantes incluent les Sonates et une référence de catalogue lorsque le nom ne suffit pas. Une actualisation échouée conserve le dernier catalogue valide. Les formulaires gardent leur fermeture accessible pendant le défilement et recommencent en haut à l’ouverture.
+
+Sources consultées le 13 septembre 2026 : [catalogue public Encore](https://api-v2.encore.moe/api/en/echo), [schéma Encore](https://api-v2.encore.moe/openapi.json), [système des Échos, Prydwen](https://www.prydwen.gg/wuthering-waves/guides/echoes-explained) (mise à jour indiquée : 11 février 2026), [statistiques des Échos, Prydwen](https://www.prydwen.gg/wuthering-waves/guides/echo-stats) (22 juin 2024). Les catégories de statistiques, plafonds de niveau par qualité et nombre de sous-statistiques sont contrôlés ; les plages exactes de jets ne sont pas imposées. Le plafond absolu de coût 12 est vérifié ; la limite individuelle de Banque de données 10/12 n’est pas encore renseignée et l’interface le précise. Les coûts inconnus ne sont pas comptés comme un zéro confirmé. Le catalogue Échos est chargé à la première utilisation puis réutilisé ; les changements de rubrique ne redemandent pas les détails de compétences.
+
+Le catalogue inspecté contient 311 identifiants, dont des variantes homonymes. Ses champs Rarity et PhantomType ne sont pas assimilés à la qualité de l’exemplaire ou au coût. Le détail de Tempest Mephis contient aussi des intitulés contradictoires : aucune déduction de coût, aucun effet de Sonate ni bonus chiffré n’en est calculé. Les noms de la source restent en anglais ; les commandes et statistiques sont disponibles en FR/EN. L’audit des ressources et la correspondance graphique exacte avec le jeu restent ouverts dans DESIGN.md.
+
+Vérifications : tests du stockage et migrations ; parcours Échos FR/EN avec saisie partielle, homonymes, catalogue retardé/corrompu/indisponible, remplacement, déplacement, annulation, enregistrement, autre propriétaire, conflit d’édition, sauvegarde et édition hors ligne ; 16 dispositions remplies sur 320/720/1152 pixels CSS, dont paysage court. Les suites editor (80 cas), responsive (42 cas) et features (36 écrans) passent. Le test PWA part de 5ce27ea, préserve un ancien Écho et vérifie le nouveau shell et ses scripts hors ligne. Captures examinées et détails visuels corrigés. Pas de validation sur tablette physique.
+
+Avancement : **5 / 14 lots fonctionnels vérifiés**, **2 / 3 étapes de refonte complètes**. Les ressources, besoins nets et coûts de progression constituent la prochaine partie du travail restant.

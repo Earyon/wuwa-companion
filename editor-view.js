@@ -2,6 +2,7 @@
 const EDITOR_SECTIONS=[
  {id:'overview',fr:'Aperçu',en:'Overview',icon:'◈'},
  {id:'weapon',fr:'Arme',en:'Weapon',icon:'◇'},
+ {id:'echo',fr:'Échos',en:'Echoes',icon:'◌'},
  {id:'forte',fr:'Forte',en:'Forte',icon:'✦'},
  {id:'sequence',fr:'Séquence',en:'Sequence',icon:'◎'}
 ];
@@ -18,6 +19,7 @@ function selectEditorSection(id,{focus=false}={}){
  for(const panel of document.querySelectorAll('.editor-panel'))panel.hidden=panel.id!=='editor-'+id;
  document.getElementById('editorStage').scrollTop=0;
  updateEditorSummary();
+ if(id==='echo'){ensureEchoCatalogue();drawEditorEchoes();}
 }
 function prepareEditorView(character,section){
  const fr=lang==='fr',set=(id,text)=>document.getElementById(id).textContent=text;

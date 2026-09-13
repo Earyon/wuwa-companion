@@ -55,13 +55,14 @@ node tests/account-store.cjs
 node tests/responsive.cjs
 node tests/features.cjs
 node tests/editor.cjs
+node tests/echoes.cjs
 node tests/pwa-update.cjs
 git diff --check
 ```
 
 - `responsive.cjs` exécute les vrais scripts de l'application avec un catalogue synthétique dans un navigateur isolé : 42 cas de dimensions/langue, rotations, noms longs, placement et absence de chevauchement, tri, filtres, recherche, édition et conservation après rechargement. Il utilise aussi un extrait réel des champs de passifs de Sanhua pour vérifier les identifiants, doublons, données absentes, annulation, sauvegarde, rafraîchissement et isolation entre Résonateurs. Les captures sont produites dans `test-results/`, exclu de Git.
 - `features.cjs` vérifie les nouveaux parcours réels FR/EN : exemplaires d'armes, Échos équipés, ressources inconnues/zéro, objectifs séparés de l'état actuel, export téléchargé puis réimporté, rejet des fichiers invalides, retour arrière sur erreur de stockage, données illisibles conservées et retrait durable d'un Résonateur.
-- `pwa-update.cjs` vérifie le passage du commit `b9265c8` au shell courant avec deux anciennes fenêtres ouvertes, l'attente de fin d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne incluant tous les scripts extraits.
+- `pwa-update.cjs` vérifie le passage du commit `5ce27ea` au shell courant avec deux anciennes fenêtres ouvertes, l'attente de fin d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne incluant tous les scripts extraits.
 - Examiner les captures, la syntaxe JavaScript et le diff avant publication. Après publication, comparer les fichiers réellement servis par Pages avec les fichiers livrés.
 
 Ces essais ne constituent pas une validation sur la tablette physique et ne vérifient pas l'exactitude des données des services de jeu. Ils ne modifient jamais le navigateur ni les données de l'utilisateur.
@@ -70,6 +71,8 @@ Le développement complet et ses fonctions restant à terminer sont suivis dans 
 
 Références des choix techniques : [container queries, MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Container_queries) et [cycle de vie du service worker, web.dev](https://web.dev/articles/service-worker-lifecycle).
 
-La progression et les équipements utilisent le stockage personnel commun (format 3). Les exemplaires d’armes peuvent être équipés et modifiés depuis le compte ; déséquiper ne supprime pas l’exemplaire. Les anciens équipements ambigus sont conservés en attendant un rattachement explicite. La direction visuelle de tous les écrans, y compris existants, est définie dans [DESIGN.md](DESIGN.md).
+La progression et les équipements utilisent le stockage personnel commun (format 4). Les exemplaires d’armes peuvent être équipés et modifiés depuis le compte ; déséquiper ne supprime pas l’exemplaire. Les anciens équipements ambigus sont conservés en attendant un rattachement explicite. La direction visuelle de tous les écrans, y compris existants, est définie dans [DESIGN.md](DESIGN.md).
 
-La fiche de progression propose désormais Aperçu, Arme, Forte et Séquence. Les panneaux conservent les saisies jusqu’à l’enregistrement commun. Les sélecteurs utilisent des dialogues natifs ; `tests/editor.cjs` vérifie 64 combinaisons rubrique/écran/langue, le clavier, le focus, les changements de rubrique, l’annulation et l’enregistrement.
+La fiche de progression propose désormais Aperçu, Arme, Échos, Forte et Séquence. Les panneaux conservent les saisies jusqu’à l’enregistrement commun. Les sélecteurs utilisent des dialogues natifs ; `tests/editor.cjs` vérifie 80 combinaisons rubrique/écran/langue, le clavier, le focus, les changements de rubrique, l’annulation et l’enregistrement.
+
+Les Échos sont suivis par exemplaire avec Sonate et statistiques structurées, puis équipés dans les cinq emplacements du Résonateur. Remplacer conserve l’ancien exemplaire ; fermer la fiche annule les modifications. `tests/echoes.cjs` couvre les parcours FR/EN, les noms ambigus, les catalogues retardés ou indisponibles, les limites de saisie, les conflits, la restauration, le hors ligne et 16 dispositions remplies. Les anciennes statistiques libres restent consultables après migration.

@@ -21,4 +21,6 @@ La nouvelle interface utilise une implémentation et des éléments graphiques o
 
 ## Première application : fiche de progression
 
-La fiche existante de progression du Résonateur comporte maintenant Aperçu, Arme, Forte et Séquence, avec navigation latérale ou horizontale, zone de contenu stable et enregistrement commun. Les cinq compétences sont présentées ensemble à la largeur tablette testée. Les passifs restent regroupés par nature ; aucune position ou liaison non vérifiée de l’arbre du jeu n’a été ajoutée. Les autres écrans restent dans le périmètre de refonte, et la correspondance exacte avec le menu actuel du jeu n’est pas présentée comme acquise.
+La fiche existante de progression du Résonateur comporte maintenant Aperçu, Arme, Échos, Forte et Séquence, avec navigation latérale ou horizontale, zone de contenu stable et enregistrement commun. Les cinq compétences sont présentées ensemble à la largeur tablette testée. Les passifs restent regroupés par nature ; aucune position ou liaison non vérifiée de l’arbre du jeu n’a été ajoutée. Les autres écrans restent dans le périmètre de refonte, et la correspondance exacte avec le menu actuel du jeu n’est pas présentée comme acquise.
+
+La rubrique Échos distingue l’emplacement principal, les quatre autres emplacements et les exemplaires disponibles. Les formulaires de détail partagent la palette et la typographie de la fiche ; leur fermeture reste accessible pendant le défilement. Les changements sont intégrés au même brouillon de Résonateur.

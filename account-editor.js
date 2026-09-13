@@ -36,6 +36,7 @@ function openAccountEditor(name,section='overview'){
  document.querySelector("#sequenceLabel").textContent=lang==="fr"?"Séquence":"Sequence";
  document.querySelector("#weaponLabel").textContent=lang==="fr"?"Arme équipée":"Equipped weapon";
  document.querySelector("#editorSave").textContent=lang==="fr"?"Enregistrer":"Save";
+ prepareEditorEchoes(state,x.id);
  prepareEditorView(x,section);
  updateEditorControls();
  openDialog('accountEditor');
@@ -197,8 +198,8 @@ function saveAccountEditor(){
  const progress={...editingOriginal,level:editingLevel,sequence:editingSeq,skills:{...editingSkills}};
  if(editingForteChanged)progress.forteNodes={...editingForteNodes};
  const character=resolveResonatorRef(editingName);if(!character)return;
- try{CompanionStore.saveCharacter(character.id,progress,editingOriginal,lang==='fr'?'Progression enregistrée':'Progress saved',{...editingEquipment,level:editingWeaponLevel,rank:editingWeaponRank},{characters:DATA,weapons:WEAPONS});}
- catch(error){companionMessage(lang==='fr'?'Progression non enregistrée. Tes modifications restent ouvertes ; vérifie le stockage ou une modification dans un autre onglet.':'Progress not saved. Your edits remain open; check storage or changes in another tab.',true);return;}
+ try{CompanionStore.saveCharacter(character.id,progress,editingOriginal,lang==='fr'?'Progression enregistrée':'Progress saved',{...editingEquipment,level:editingWeaponLevel,rank:editingWeaponRank},{characters:DATA,weapons:WEAPONS},editingEchoes);}
+ catch(error){if(error.message==='Echo cost exceeds 12'){selectEditorSection('echo');companionMessage(tr('Le coût total des Échos équipés dépasse 12. Modifie la sélection avant d’enregistrer.','Total equipped Echo cost exceeds 12. Adjust the selection before saving.'),true);return;}companionMessage(lang==='fr'?'Progression non enregistrée. Tes modifications restent ouvertes ; vérifie le stockage ou une modification dans un autre onglet.':'Progress not saved. Your edits remain open; check storage or changes in another tab.',true);return;}
  closeDialog('accountEditor');
  render();
 }

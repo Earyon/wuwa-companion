@@ -3,7 +3,7 @@
 const CompanionStore=(()=>{
  const KEY='wwc_companion_v1';
  const PERSONAL=[KEY,'wwc_owned_ids','wwc_owned','wwc_account_data','wwc_lang'];
- const blank=()=>({version:3,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
+ const blank=()=>({version:4,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
  const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
  const number=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  function parse(raw){return JSON.parse(raw,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw Error('Invalid key');return value;});}
@@ -17,10 +17,12 @@ const CompanionStore=(()=>{
  }
  function upgrade(data){
   validate(data);
-  return data.version===1?{...data,version:3,roster:null,characters:{},legacyProgress:{}}:{...data,version:3};
+  const next=data.version===1?{...data,roster:null,characters:{},legacyProgress:{}}:{...data};
+  if(data.version<4)next.echoes=data.echoes.map(e=>({id:e.id,catalogId:e.catalogId,name:e.catalogId,owner:e.owner,slot:e.slot,level:e.level,quality:null,cost:null,setId:null,main:null,secondary:null,substats:[],legacyStats:{mainStat:e.mainStat,mainValue:e.mainValue,substats:e.substats}}));
+  next.version=4;validate(next);return next;
  }
  function validate(data){
-  if(!object(data)||![1,2,3].includes(data.version))throw Error('Unsupported account format');
+  if(!object(data)||![1,2,3,4].includes(data.version))throw Error('Unsupported account format');
   if(data.version>=2){
    if(data.roster!==null&&(!Array.isArray(data.roster)||data.roster.some(id=>typeof id!=='string')||new Set(data.roster).size!==data.roster.length))throw Error('Invalid roster');
    if(!object(data.characters)||!object(data.legacyProgress))throw Error('Invalid progress');
@@ -49,8 +51,11 @@ const CompanionStore=(()=>{
   const echoSlots=new Set();
   const echoIds=new Set();
   for(const echo of data.echoes){
+   if(data.version>=4){EchoRules.validate(echo);if(echoIds.has(echo.id)||(echo.owner!==null&&echoSlots.has(echo.owner+':'+echo.slot)))throw Error('Invalid Echo slot');}
+   else {
    if(!object(echo)||typeof echo.id!=='string'||echoIds.has(echo.id)||typeof echo.catalogId!=='string'||typeof echo.owner!=='string'||!Number.isInteger(echo.level)||!number(echo.level,0,25)||!Number.isInteger(echo.slot)||!number(echo.slot,1,5)||typeof echo.mainStat!=='string'||typeof echo.mainValue!=='string'||!Array.isArray(echo.substats)||echo.substats.length>5||echo.substats.some(x=>typeof x!=='string')||echoSlots.has(echo.owner+':'+echo.slot))throw Error('Invalid Echo');
-   echoSlots.add(echo.owner+':'+echo.slot);
+   }
+   if(echo.owner!==null)echoSlots.add(echo.owner+':'+echo.slot);
    echoIds.add(echo.id);
   }
   for(const activity of data.activities)if(!object(activity)||typeof activity.id!=='string'||typeof activity.name!=='string'||!['unknown','todo','done'].includes(activity.status))throw Error('Invalid activity');
@@ -84,7 +89,7 @@ const CompanionStore=(()=>{
   if(!character||!weapon||character.weapon==='Unknown'||character.weapon!==weapon.type)throw Error('Incompatible weapon');
   return weapon;
  }
- function saveCharacter(id,progress,expected,label,equipment=null,catalog=null){
+ function saveCharacter(id,progress,expected,label,equipment=null,catalog=null,echoDraft=null){
   if(typeof id!=='string'||!id)throw Error('Invalid character ID');
   return update(next=>{
    if(next.roster===null)throw Error('Migration required');
@@ -113,6 +118,7 @@ const CompanionStore=(()=>{
     }else if(equipment.mode==='keep')progress.weapon=expected.weapon??null;
     else throw Error('Invalid equipment choice');
    }
+   if(echoDraft)applyEchoChanges(next,echoDraft.before,echoDraft.after,id);
    next.characters[id]=progress;
   },label);
  }
@@ -136,6 +142,35 @@ const CompanionStore=(()=>{
    next.weapons=next.weapons.filter(w=>w.id!==id);
   },label);
  }
+ // Patch only changed copies; reject stale drafts without overwriting another tab.
+ function applyEchoChanges(next,before,after,characterId=null){
+  const changed=[...new Set([...before,...after].map(e=>e.id))].filter(id=>!same(before.find(e=>e.id===id),after.find(e=>e.id===id)));
+  const owners=new Set();
+  for(const id of changed){
+   const expected=before.find(e=>e.id===id),value=after.find(e=>e.id===id),current=next.echoes.find(e=>e.id===id);
+   if(!same(current,expected))throw Error('Echo changed in another window');
+   if(value){
+    EchoRules.validate(value);
+    if(value.owner!==null&&value.owner!==expected?.owner&&!next.roster?.includes(value.owner))throw Error('Character is no longer owned');
+    if(characterId&&value.owner!==null&&value.owner!==characterId&&!same(value,expected))throw Error('Echo belongs to another character');
+    if(value.owner)owners.add(value.owner);
+   }
+   const index=next.echoes.findIndex(e=>e.id===id);
+   if(value){if(index<0)next.echoes.push(structuredClone(value));else next.echoes[index]=structuredClone(value);}
+   else if(index>=0)next.echoes.splice(index,1);
+  }
+  // 12 is the game's absolute ceiling; unknown costs are never treated as confirmed zero.
+  for(const owner of owners)if(next.echoes.filter(e=>e.owner===owner).reduce((n,e)=>n+(e.cost??0),0)>12)throw Error('Echo cost exceeds 12');
+ }
+ function saveEcho(record,expected,catalog,label){
+  return update(next=>{
+   const row=catalog.find(e=>e.id===record.catalogId);
+   if(!row&&record.catalogId!==expected?.catalogId)throw Error('Unknown Echo');
+   if(record.setId!==null&&(record.setId!==expected?.setId||record.catalogId!==expected?.catalogId)&&!row?.sets.some(s=>s.id===record.setId))throw Error('Unknown Sonata');
+   applyEchoChanges(next,expected?[expected]:[],[{...record,name:row?.name||expected?.name||record.catalogId}]);
+  },label);
+ }
+ function removeEcho(id,expected,label){return update(next=>{if(!expected||id!==expected.id)throw Error('Missing Echo');applyEchoChanges(next,[expected],[]);},label);}
  function migrate(resolve){
   if(error)throw error;
   if(state.roster!==null)return;
@@ -187,5 +222,5 @@ const CompanionStore=(()=>{
    throw e;
   }
  }
- return {get:()=>structuredClone(state),update,migrate,saveCharacter,saveWeapon,removeWeapon,weaponOwner,exportData,validateBackup,restore,error:()=>error,parse};
+ return {get:()=>structuredClone(state),update,migrate,saveCharacter,saveWeapon,removeWeapon,weaponOwner,saveEcho,removeEcho,exportData,validateBackup,restore,error:()=>error,parse};
 })();
