@@ -28,7 +28,7 @@ async function loadExtended(kind,{refresh=false}={}){
  }catch(error){
   extendedCatalog.errors[kind]=true;
   try{const old=JSON.parse(localStorage.getItem(key)||'null');if(old?.payload)extendedCatalog[kind]=normalizeExtended(kind,old.payload);}catch(e){/* Preserve invalid cache for diagnosis. */}
- }finally{extendedCatalog.loading[kind]=false;document.dispatchEvent(new CustomEvent('catalogue-ready',{detail:kind}));if(kind==='item'&&currentView==='account'&&accountTab==='resources'&&!document.querySelector('#resourcesForm input'))render();}
+ }finally{extendedCatalog.loading[kind]=false;document.dispatchEvent(new CustomEvent('catalogue-ready',{detail:kind}));}
 }
 function catalogOptions(rows,id){return `<datalist id="${id}">${rows.map(row=>`<option value="${esc(row.name)}"></option>`).join('')}</datalist>`;}
 function inventorySearch(){return `<form id="inventorySearch" class="companion-form"><label>${tr('Rechercher','Search')}<input name="query" value="${esc(inventoryQuery)}" type="search"></label><button class="companion-button">${tr('Filtrer','Filter')}</button></form>`;}

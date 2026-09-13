@@ -1,10 +1,10 @@
 'use strict';
 let planningCharacter=null;
 const goalDrafts=new Map(),goalOriginals=new Map();
-function planCharacter(){const s=CompanionStore.get();return DATA.find(r=>r.id===(planningCharacter||s.active)&&s.roster?.includes(r.id))||DATA.find(r=>s.roster?.includes(r.id));}
+function planCharacter(){const s=CompanionStore.get();return DATA.find(r=>r.id===(planningCharacter||s.active)&&(s.roster?.includes(r.id)||s.wishlist.includes(r.id)&&(s.goals[r.id]?.prefarm||goalDrafts.get(r.id)?.prefarm)))||DATA.find(r=>s.roster?.includes(r.id));}
 function planningTasks(character,goal){
  if(!character||!goal)return [];
- const state=CompanionStore.get(),actual=state.characters[character.id]||{},tasks=[];
+ const state=CompanionStore.get(),actual=planningActual(character,goal),tasks=[];
  const step=(key,label,now,target,priority)=>{if(target==null||now>=target)return;tasks.push({key,text:label+' : '+(now==null?tr('à renseigner','unknown'):now)+' → '+target,priority});};
  step('level',tr('Niveau du Résonateur','Resonator level'),actual.level,goal.level,5);
  step('ascension',tr('Ascension du Résonateur','Resonator ascension'),actual.ascension,goal.ascension,5);
@@ -23,18 +23,18 @@ function goalPassiveHTML(character,goal){
 function personalPlanner(){
  const state=CompanionStore.get(),character=planCharacter();
  if(!character)return companionPanel(tr('Objectif actif','Active goal'),`<p>${tr('Ajoute un Résonateur possédé dans Mon compte pour préparer son amélioration.','Add an owned Resonator in My Account to plan improvements.')}</p>`);
- const saved=state.goals[character.id]||null,actual=state.characters[character.id]||{};
+ const saved=state.goals[character.id]||null,prefarm=!state.roster?.includes(character.id),actual=planningActual(character,goalDrafts.get(character.id)||saved);
  if(!goalOriginals.has(character.id))goalOriginals.set(character.id,structuredClone(saved));
  const goal=goalDrafts.get(character.id)||saved||{level:actual.level??null,skills:{...actual.skills},priorities:{},forteNodes:{}};
  queueMicrotask(()=>loadProgressSources(character));
- return companionPanel(tr('Objectif personnel','Personal goal'),`<p>${tr('Choisis ce que tu souhaites améliorer. Un objectif vide exclut cette amélioration. Un seul Résonateur possédé est actif à la fois.','Choose what to improve. An empty target excludes that upgrade. Only one owned Resonator is active at a time.')}</p>
- <form id="goalForm" class="companion-form"><label class="wide">${tr('Résonateur','Resonator')}<select id="planningCharacter" name="character">${DATA.filter(r=>state.roster?.includes(r.id)).map(r=>`<option value="${r.id}" ${r.id===character.id?'selected':''}>${esc(r.name)}</option>`).join('')}</select></label>
+ return companionPanel(prefarm?tr('Pré-farm explicite','Explicit pre-farming'):tr('Objectif personnel','Personal goal'),`${prefarm?'<p>'+tr('Simulation depuis le niveau 1 et les compétences au niveau 1. Elle reste séparée de ton objectif actif possédé.','Simulation from level 1 and skills at level 1. It stays separate from your owned active goal.')+'</p>':''}<p>${tr('Choisis ce que tu souhaites améliorer. Un objectif vide exclut cette amélioration. Un seul Résonateur possédé est actif à la fois.','Choose what to improve. An empty target excludes that upgrade. Only one owned Resonator is active at a time.')}</p>
+ <form id="goalForm" class="companion-form"><label class="wide">${tr('Résonateur','Resonator')}<select id="planningCharacter" name="character">${DATA.filter(r=>state.roster?.includes(r.id)||state.wishlist.includes(r.id)&&(state.goals[r.id]?.prefarm||goalDrafts.get(r.id)?.prefarm)).map(r=>`<option value="${r.id}" ${r.id===character.id?'selected':''}>${esc(r.name)}</option>`).join('')}</select></label>
  <label>${tr('Niveau actuel','Current level')}<output>${actual.level??'?'}</output></label><label>${tr('Niveau visé','Target level')}<input name="level" type="number" min="1" max="90" step="1" value="${goal.level??''}" placeholder="—"></label>
  ${ascensionField('ascension',goal.ascension,tr('Ascension visée','Target ascension'))}<label>${tr('Niveau d’arme visé','Target weapon level')}<input name="weaponLevel" type="number" min="1" max="90" step="1" value="${goal.weaponLevel??''}" placeholder="—"></label>${ascensionField('weaponAscension',goal.weaponAscension,tr('Ascension d’arme visée','Target weapon ascension'))}
  <div class="wide"><h3>${tr('Compétences : actuel → objectif','Skills: current → target')}</h3></div>
  ${SKILL_ORDER.map((type,index)=>`<div class="goal-skill"><label>${esc(SKILL_LABELS[lang][type])} · ${actual.skills?.[type]??'?'} →<input aria-label="${esc(SKILL_LABELS[lang][type])}" name="skill:${index}" type="number" min="1" max="10" step="1" value="${goal.skills?.[type]??''}" placeholder="—"></label><label>${tr('Priorité','Priority')}<select name="priority:${index}">${[0,1,2,3].map(n=>`<option value="${n}" ${(goal.priorities?.[type]||0)===n?'selected':''}>${[tr('Non définie','Unspecified'),tr('Faible','Low'),tr('Normale','Normal'),tr('Haute','High')][n]}</option>`).join('')}</select></label></div>`).join('')}
  <fieldset class="wide plan-passives"><legend>${tr('Passifs à débloquer','Passive unlock targets')}</legend><div id="goalPassives">${goalPassiveHTML(character,goal)}</div></fieldset>
- <div class="companion-actions wide"><button type="submit" name="mode" value="activate" class="companion-button">${tr('Enregistrer et activer','Save and activate')}</button><button type="submit" name="mode" value="keep" class="companion-button">${tr('Enregistrer sans activer','Save without activating')}</button>${companionButton('cancel-goal',tr('Annuler mes changements','Cancel my changes'),character.id)}${state.active?companionButton('pause-plan',tr('Mettre en pause','Pause')):''}${companionButton('edit-plan-progress',tr('Renseigner ma progression','Record my progress'),character.id)}</div></form>`)+
+ <div class="companion-actions wide"><button type="submit" name="mode" value="activate" class="companion-button">${prefarm?tr('Enregistrer le pré-farm','Save pre-farming'):tr('Enregistrer et activer','Save and activate')}</button><button type="submit" name="mode" value="keep" class="companion-button">${tr('Enregistrer sans activer','Save without activating')}</button>${companionButton('cancel-goal',tr('Annuler mes changements','Cancel my changes'),character.id)}${state.active?companionButton('pause-plan',tr('Mettre en pause','Pause')):''}${prefarm?'':companionButton('edit-plan-progress',tr('Renseigner ma progression','Record my progress'),character.id)}</div></form>`)+
  companionPanel(tr('À améliorer','To improve'),saved?`<ul>${planningTasks(character,saved).map(task=>`<li>${esc(task.text)}</li>`).join('')||`<li>${tr('Les objectifs renseignés sont atteints.','The recorded targets are reached.')}</li>`}</ul><div id="planCosts">${planCostsHTML(character,saved)}</div>`:`<p>${tr('Enregistre un objectif pour calculer les besoins.','Save a target to calculate costs.')}</p>`);
 }
 function personalDaily(){

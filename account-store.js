@@ -48,6 +48,7 @@ const CompanionStore=(()=>{
   for(const goal of Object.values(data.goals)){
    if(!object(goal)||(goal.level!==null&&(!Number.isInteger(goal.level)||!number(goal.level,1,90)))||!object(goal.skills)||!object(goal.priorities))throw Error('Invalid goal');
    validateAscension(goal.level,goal.ascension);validateAscension(goal.weaponLevel,goal.weaponAscension);
+   if(goal.prefarm!==undefined&&typeof goal.prefarm!=='boolean')throw Error('Invalid pre-farming');
    if(goal.weaponLevel!=null&&(!Number.isInteger(goal.weaponLevel)||!number(goal.weaponLevel,1,90)))throw Error('Invalid weapon goal');
    if(goal.forteNodes&&(!object(goal.forteNodes)||Object.values(goal.forteNodes).some(v=>typeof v!=='boolean')))throw Error('Invalid passive target');
    for(const value of Object.values(goal.skills))if(!Number.isInteger(value)||!number(value,1,10))throw Error('Invalid skill target');
@@ -67,7 +68,9 @@ const CompanionStore=(()=>{
   for(const activity of data.activities)if(!object(activity)||typeof activity.id!=='string'||typeof activity.name!=='string'||!['unknown','todo','done'].includes(activity.status))throw Error('Invalid activity');
   if(!data.wishlist.every(id=>typeof id==='string'))throw Error('Invalid wishlist');
   if(data.achievements!==undefined&&(!object(data.achievements)||Object.values(data.achievements).some(v=>!['unknown','todo','done'].includes(v))))throw Error('Invalid achievements');
-  if(data.settings!==undefined){if(!object(data.settings))throw Error('Invalid settings');if(data.settings.server!=null&&!['america','europe','asia','sea','hmt'].includes(data.settings.server))throw Error('Invalid server');}
+  if(data.settings!==undefined){if(!object(data.settings))throw Error('Invalid settings');if(data.settings.server!=null&&!['america','europe','asia','sea','hmt'].includes(data.settings.server))throw Error('Invalid server');
+   const p=data.settings.pullBudget;if(p!==undefined){if(!object(p)||!Number.isInteger(p.characters)||!number(p.characters,0,7)||!Number.isInteger(p.weapons)||!number(p.weapons,0,5)||p.guaranteed!==null&&typeof p.guaranteed!=='boolean')throw Error('Invalid pull budget');for(const key of ['characterPity','weaponPity'])if(p[key]!==null&&(!Number.isInteger(p[key])||!number(p[key],0,79)))throw Error('Invalid pity');}
+  }
   for(const a of data.activities){if(a.name.length>160||a.id.length>160||(a.period!=null&&!['once','daily','weekly'].includes(a.period))||(a.cycle!=null&&typeof a.cycle!=='string')||(a.end!=null&&(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}Z)?$/.test(a.end)||!Number.isFinite(Date.parse(a.end.endsWith('Z')?a.end:a.end+'Z')))))throw Error('Invalid activity schedule');}
   if(new Set(data.activities.map(a=>a.id)).size!==data.activities.length)throw Error('Duplicate activity');
   if(data.builds!==undefined){
@@ -192,7 +195,7 @@ const CompanionStore=(()=>{
   },label);
  }
  function removeEcho(id,expected,label){return update(next=>{if(!expected||id!==expected.id)throw Error('Missing Echo');applyEchoChanges(next,[expected],[]);},label);}
- function saveGoal(id,goal,expected,activate,label){return update(next=>{if(!same(next.goals[id]||null,expected))throw Error('Goal changed in another window');if(!next.roster?.includes(id))throw Error('Character is not owned');next.goals[id]=goal;if(activate)next.active=id;},label);}
+ function saveGoal(id,goal,expected,activate,label){return update(next=>{if(!same(next.goals[id]||null,expected))throw Error('Goal changed in another window');const owned=next.roster?.includes(id);if(!owned&&(!goal.prefarm||!next.wishlist.includes(id)))throw Error('Character is not owned or wished');next.goals[id]={...goal,prefarm:!owned};if(activate&&owned)next.active=id;},label);}
  function saveResources(changes,expected,label){return update(next=>{for(const [id,value] of Object.entries(changes)){if((next.resources[id]??null)!==(expected[id]??null))throw Error('Stock changed in another window');next.resources[id]=value;}},label);}
  function saveTeam(team,expected,label,catalog=[]){return update(s=>{const current=s.teams.find(t=>t.id===team.id)||null;if(!same(current,expected))throw Error('Team changed in another window');if(team.members.some(id=>!s.roster?.includes(id)))throw Error('Team members must be owned');const identities=team.members.map(id=>{const c=catalog.find(c=>c.id===id);return /^rover(?:\s*:|\s*$)/i.test(c?.name||'')?'rover':id;});if(new Set(identities).size!==3)throw Error('Only one Rover per team');if(current)s.teams[s.teams.indexOf(current)]=team;else s.teams.push(team);},label);}
  function saveBuild(build,expected,catalog,label){return update(s=>{const current=s.builds.find(b=>b.id===build.id)||null;if(!same(current,expected))throw Error('Build changed in another window');if(build.weaponId&&build.weaponId!==current?.weaponId)compatible(catalog,build.characterId,build.weaponId);if(current)s.builds[s.builds.indexOf(current)]=build;else s.builds.push(build);},label);}

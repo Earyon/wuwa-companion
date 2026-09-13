@@ -64,3 +64,6 @@
 @media(max-width:600px){.profile-dialog{height:100dvh;border:0}.profile-dialog .detail-inner{padding:0 16px 36px}.profile-header{grid-template-columns:90px minmax(0,1fr);gap:12px}.profile-art{min-height:110px}.profile-art img{height:130px}.profile-dialog .section-tabs button{padding:10px 12px}.profile-header .companion-actions{grid-column:1/-1}.team-members{gap:6px}.team-member{padding:8px}.team-member b{font-size:13px}}
 
 .skill-multiplier{display:grid;gap:6px;padding:12px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.skill-multiplier span{color:var(--muted);font-size:13px}
+
+.budget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px}.budget-grid article{padding:16px;border:1px solid var(--line);background:#0a1a2a}.budget-grid h3{font-size:15px;line-height:1.6}.budget-grid b{font-size:28px;color:var(--gold)}.import-values{max-height:300px;overflow:auto;overflow-wrap:anywhere;padding:12px;border:1px solid var(--line)}.companion-card img{max-width:100%}
+.optimization-card{padding:18px;border:1px solid var(--line);background:#0a1a2a;border-radius:8px;overflow-wrap:anywhere}.optimization-card h3{margin:0;color:var(--gold)}.optimization-card summary{min-height:44px;cursor:pointer;padding:10px 0}

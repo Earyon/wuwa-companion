@@ -1,0 +1,12 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const ctx=vm.createContext({});vm.runInContext(fs.readFileSync('convene-rules.js','utf8')+';globalThis.rules=ConveneRules;',ctx);vm.runInContext(fs.readFileSync('tracker-import.js','utf8')+';globalThis.importer=TrackerImport;',ctx);
+const {rules:r,importer:t}=ctx;
+assert.equal(r.budget(1,0,false).max,160);assert.equal(r.budget(1,79,true).max,1);assert.equal(r.budget(7,5,false).max,1115);assert.equal(r.budget(5,79,true,true).max,321);assert.equal(r.budget(0,null,null).max,0);assert.equal(r.budget(1,0,true).median,80);assert.equal(r.astrites(160,80,10,20),33600);assert.equal(r.astrites(160,80,null,20),null);assert.throws(()=>r.budget(1,80,true));
+const raw={playerId:'test-player',siteVersion:'v4.7.19',version:'0.0.2',pulls:Array.from({length:10},()=>({cardPoolType:1,qualityLevel:3,resourceId:21020023,name:'Test weapon',time:'2026-05-21T03:03:18+00:00'}))};
+const a=t.parse(JSON.stringify(raw));assert.equal(a.accounts[0].rows.length,10);assert.equal(t.merge(a.accounts[0].rows,a.accounts[0].rows).length,10,'Do not collapse ten identical pulls');
+const longer=JSON.parse(JSON.stringify(raw));longer.pulls.push({...longer.pulls[0],time:'2026-05-22T03:03:18Z'});assert.equal(t.merge(a.accounts[0].rows,t.parse(JSON.stringify(longer)).accounts[0].rows).length,11);
+const missing=raw.pulls.map(r=>({...r,resourceId:null}));assert.equal(t.merge(a.accounts[0].rows,t.parse(JSON.stringify({...raw,pulls:missing})).accounts[0].rows).length,10,'Repaired IDs do not duplicate records');
+assert.throws(()=>t.parse(JSON.stringify({...raw,queryArgs:{recordId:'not-a-real-token'}})));assert.throws(()=>t.parse(JSON.stringify({...raw,pulls:[{...raw.pulls[0],time:'2026-05-21T03:03:18'}]})));
+const profile=t.parse(JSON.stringify({id:'test-profile',version:1,items:[{id:3,value:0}],achievements:[1],todos:[]}));assert.equal(profile.resources['3'],0);assert.equal(profile.achievements['1'],'done');assert.throws(()=>t.parse(JSON.stringify({id:'x',items:[{id:3,value:-1}],achievements:[],todos:[]})));
+const rows=a.accounts[0].rows.map((r,i)=>({...r,quality:i===0?5:3}));assert.equal(r.pity(rows,1).min,0);assert.equal(r.pity(rows,1).max,9);assert.equal(r.pity(a.accounts[0].rows,1).max,null);
+console.log('PASS: banner bounds, conservative model, shared wallet, strict imports, time zones, multiset merging, null IDs, ten-pull ambiguity, sensitive-data rejection.');

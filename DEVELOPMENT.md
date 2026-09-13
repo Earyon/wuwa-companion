@@ -2,7 +2,7 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Avancement : 10 / 14 lots vérifiés
+## Avancement : 12 / 14 lots vérifiés
 
 - [x] Catalogue Résonateurs / armes, compte et niveaux, cinq compétences et passifs.
 - [x] Mise en page consolidée, publication Pages et mises à jour PWA.
@@ -15,8 +15,8 @@ Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue
 - [ ] Fiches complètes, builds contextualisés, recommandations sourcées et datées.
 - [x] Équipes de trois, favoris et profils de builds.
 - [x] Succès, activités / événements / resets et historique utile.
-- [ ] Wishlist et Pull Planner, historique Tracker et imports contrôlés.
-- [ ] Optimisation globale fondée sur le compte et ses équipes.
+- [x] Wishlist et Pull Planner, historique Tracker et imports contrôlés.
+- [x] Optimisation globale fondée sur le compte et ses équipes.
 - [ ] Revue finale des parcours FR/EN, tactile, hors ligne, migrations et données absentes.
 
 ## Contraintes
@@ -144,4 +144,22 @@ La fiche publique utilise maintenant un dialogue natif : aperçu, build, Forte, 
 
 Huit recommandations initiales sont rattachées aux identifiants du jeu, avec références et date de consultation. Le classement général des armes reste indépendant du compte et indique les rangs utilisés par le guide. Les objectifs préparés depuis une recommandation demeurent des brouillons à enregistrer ; ils ne changent pas la progression. Les autres recommandations et les contextes restent à compléter : le lot 9 n’est pas compté comme terminé. Les nouveaux parcours de fiches, navigation, absence de requêtes répétées entre rubriques, brouillons et création de profils passent leurs tests FR/EN.
 
-Avancement : **10 / 14 lots vérifiés** (1 à 8, 10 et 11), refonte **2 / 3**. Restent les recommandations complètes, souhaits/Pull Planner/Tracker, optimisation globale et revue finale de l’ensemble.
+Avancement après ces deux lots : **10 / 14 lots vérifiés** (1 à 8, 10 et 11), refonte **2 / 3**.
+
+## Souhaits, invocations et optimisation — lots 12 et 13 vérifiés
+
+Les souhaits ne déclenchent aucun farming. Un bouton explicite prépare un pré-farm depuis le niveau 1, ascension 0, compétences 1 et passifs verrouillés ; ce scénario ne crée pas de possession et ne remplace pas l’objectif actif possédé. Les calculs réutilisent le moteur de coûts existant.
+
+Le budget concerne les bannières régulières en vedette : copies supplémentaires, compteurs distincts, garantie connue/inconnue, monnaies de l’inventaire. Minimum théorique et maximum garanti sont séparés de la somme des médianes d’un modèle prudent explicitement sans soft pity. Ce modèle ne prétend pas reproduire les probabilités réelles du jeu. Les Astrites sont partagées une seule fois entre les deux budgets. Les bannières spéciales ne reprennent pas automatiquement ces règles.
+
+Imports JSON contrôlés de WuWa Tracker : stocks et succès pour ExportProfile, invocations pour ExportPullHistory. Les plans Tracker ne sont pas assimilés à une preuve d’inventaire. Aperçu avant application, conservation par défaut des valeurs déjà connues, remplacement explicite, refus des changements devenus obsolètes. Les journaux ou champs d’authentification sont rejetés. Les horodatages doivent préciser leur fuseau. Les profils d’historique sont séparés ; la fusion conserve les répétitions d’un tirage multiple et rend les imports répétés idempotents. Un identifiant absent reste inconnu, sauf correspondance unique dans les données importées. L’ordre ambigu d’un tirage multiple donne un intervalle de compteur. Aucun compteur ni possession n’est déduit automatiquement pour le compte actuel.
+
+Les historiques volumineux utilisent une transaction IndexedDB ; un échec annule toute la transaction. Leur export/import est séparé de la sauvegarde compacte du compte, ce qui est indiqué dans les deux écrans. La réussite est annoncée après la fin de transaction. Export réellement téléchargé et rechargement testés.
+
+L’optimisation classe les Résonateurs possédés selon l’objectif actif, les équipes favorites puis leur réutilisation. Les coûts connus sont répartis dans cet ordre, sans compter deux fois les stocks ; les besoins inconnus restent inconnus et aucun stock n’est dépensé. Les objectifs et informations manquantes sont présentés avec des liens vers les éditeurs existants. L’actualisation volontaire limite les chargements à trois personnages simultanément. Aucun score fictif de dégâts ou nombre de runs n’est calculé.
+
+Vérifications : règles de budget, import strict, fusion multiensemble, compteurs ambigus, stock partagé, rollback IndexedDB ; parcours réels FR/EN d’import, conflits, export, rechargement, pré-farm, analyse, recherche et navigation ; vues 320/720/1152 CSS px. Suites account-store, planning, responsive, features et PWA réussies. PWA 17 vérifiée depuis 09dbddc, maintien de l’ancienne version avec deux fenêtres ouvertes, activation après fermeture et imports disponibles hors ligne. Les exports originaux de l’utilisateur n’étant pas disponibles, les parcours utilisent des fixtures explicitement identifiées, conformes aux formats publics inspectés.
+
+Sources consultées le 13 septembre 2026 : [paramètres et export public WuWa Tracker](https://wuwatracker.com/settings), [importeur maintenu, révision identifiée](https://github.com/GoneTone/wuthering-waves-convene-gacha-analyzer/blob/12f49ab878874649c29147b2ec4ba6391970be14/lib/services/importers/wuwa_tracker_importer.dart), [catégories d’invocations](https://github.com/GoneTone/wuthering-waves-convene-gacha-analyzer/blob/12f49ab878874649c29147b2ec4ba6391970be14/lib/data/gacha_types.dart), [règles d’invocation Prydwen](https://www.prydwen.gg/wuthering-waves/guides/gacha), [transactions IndexedDB, MDN](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB). Seules les catégories sont reprises de l’importeur tiers, pas ses suppositions horaires ni ses correspondances approximatives de noms.
+
+Avancement : **12 / 14 lots vérifiés**, refonte **2 / 3**. Restent la couverture des recommandations contextualisées et la revue finale de l’ensemble.

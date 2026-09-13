@@ -23,10 +23,14 @@ async function getWeaponDetail(gameId,{refresh=false}={}){
  if(cached?.detail&&!refresh)return cached.detail;
  try{const detail=await fetchJSON(`${ENCORE_BASE}/en/weapon/${encodeURIComponent(gameId)}`);if(String(detail.ItemId)!==String(gameId))throw Error('Invalid weapon ID');try{localStorage.setItem(key,JSON.stringify({detail,savedAt:new Date().toISOString()}));}catch{}return detail;}catch(error){if(cached?.detail)return cached.detail;throw error;}
 }
-function currentCostPlan(character,goal){
- const state=CompanionStore.get(),actual=state.characters[character.id]||{},copy=state.weapons.find(w=>w.id===actual.weaponCopyId),weapon=WEAPONS.find(w=>w.id===copy?.catalogId);
+function planningActual(character,goal){
+ const state=CompanionStore.get();if(!goal?.prefarm||state.roster?.includes(character.id))return state.characters[character.id]||{};
+ return {level:1,ascension:0,skills:Object.fromEntries(SKILL_ORDER.map(k=>[k,1])),forteNodes:Object.fromEntries(Object.keys(goal.forteNodes||{}).map(k=>[k,false]))};
+}
+function currentCostPlan(character,goal,{load=true}={}){
+ const state=CompanionStore.get(),actual=planningActual(character,goal),copy=state.weapons.find(w=>w.id===actual.weaponCopyId),weapon=WEAPONS.find(w=>w.id===copy?.catalogId);
  const source=progressSources.get(character.id+':'+(weapon?.id||''));
- if(!source&&!progressPending.has(character.id+':'+(weapon?.id||'')))queueMicrotask(()=>loadProgressSources(character));
+ if(load&&!source&&!progressPending.has(character.id+':'+(weapon?.id||'')))queueMicrotask(()=>loadProgressSources(character));
  const version=String(catalogState.gameVersion||'').split('.').slice(0,2).join('.');
  const tables=progressionTables&&(version==='test'||version===progressionTables.gameVersion.split('.').slice(0,2).join('.'))?progressionTables:null;
  const calculation=CostEngine.calculate(actual,goal,source?.detail,copy,source?.weaponDetail,tables);
