@@ -1,5 +1,5 @@
 'use strict';
-let inventoryQuery='',inventoryEdit=null;
+let inventoryQuery='',inventoryEdit=null,inventoryOriginal=null;
 const extendedCatalog={echo:[],item:[],loading:{},errors:{}};
 function normalizeExtended(kind,payload){
  const rows=kind==='echo'?payload?.Echo:payload?.itemList;
@@ -35,11 +35,11 @@ function personalInventory(){
  const data=CompanionStore.get();
  if(accountTab==='weap'){
   const edit=data.weapons.find(w=>w.id===inventoryEdit),source=WEAPONS.find(w=>w.id===edit?.catalogId);
-  const filtered=data.weapons.filter(w=>(WEAPONS.find(x=>x.id===w.catalogId)?.name||w.catalogId).toLowerCase().includes(inventoryQuery.toLowerCase()));
+  const filtered=data.weapons.filter(w=>(WEAPONS.find(x=>x.id===w.catalogId)?.name||w.name||w.catalogId).toLowerCase().includes(inventoryQuery.toLowerCase()));
   return companionPanel(t('weap'),`<p>${tr('Un enregistrement par exemplaire : deux armes R1 restent deux armes distinctes.','One record per copy: two R1 weapons remain two separate weapons.')}</p>
-  <form id="weaponInventoryForm" class="companion-form"><label>${tr('Arme','Weapon')}<input name="weapon" list="weaponCatalogue" required value="${esc(source?.name||'')}" autocomplete="off"></label>${catalogOptions(WEAPONS,'weaponCatalogue')}
-  <label>${tr('Niveau','Level')}<input name="level" type="number" required min="1" max="90" step="1" value="${edit?.level||1}"></label><label>${tr('Syntonisation','Rank')}<select name="rank">${[1,2,3,4,5].map(n=>`<option ${edit?.rank===n?'selected':''} value="${n}">R${n}</option>`).join('')}</select></label><button class="companion-button">${edit?tr('Enregistrer','Save'):tr('Ajouter cet exemplaire','Add this copy')}</button></form>
-  ${edit?companionButton('cancel-inventory',tr('Annuler','Cancel')):''}${inventorySearch()}<div class="companion-list">${filtered.map(w=>{const row=WEAPONS.find(x=>x.id===w.catalogId);return inventoryCard(row,`<b>${esc(row?.name||w.catalogId)}</b><small>${tr('Niveau','Level')} ${w.level} · R${w.rank} · ${esc(row?weaponLabel(row.type):'?')}</small>`,companionButton('edit-weapon',tr('Modifier','Edit'),w.id)+companionButton('remove-weapon',tr('Retirer','Remove'),w.id));}).join('')||`<p>${tr('Aucun exemplaire enregistré.','No copies recorded.')}</p>`}</div>`);
+  <form id="weaponInventoryForm" class="companion-form"><label>${tr('Arme','Weapon')}<input name="weapon" list="weaponCatalogue" required value="${esc(source?.name||edit?.name||edit?.catalogId||'')}" autocomplete="off"></label>${catalogOptions(WEAPONS,'weaponCatalogue')}
+  <label>${tr('Niveau','Level')}<input name="level" type="number" min="1" max="90" step="1" placeholder="?" value="${edit?edit.level??'':1}"></label><label>${tr('Syntonisation','Rank')}<select name="rank"><option value="" ${edit?.rank===null?'selected':''}>?</option>${[1,2,3,4,5].map(n=>`<option ${(edit?edit.rank:1)===n?'selected':''} value="${n}">R${n}</option>`).join('')}</select></label><button class="companion-button">${edit?tr('Enregistrer','Save'):tr('Ajouter cet exemplaire','Add this copy')}</button></form>
+  ${edit?companionButton('cancel-inventory',tr('Annuler','Cancel')):''}${inventorySearch()}<div class="companion-list">${filtered.map(w=>{const row=WEAPONS.find(x=>x.id===w.catalogId),owner=CompanionStore.weaponOwner(data,w.id);return inventoryCard(row,`<b>${esc(row?.name||w.name||w.catalogId)} · #${data.weapons.indexOf(w)+1}</b><small>${tr('Niveau','Level')} ${w.level??'?'} · R${w.rank??'?'} · ${esc(row?weaponLabel(row.type):'?')}<br>${owner?esc(DATA.find(c=>c.id===owner)?.name||owner):tr('Non équipée','Unequipped')}</small>`,companionButton('edit-weapon',tr('Modifier','Edit'),w.id)+companionButton('remove-weapon',tr('Retirer','Remove'),w.id)+(owner&&DATA.some(c=>c.id===owner)?companionButton('edit-weapon-owner',tr('Voir le Résonateur','View Resonator'),owner):''));}).join('')||`<p>${tr('Aucun exemplaire enregistré.','No copies recorded.')}</p>`}</div>`);
  }
  const kind=accountTab==='echo'?'echo':'item';
  if(!extendedCatalog[kind].length&&!extendedCatalog.loading[kind]&&!extendedCatalog.errors[kind])queueMicrotask(()=>loadExtended(kind));
@@ -62,9 +62,14 @@ function personalInventory(){
 }
 Object.assign(companionActions,{
  'cancel-inventory':()=>{inventoryEdit=null;render();},
- 'edit-weapon':id=>{inventoryEdit=id;render();},
+ 'edit-weapon':id=>{inventoryEdit=id;inventoryOriginal=CompanionStore.get().weapons.find(w=>w.id===id)||null;render();},
  'edit-echo':id=>{inventoryEdit=id;render();},
- 'remove-weapon':id=>{if(confirm(tr('Retirer cet exemplaire ?','Remove this copy?'))){CompanionStore.update(s=>{s.weapons=s.weapons.filter(w=>w.id!==id);},tr('Arme retirée','Weapon removed'));inventoryEdit=null;render();}},
+ 'edit-weapon-owner':id=>{const row=DATA.find(c=>c.id===id);if(row)openAccountEditor(row.name);},
+ 'remove-weapon':id=>{
+  const data=CompanionStore.get(),copy=data.weapons.find(w=>w.id===id),owner=CompanionStore.weaponOwner(data,id);
+  const name=DATA.find(c=>c.id===owner)?.name||owner;
+  if(confirm(owner?tr('Retirer cet exemplaire et le déséquiper de '+name+' ?','Remove this copy and unequip it from '+name+'?'):tr('Retirer cet exemplaire ?','Remove this copy?'))){CompanionStore.removeWeapon(id,copy,owner,tr('Arme retirée','Weapon removed'));inventoryEdit=null;render();}
+ },
  'remove-echo':id=>{if(confirm(tr('Retirer cet Écho équipé ?','Remove this equipped Echo?'))){CompanionStore.update(s=>{s.echoes=s.echoes.filter(e=>e.id!==id);},tr('Écho retiré','Echo removed'));inventoryEdit=null;render();}},
  'reload-catalogue':kind=>{extendedCatalog[kind]=[];return loadExtended(kind);}
 });
@@ -74,9 +79,10 @@ document.querySelector('#view').addEventListener('submit',event=>{
  try{
   if(form.id==='inventorySearch'){inventoryQuery=String(values.get('query')||'');render();return;}
   if(form.id==='weaponInventoryForm'){
-   const row=WEAPONS.find(w=>w.name===values.get('weapon'));if(!row)throw Error('Select a catalogue weapon');
-   const record={id:inventoryEdit||crypto.randomUUID(),catalogId:row.id,level:Number(values.get('level')),rank:Number(values.get('rank'))};
-   CompanionStore.update(s=>{s.weapons=s.weapons.filter(w=>w.id!==record.id);s.weapons.push(record);},tr('Exemplaire d’arme enregistré','Weapon copy saved'));
+   const row=WEAPONS.find(w=>w.name===values.get('weapon'));const original=inventoryEdit?inventoryOriginal:null;
+   const catalogId=row?.id||(original&&(values.get('weapon')===(original.name||original.catalogId))?original.catalogId:null);if(!catalogId)throw Error('Select a catalogue weapon');
+   const record={id:inventoryEdit||crypto.randomUUID(),catalogId,level:values.get('level')===''?null:Number(values.get('level')),rank:values.get('rank')===''?null:Number(values.get('rank'))};
+   CompanionStore.saveWeapon(record,original,{characters:DATA,weapons:WEAPONS},tr('Exemplaire d’arme enregistré','Weapon copy saved'));
   }else if(form.id==='resourcesForm'){
    CompanionStore.update(s=>{for(const [key,value] of values)if(key.startsWith('item:'))s.resources[key.slice(5)]=value===''?null:Number(value);},tr('Inventaire de ressources mis à jour','Resource inventory updated'));
   }else{

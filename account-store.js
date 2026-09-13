@@ -3,7 +3,7 @@
 const CompanionStore=(()=>{
  const KEY='wwc_companion_v1';
  const PERSONAL=[KEY,'wwc_owned_ids','wwc_owned','wwc_account_data','wwc_lang'];
- const blank=()=>({version:2,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
+ const blank=()=>({version:3,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
  const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
  const number=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  function parse(raw){return JSON.parse(raw,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw Error('Invalid key');return value;});}
@@ -17,11 +17,11 @@ const CompanionStore=(()=>{
  }
  function upgrade(data){
   validate(data);
-  return data.version===1?{...data,version:2,roster:null,characters:{},legacyProgress:{}}:data;
+  return data.version===1?{...data,version:3,roster:null,characters:{},legacyProgress:{}}:{...data,version:3};
  }
  function validate(data){
-  if(!object(data)||![1,2].includes(data.version))throw Error('Unsupported account format');
-  if(data.version===2){
+  if(!object(data)||![1,2,3].includes(data.version))throw Error('Unsupported account format');
+  if(data.version>=2){
    if(data.roster!==null&&(!Array.isArray(data.roster)||data.roster.some(id=>typeof id!=='string')||new Set(data.roster).size!==data.roster.length))throw Error('Invalid roster');
    if(!object(data.characters)||!object(data.legacyProgress))throw Error('Invalid progress');
    validateProgress(data.characters);validateProgress(data.legacyProgress);
@@ -31,8 +31,13 @@ const CompanionStore=(()=>{
   if(data.active!==null&&typeof data.active!=='string')throw Error('Invalid active goal');
   const ids=new Set();
   for(const w of data.weapons){
-   if(!object(w)||typeof w.id!=='string'||ids.has(w.id)||typeof w.catalogId!=='string'||!number(w.level,1,90)||!number(w.rank,1,5)||!Number.isInteger(w.level)||!Number.isInteger(w.rank))throw Error('Invalid weapon');
+   if(!object(w)||typeof w.id!=='string'||!w.id||ids.has(w.id)||typeof w.catalogId!=='string'||!w.catalogId||(w.name!=null&&typeof w.name!=='string')||(w.level!==null&&(!number(w.level,1,90)||!Number.isInteger(w.level)))||(w.rank!==null&&(!number(w.rank,1,5)||!Number.isInteger(w.rank))))throw Error('Invalid weapon');
    ids.add(w.id);
+  }
+  const equipped=new Set();
+  for(const p of Object.values(data.characters||{}))if(p.weaponCopyId!=null){
+   if(typeof p.weaponCopyId!=='string'||!ids.has(p.weaponCopyId)||equipped.has(p.weaponCopyId)||p.weapon!=null)throw Error('Invalid equipment link');
+   equipped.add(p.weaponCopyId);
   }
   for(const value of Object.values(data.resources))if(value!==null&&(!Number.isInteger(value)||!number(value,0,1e12)))throw Error('Invalid quantity');
   for(const goal of Object.values(data.goals)){
@@ -72,12 +77,63 @@ const CompanionStore=(()=>{
   if(event.key!==KEY)return;
   try{state=event.newValue?upgrade(parse(event.newValue)):blank();error=null;}catch(e){error=e;}
  });
- function saveCharacter(id,progress,expected,label){
+ const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+ const weaponOwner=(data,id)=>Object.keys(data.characters).find(key=>data.characters[key].weaponCopyId===id)||null;
+ function compatible(catalog,characterId,catalogId){
+  const character=catalog.characters.find(c=>c.id===characterId),weapon=catalog.weapons.find(w=>w.id===catalogId);
+  if(!character||!weapon||character.weapon==='Unknown'||character.weapon!==weapon.type)throw Error('Incompatible weapon');
+  return weapon;
+ }
+ function saveCharacter(id,progress,expected,label,equipment=null,catalog=null){
   if(typeof id!=='string'||!id)throw Error('Invalid character ID');
   return update(next=>{
    if(next.roster===null)throw Error('Migration required');
-   if(JSON.stringify(next.characters[id]||{})!==JSON.stringify(expected))throw Error('Character changed in another window');
+   if(!same(next.characters[id]||{},expected))throw Error('Character changed in another window');
+   if(equipment){
+    progress=structuredClone(progress);
+    if(equipment.mode==='copy'||equipment.mode==='new'){
+     if(!next.roster.includes(id))throw Error('Character is no longer owned');
+     let copy;
+     if(equipment.mode==='copy'){
+      copy=next.weapons.find(w=>w.id===equipment.id);
+      if(!copy||!same(copy,equipment.expected))throw Error('Weapon changed in another window');
+      const owner=weaponOwner(next,copy.id);
+      if(owner&&owner!==id)throw Error('Weapon is already equipped');
+      // An existing link stays editable if its remote catalogue row disappears.
+      if(expected.weaponCopyId!==copy.id)compatible(catalog,id,copy.catalogId);
+     }else{
+      const row=compatible(catalog,id,equipment.catalogId);
+      copy={id:crypto.randomUUID(),catalogId:row.id,name:row.name,level:null,rank:null};
+      next.weapons.push(copy);
+     }
+     copy.level=equipment.level;copy.rank=equipment.rank;
+     progress.weapon=null;progress.weaponCopyId=copy.id;
+    }else if(equipment.mode==='none'){
+     progress.weapon=null;delete progress.weaponCopyId;
+    }else if(equipment.mode==='keep')progress.weapon=expected.weapon??null;
+    else throw Error('Invalid equipment choice');
+   }
    next.characters[id]=progress;
+  },label);
+ }
+ function saveWeapon(record,expected,catalog,label){
+  return update(next=>{
+   const current=next.weapons.find(w=>w.id===record.id);
+   if(!same(current||null,expected))throw Error('Weapon changed in another window');
+   const row=catalog.weapons.find(w=>w.id===record.catalogId);
+   if(!row&&current?.catalogId!==record.catalogId)throw Error('Unknown weapon');
+   const owner=weaponOwner(next,record.id);
+   if(owner&&current.catalogId!==record.catalogId)compatible(catalog,owner,record.catalogId);
+   const value={...current,...record,name:row?.name||current?.name||record.catalogId};
+   if(current)next.weapons[next.weapons.indexOf(current)]=value;else next.weapons.push(value);
+  },label);
+ }
+ function removeWeapon(id,expected,expectedOwner,label){
+  return update(next=>{
+   const copy=next.weapons.find(w=>w.id===id),owner=weaponOwner(next,id);
+   if(!same(copy,expected)||owner!==expectedOwner)throw Error('Equipment changed in another window');
+   if(owner){delete next.characters[owner].weaponCopyId;next.characters[owner].weapon=null;}
+   next.weapons=next.weapons.filter(w=>w.id!==id);
   },label);
  }
  function migrate(resolve){
@@ -131,5 +187,5 @@ const CompanionStore=(()=>{
    throw e;
   }
  }
- return {get:()=>structuredClone(state),update,migrate,saveCharacter,exportData,validateBackup,restore,error:()=>error,parse};
+ return {get:()=>structuredClone(state),update,migrate,saveCharacter,saveWeapon,removeWeapon,weaponOwner,exportData,validateBackup,restore,error:()=>error,parse};
 })();

@@ -1,3 +1,4 @@
+let editingEquipment={mode:"keep"},weaponPickerMode="inventory";
 let editingOriginal={},editingName=null, editingLevel=null, editingSeq=0, editingWeapon=null, editingWeaponLevel=null, editingWeaponRank=1;
 function accountStatus(name){
  const d=accountData[name]||{};
@@ -20,12 +21,15 @@ function openAccountEditor(name){
  const x=DATA.find(v=>v.name===name); if(!x)return;
  editingName=name;
  const d=accountData[name]||{};
- editingOriginal=structuredClone(d);
+ const state=CompanionStore.get();
+ editingOriginal=structuredClone(state.characters[x.id]||{});
+ const copy=state.weapons.find(w=>w.id===editingOriginal.weaponCopyId);
+ editingEquipment=copy?{mode:'copy',id:copy.id,expected:copy}:{mode:'keep'};
  editingLevel=d.level||null;
  editingSeq=(d.sequence!==undefined?d.sequence:0);
  editingWeapon=d.weapon?.name||null;
  editingWeaponLevel=d.weapon?.level||null;
- editingWeaponRank=d.weapon?.rank||1;
+ editingWeaponRank=d.weapon?.rank??null;
  document.querySelector("#editorName").textContent=name;
  document.querySelector("#editorSub").textContent=`${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}`;
  document.querySelector("#levelLabel").textContent=lang==="fr"?"Niveau":"Level";
@@ -44,7 +48,10 @@ function updateEditorControls(){
    const w=WEAPONS.find(x=>x.name===editingWeapon);
    wc.classList.remove("empty");
    wc.innerHTML=`<div class="equipped-img-wrap"><img src="${w?.image||""}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(editingWeapon)}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
-   ws.innerHTML=`<button class="weapon-setting" onclick="openWeaponLevelPicker()"><b>${lang==="fr"?"Niveau":"Level"}</b>${editingWeaponLevel||"—"}</button><div class="weapon-setting"><b>${lang==="fr"?"Syntonisation":"Syntony"}</b><div class="rank-row">${[1,2,3,4,5].map(n=>`<button class="rank-btn ${editingWeaponRank===n?"active":""}" onclick="event.stopPropagation();editingWeaponRank=${n};updateEditorControls()">R${n}</button>`).join("")}</div></div>`;
+   if(editingEquipment.mode==='keep'){
+    ws.innerHTML=`<p class="companion-note">${lang==='fr'?'Équipement ancien conservé. Choisis un exemplaire existant ou ajoute un exemplaire depuis le catalogue pour le modifier.':'Previous equipment preserved. Choose its inventory copy or add a copy from the catalogue to edit it.'} · ${editingWeaponLevel||'?'} · R${editingWeaponRank||'?'}</p>`;
+   }else ws.innerHTML=`<button class="weapon-setting" onclick="openWeaponLevelPicker()"><b>${lang==="fr"?"Niveau":"Level"}</b>${editingWeaponLevel||"—"}</button><div class="weapon-setting"><b>${lang==="fr"?"Syntonisation":"Syntony"}</b><div class="rank-row">${[1,2,3,4,5].map(n=>`<button class="rank-btn ${editingWeaponRank===n?"active":""}" onclick="event.stopPropagation();editingWeaponRank=${n};updateEditorControls()">R${n}</button>`).join("")}</div></div>`;
+   ws.innerHTML+=`<button class="companion-button" onclick="clearEditingWeapon()">${lang==='fr'?'Déséquiper':'Unequip'}</button>`;
  } else {
    wc.classList.add("empty");
    wc.textContent=lang==="fr"?"Choisir une arme compatible":"Choose a compatible weapon";
@@ -122,31 +129,39 @@ function currentResonatorWeaponType(){
 }
 function openWeaponPicker(){
  const type=currentResonatorWeaponType();
- const compatibleCount=WEAPONS.filter(w=>w.type===type).length;
- document.querySelector("#weaponPickerTitle").textContent=(lang==="fr"?`Choisir une ${weaponLabel(type)}`:`Choose a ${weaponLabel(type)}`)+` · ${compatibleCount}`;
- document.querySelector("#weaponQ").placeholder=lang==="fr"?"Rechercher une arme…":"Search a weapon…";
- document.querySelector("#weaponQ").value="";
- drawWeapons();
- document.querySelector("#weaponPicker").classList.add("open");
+ weaponPickerMode=CompanionStore.get().weapons.some(copy=>WEAPONS.find(w=>w.id===copy.catalogId)?.type===type)?'inventory':'new';
+ document.querySelector('#weaponPickerTitle').textContent=lang==='fr'?'Choisir une arme compatible':'Choose a compatible weapon';
+ document.querySelector('#weaponQ').placeholder=lang==='fr'?'Rechercher une arme…':'Search a weapon…';
+ document.querySelector('#weaponQ').value='';drawWeapons();
+ document.querySelector('#weaponPicker').classList.add('open');
 }
 function drawWeapons(){
- const q=(document.querySelector("#weaponQ").value||"").toLowerCase();
- const type=currentResonatorWeaponType();
- const list=WEAPONS
-   .filter(w=>w.type===type && w.name.toLowerCase().includes(q))
-   .sort((a,b)=>(b.rarity-a.rarity)||a.name.localeCompare(b.name));
- document.querySelector("#weaponGrid").innerHTML=list.length?list.map(w=>`<button class="weapon-card" onclick="selectWeaponByIndex(${WEAPONS.indexOf(w)})"><div class="weapon-img-wrap"><img src="${w.image}" alt="${esc(w.name)}" loading="lazy" decoding="async" fetchpriority="low" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w.name,w.image)))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><b>${esc(w.name)}</b><small>${"★".repeat(w.rarity)}</small></button>`).join(""):`<div class="empty">${lang==="fr"?"Aucune arme compatible trouvée dans le catalogue actuel.":"No compatible weapon found in the current catalogue."}</div>`;
+ const q=(document.querySelector('#weaponQ').value||'').toLowerCase(),type=currentResonatorWeaponType();
+ const data=CompanionStore.get(),character=resolveResonatorRef(editingName);
+ document.querySelector('#weaponSource').innerHTML=`<button class="companion-button" aria-pressed="${weaponPickerMode==='inventory'}" onclick="weaponPickerMode='inventory';drawWeapons()">${tr('Mes exemplaires','My copies')}</button><button class="companion-button" aria-pressed="${weaponPickerMode==='new'}" onclick="weaponPickerMode='new';drawWeapons()">${tr('Ajouter un exemplaire','Add a copy')}</button>`;
+ document.querySelector('#weaponPickerNote').textContent=weaponPickerMode==='new'?tr('Le choix sera ajouté à ton inventaire lors de l’enregistrement du Résonateur.','The choice will be added to your inventory when you save the Resonator.'):tr('Un exemplaire ne peut équiper qu’un Résonateur à la fois.','A copy can equip only one Resonator at a time.');
+ const rows=weaponPickerMode==='new'?WEAPONS.filter(w=>w.type===type&&w.name.toLowerCase().includes(q)).map(w=>({row:w,copy:null})):data.weapons.map(copy=>({copy,row:WEAPONS.find(w=>w.id===copy.catalogId)})).filter(({row})=>row?.type===type&&row.name.toLowerCase().includes(q));
+ rows.sort((a,b)=>(b.row.rarity-a.row.rarity)||a.row.name.localeCompare(b.row.name));
+ document.querySelector('#weaponGrid').innerHTML=rows.map(({row,copy})=>{
+  const owner=copy?CompanionStore.weaponOwner(data,copy.id):null,unavailable=owner&&owner!==character?.id;
+  const selection=copy?`data-copy="${esc(copy.id)}" onclick="selectWeaponCopy(this.dataset.copy)"`:`onclick="selectWeaponByIndex(${WEAPONS.indexOf(row)})"`;
+  const subtitle=copy?`#${data.weapons.indexOf(copy)+1} · ${tr('Niv.','Lv.')} ${copy.level??'?'} · R${copy.rank??'?'}`:'★'.repeat(row.rarity);
+  return `<button class="weapon-card" ${selection} ${unavailable?'disabled':''}><div class="weapon-img-wrap"><img src="${esc(row.image)}" alt="" loading="lazy" decoding="async" data-candidates='${esc(JSON.stringify(weaponImageCandidates(row.name,row.image)))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><b>${esc(row.name)}</b><small>${subtitle}${owner?'<br>'+esc(DATA.find(c=>c.id===owner)?.name||owner):''}</small></button>`;
+ }).join('')||`<div class="empty">${tr('Aucun exemplaire compatible. Utilise « Ajouter un exemplaire » si nécessaire.','No compatible copy. Use “Add a copy” if needed.')}</div>`;
 }
-function selectWeaponByIndex(i){
- const w=WEAPONS[i], expected=currentResonatorWeaponType();
- if(!w || w.type!==expected) return;
- selectWeapon(w.name);
+function selectWeaponByIndex(index){
+ const row=WEAPONS[index];if(!row||row.type!==currentResonatorWeaponType())return;
+ const previous=editingOriginal.weapon?.name===row.name?editingOriginal.weapon:null;
+ editingEquipment={mode:'new',catalogId:row.id};editingWeapon=row.name;editingWeaponLevel=previous?.level??null;editingWeaponRank=previous?previous.rank??null:1;
+ document.querySelector('#weaponPicker').classList.remove('open');updateEditorControls();
 }
-function selectWeapon(name){
- editingWeapon=name; editingWeaponLevel=null; editingWeaponRank=1;
- document.querySelector("#weaponPicker").classList.remove("open");
- updateEditorControls();
+function selectWeaponCopy(id){
+ const state=CompanionStore.get(),copy=state.weapons.find(w=>w.id===id),row=WEAPONS.find(w=>w.id===copy?.catalogId),owner=CompanionStore.weaponOwner(state,id);
+ if(!copy||!row||row.type!==currentResonatorWeaponType()||(owner&&owner!==resolveResonatorRef(editingName)?.id))return;
+ editingEquipment={mode:'copy',id,expected:copy};editingWeapon=row.name;editingWeaponLevel=copy.level;editingWeaponRank=copy.rank;
+ document.querySelector('#weaponPicker').classList.remove('open');updateEditorControls();
 }
+function clearEditingWeapon(){editingEquipment={mode:'none'};editingWeapon=null;editingWeaponLevel=null;editingWeaponRank=null;updateEditorControls();}
 function openWeaponLevelPicker(){
  document.querySelector("#weaponLevelTitle").textContent=lang==="fr"?"Niveau de l’arme":"Weapon level";
  document.querySelector("#weaponLevelQ").placeholder=lang==="fr"?"Rechercher un niveau…":"Search a level…";
@@ -173,10 +188,10 @@ function drawLevels(){
 }
 function saveAccountEditor(){
  if(!editingName||!canWritePersonalData())return;
- const progress={...editingOriginal,level:editingLevel,sequence:editingSeq,weapon:editingWeapon?{name:editingWeapon,level:editingWeaponLevel,rank:editingWeaponRank}:null,skills:{...editingSkills}};
+ const progress={...editingOriginal,level:editingLevel,sequence:editingSeq,skills:{...editingSkills}};
  if(editingForteChanged)progress.forteNodes={...editingForteNodes};
  const character=resolveResonatorRef(editingName);if(!character)return;
- try{CompanionStore.saveCharacter(character.id,progress,editingOriginal,lang==='fr'?'Progression enregistrée':'Progress saved');}
+ try{CompanionStore.saveCharacter(character.id,progress,editingOriginal,lang==='fr'?'Progression enregistrée':'Progress saved',{...editingEquipment,level:editingWeaponLevel,rank:editingWeaponRank},{characters:DATA,weapons:WEAPONS});}
  catch(error){companionMessage(lang==='fr'?'Progression non enregistrée. Tes modifications restent ouvertes ; vérifie le stockage ou une modification dans un autre onglet.':'Progress not saved. Your edits remain open; check storage or changes in another tab.',true);return;}
  document.querySelector("#accountEditor").classList.remove("open");
  render();

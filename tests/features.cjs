@@ -24,6 +24,46 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(new
    const copies=await page.evaluate(()=>CompanionStore.get().weapons);assert.equal(new Set(copies.map(w=>w.id)).size,2);assert.ok(copies.every(w=>w.rank===1));
    await page.locator('[data-action="edit-weapon"]').first().click();await page.locator('[name="rank"]').selectOption('2');await page.locator('#weaponInventoryForm button').click();
    assert.deepEqual((await page.evaluate(()=>CompanionStore.get().weapons.map(w=>w.rank))).sort(),[1,2]);
+   const beforeEquipment=await page.evaluate(()=>CompanionStore.exportData());
+   const openCharacter=async name=>{await tab('res');await page.locator('#ownedSearch').fill(name);await page.locator('.edit-chevron').click();};
+   const chooseCopy=async id=>{await page.locator('#weaponCurrent').click();await page.locator(`[data-copy="${id}"]`).click();};
+   await openCharacter('Qingxiao');await chooseCopy(copies[0].id);await page.locator('#editorClose').click();
+   assert.equal(await page.evaluate(()=>CompanionStore.get().characters['resonator:1'].weaponCopyId),undefined,'Cancel does not equip or create copies');
+   await openCharacter('Qingxiao');await chooseCopy(copies[0].id);await page.locator('#editorSave').click();
+   assert.equal(await page.evaluate(()=>CompanionStore.get().characters['resonator:1'].weaponCopyId),copies[0].id);
+   assert.equal(await page.evaluate(()=>CompanionStore.get().weapons.length),2);
+   await tab('weap');await page.locator(`[data-action="edit-weapon"][data-value="${copies[0].id}"]`).click();
+   await page.locator('[name="level"]').fill('85');await page.locator('#weaponInventoryForm button').click();
+   assert.equal(await page.evaluate(()=>accountData.Qingxiao.weapon.level),85,'Inventory and character share one record');
+   await openCharacter('Test 2');await page.locator('#weaponCurrent').click();
+   assert.equal(await page.locator(`[data-copy="${copies[0].id}"]`).isDisabled(),true,'One owner per copy');
+   await page.locator(`[data-copy="${copies[1].id}"]`).click();await page.locator('#editorSave').click();
+   await openCharacter('Qingxiao');await page.locator('#weaponCurrent').click();
+   for(const width of [320,720,1152]){
+    await page.setViewportSize({width,height:1122});
+    const geometry=await page.locator('#weaponPicker .selector-sheet').evaluate(el=>({overflow:el.scrollWidth>el.clientWidth+1,buttons:[...el.querySelectorAll('#weaponSource button')].every(b=>b.getBoundingClientRect().height>=44)}));
+    assert.equal(geometry.overflow,false);assert.equal(geometry.buttons,true);
+   }
+   await page.setViewportSize({width:720,height:1122});
+   fs.mkdirSync(path.join(root,'test-results'),{recursive:true});await page.screenshot({path:path.join(root,'test-results',`${language}-equipment.png`)});
+   await page.locator('#weaponPickerClose').click();
+   await page.locator('.rank-btn').filter({hasText:'R3'}).click();await page.locator('#editorSave').click();
+   assert.equal(await page.evaluate(id=>CompanionStore.get().weapons.find(w=>w.id===id).rank,copies[0].id),3,'Editor updates shared rank');
+   await openCharacter('Qingxiao');
+   await page.evaluate(id=>{const w=CompanionStore.get().weapons.find(w=>w.id===id);CompanionStore.saveWeapon({...w,level:86},w,{characters:DATA,weapons:WEAPONS});},copies[0].id);
+   await page.locator('#editorSave').click();assert.equal(await page.locator('#accountEditor.open').count(),1,'Stale weapon edit is rejected');
+   await page.locator('#editorClose').click();
+   await tab('weap');await page.locator(`[data-action="remove-weapon"][data-value="${copies[0].id}"]`).click();
+   assert.equal(await page.evaluate(()=>CompanionStore.get().characters['resonator:1'].weaponCopyId),undefined);
+   assert.equal(await page.evaluate(()=>CompanionStore.get().weapons.length),1);
+   await openCharacter('Qingxiao');await page.locator('#weaponCurrent').click();await page.locator('#weaponSource button').last().click();await page.locator('#weaponQ').fill('Weapon 3');await page.locator('#weaponGrid .weapon-card').first().click();
+   await page.locator('#editorSave').click();assert.equal(await page.evaluate(()=>CompanionStore.get().weapons.length),2,'Explicit new copy added once');
+   const linkedBackup=await page.evaluate(()=>CompanionStore.exportData());
+   await page.evaluate(b=>CompanionStore.restore(b),linkedBackup);await page.reload();await page.locator('.res-row').first().waitFor();
+   assert.ok(await page.evaluate(()=>accountData.Qingxiao.weapon?.name));
+   await openCharacter('Qingxiao');await page.locator('#weaponSettings button').filter({hasText:language==='fr'?'Déséquiper':'Unequip'}).click();await page.locator('#editorSave').click();
+   assert.equal(await page.evaluate(()=>CompanionStore.get().weapons.length),2,'Unequipping retains the inventory copy');
+   await page.evaluate(b=>CompanionStore.restore(b),beforeEquipment);await page.reload();await page.locator('.res-row').first().waitFor();
    await tab('resources');await page.locator('[name="item:2"]').waitFor();await page.locator('[name="item:2"]').fill('0');await page.locator('#resourcesForm button').click();
    assert.deepEqual(await page.evaluate(()=>CompanionStore.get().resources),{'2':0,'3':null});
    await tab('echo');await page.locator('#echoCatalogue option').waitFor({state:'attached'});await page.locator('[name="echo"]').fill('Test Echo');await page.locator('[name="mainStat"]').fill('ATK');await page.locator('[name="substats"]').fill('Crit. Rate 8.1%');await page.locator('#echoInventoryForm button').click();
@@ -62,6 +102,6 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(new
    assert.equal(await page.evaluate(()=>localStorage.getItem('wwc_account_data')),'{broken');
    assert.deepEqual(errors,[]);await context.close();
   }
-  console.log('PASS: FR/EN weapon copies/edit, resources unknown/zero, equipped Echo, goals/current separation, active switch/pause, real backup download/import, invalid backup, quota rollback, durable removal, 36 screen/width cases.');
+  console.log('PASS: FR/EN weapon copies/edit/equip/unequip, shared level/rank, stale-copy rejection, linked restore, picker geometry, resources unknown/zero, equipped Echo, goals/current separation, active switch/pause, real backup download/import, invalid backup, quota rollback, durable removal, 36 screen/width cases.');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

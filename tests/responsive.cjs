@@ -117,6 +117,11 @@ async function inspect(page,label){
    // Real editor, observed source schema; never replace rendered components.
    const openQ=async()=>{await page.locator('#ownedSearch').fill('Qingxiao');await page.locator('.edit-chevron').click();await page.waitForFunction(()=>document.querySelectorAll('#forteEditor input').length===10);};
    await openQ();
+   // Explicitly adding the legacy equipped weapon carries over known values;
+   // cancelling still creates no inventory copy.
+   await page.locator('#weaponCurrent').click();await page.locator('#weaponQ').fill('Glint of Clouds');await page.locator('#weaponGrid .weapon-card').click();
+   assert.deepEqual(await page.evaluate(()=>({level:editingWeaponLevel,rank:editingWeaponRank})),{level:90,rank:1});
+   await page.locator('#editorClose').click();assert.equal(await page.evaluate(()=>CompanionStore.get().weapons.length),0);await openQ();
    const normalized=await page.evaluate(fixture=>{
     const original=normalizeForteDefs(fixture);
     const duplicate=normalizeForteDefs({...fixture,SkillTree:[...fixture.SkillTree,...fixture.SkillTree,{Id:'invalid',PropertyNodeTitle:'Invalid'}]});

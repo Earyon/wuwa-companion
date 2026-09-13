@@ -11,7 +11,12 @@ function syncPersonalViews(){
  const state=CompanionStore.get();
  ownedIds=state.roster||[];
  owned=ownedIds.map(id=>DATA.find(r=>r.id===id)?.name).filter(Boolean);
- accountData=Object.fromEntries(DATA.filter(r=>Object.hasOwn(state.characters,r.id)).map(r=>[r.name,state.characters[r.id]]));
+ accountData=Object.fromEntries(DATA.filter(r=>Object.hasOwn(state.characters,r.id)).map(r=>{
+  const progress=state.characters[r.id],copy=state.weapons.find(w=>w.id===progress.weaponCopyId);
+  if(!copy)return [r.name,progress];
+  const row=WEAPONS.find(w=>w.id===copy.catalogId);
+  return [r.name,{...progress,weapon:{name:row?.name||copy.name||copy.catalogId,level:copy.level,rank:copy.rank,catalogId:copy.catalogId}}];
+ }));
 }
 
 function normalizedLookupName(v){
@@ -341,7 +346,6 @@ function auditCompanionData(){
  return window.__WWC_AUDIT__;
 }
 auditCompanionData();
-
 
 
 
