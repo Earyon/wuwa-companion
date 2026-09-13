@@ -1,4 +1,4 @@
-let editingName=null, editingLevel=null, editingSeq=0, editingWeapon=null, editingWeaponLevel=null, editingWeaponRank=1;
+let editingOriginal={},editingName=null, editingLevel=null, editingSeq=0, editingWeapon=null, editingWeaponLevel=null, editingWeaponRank=1;
 function accountStatus(name){
  const d=accountData[name]||{};
  const bits=[];
@@ -16,9 +16,11 @@ function accountStatus(name){
 }
 
 function openAccountEditor(name){
+ syncPersonalViews();
  const x=DATA.find(v=>v.name===name); if(!x)return;
  editingName=name;
  const d=accountData[name]||{};
+ editingOriginal=structuredClone(d);
  editingLevel=d.level||null;
  editingSeq=(d.sequence!==undefined?d.sequence:0);
  editingWeapon=d.weapon?.name||null;
@@ -171,9 +173,11 @@ function drawLevels(){
 }
 function saveAccountEditor(){
  if(!editingName||!canWritePersonalData())return;
- accountData[editingName]={...(accountData[editingName]||{}),level:editingLevel,sequence:editingSeq,weapon:editingWeapon?{name:editingWeapon,level:editingWeaponLevel,rank:editingWeaponRank}:null,skills:{...editingSkills}};
- if(editingForteChanged)accountData[editingName].forteNodes={...editingForteNodes};
- localStorage.setItem("wwc_account_data",JSON.stringify(accountData));
+ const progress={...editingOriginal,level:editingLevel,sequence:editingSeq,weapon:editingWeapon?{name:editingWeapon,level:editingWeaponLevel,rank:editingWeaponRank}:null,skills:{...editingSkills}};
+ if(editingForteChanged)progress.forteNodes={...editingForteNodes};
+ const character=resolveResonatorRef(editingName);if(!character)return;
+ try{CompanionStore.saveCharacter(character.id,progress,editingOriginal,lang==='fr'?'Progression enregistrée':'Progress saved');}
+ catch(error){companionMessage(lang==='fr'?'Progression non enregistrée. Tes modifications restent ouvertes ; vérifie le stockage ou une modification dans un autre onglet.':'Progress not saved. Your edits remain open; check storage or changes in another tab.',true);return;}
  document.querySelector("#accountEditor").classList.remove("open");
  render();
 }

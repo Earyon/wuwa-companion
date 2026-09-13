@@ -3,12 +3,29 @@
 const CompanionStore=(()=>{
  const KEY='wwc_companion_v1';
  const PERSONAL=[KEY,'wwc_owned_ids','wwc_owned','wwc_account_data','wwc_lang'];
- const blank=()=>({version:1,weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
+ const blank=()=>({version:2,roster:null,characters:{},legacyProgress:{},weapons:[],echoes:[],resources:{},goals:{},active:null,wishlist:[],teams:[],activities:[],journal:[]});
  const object=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
  const number=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  function parse(raw){return JSON.parse(raw,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw Error('Invalid key');return value;});}
+ function validateProgress(records){
+    for(const p of Object.values(records)){
+     if(!object(p)||(p.level!=null&&(!Number.isInteger(p.level)||!number(p.level,1,90)))||(p.sequence!=null&&(!Number.isInteger(p.sequence)||!number(p.sequence,0,6))))throw Error('Invalid character progress');
+     if(p.skills){if(!object(p.skills))throw Error('Invalid skills');for(const v of Object.values(p.skills))if(!Number.isInteger(v)||!number(v,1,10))throw Error('Invalid skill level');}
+     if(p.forteNodes&&(!object(p.forteNodes)||Object.values(p.forteNodes).some(v=>typeof v!=='boolean')))throw Error('Invalid passive');
+     if(p.weapon!=null&&(!object(p.weapon)||typeof p.weapon.name!=='string'||(p.weapon.level!=null&&(!Number.isInteger(p.weapon.level)||!number(p.weapon.level,1,90)))||(p.weapon.rank!=null&&(!Number.isInteger(p.weapon.rank)||!number(p.weapon.rank,1,5)))))throw Error('Invalid equipped weapon');
+    }
+ }
+ function upgrade(data){
+  validate(data);
+  return data.version===1?{...data,version:2,roster:null,characters:{},legacyProgress:{}}:data;
+ }
  function validate(data){
-  if(!object(data)||data.version!==1)throw Error('Unsupported account format');
+  if(!object(data)||![1,2].includes(data.version))throw Error('Unsupported account format');
+  if(data.version===2){
+   if(data.roster!==null&&(!Array.isArray(data.roster)||data.roster.some(id=>typeof id!=='string')||new Set(data.roster).size!==data.roster.length))throw Error('Invalid roster');
+   if(!object(data.characters)||!object(data.legacyProgress))throw Error('Invalid progress');
+   validateProgress(data.characters);validateProgress(data.legacyProgress);
+  }
   for(const key of ['weapons','echoes','wishlist','teams','activities','journal'])if(!Array.isArray(data[key]))throw Error('Invalid '+key);
   for(const key of ['resources','goals'])if(!object(data[key]))throw Error('Invalid '+key);
   if(data.active!==null&&typeof data.active!=='string')throw Error('Invalid active goal');
@@ -37,7 +54,7 @@ const CompanionStore=(()=>{
   return data;
  }
  let error=null,state;
- try{state=localStorage.getItem(KEY)?validate(parse(localStorage.getItem(KEY))):blank();}catch(e){error=e;state=blank();}
+ try{state=localStorage.getItem(KEY)?upgrade(parse(localStorage.getItem(KEY))):blank();}catch(e){error=e;state=blank();}
  function commit(next,label){
   if(error)throw Error('Saved account cannot be read. Export it before restoring a backup.');
   const value=validate(structuredClone(next));
@@ -46,15 +63,42 @@ const CompanionStore=(()=>{
  }
  function update(change,label){
   // Read the latest committed record before each change, including other tabs.
-  const raw=localStorage.getItem(KEY);const next=raw?validate(parse(raw)):blank();
+  const raw=localStorage.getItem(KEY);const next=raw?upgrade(parse(raw)):blank();
   change(next);
   if(localStorage.getItem(KEY)!==raw)throw Error('Account changed in another window');
   commit(next,label);return next;
  }
  window.addEventListener('storage',event=>{
   if(event.key!==KEY)return;
-  try{state=event.newValue?validate(parse(event.newValue)):blank();error=null;}catch(e){error=e;}
+  try{state=event.newValue?upgrade(parse(event.newValue)):blank();error=null;}catch(e){error=e;}
  });
+ function saveCharacter(id,progress,expected,label){
+  if(typeof id!=='string'||!id)throw Error('Invalid character ID');
+  return update(next=>{
+   if(next.roster===null)throw Error('Migration required');
+   if(JSON.stringify(next.characters[id]||{})!==JSON.stringify(expected))throw Error('Character changed in another window');
+   next.characters[id]=progress;
+  },label);
+ }
+ function migrate(resolve){
+  if(error)throw error;
+  if(state.roster!==null)return;
+  const read=(key,fallback)=>{const raw=localStorage.getItem(key);return raw===null?fallback:parse(raw);};
+  const progress=read('wwc_account_data',{}),names=read('wwc_owned',[]),ids=read('wwc_owned_ids',null);
+  if(!object(progress))throw Error('Invalid legacy progress');
+  validateProgress(progress);
+  for(const list of [names,ids])if(list!==null&&(!Array.isArray(list)||list.some(x=>typeof x!=='string')))throw Error('Invalid legacy roster');
+  update(next=>{
+   if(next.roster!==null)return;
+   // An explicit empty roster is authoritative. Preserve unknown IDs and names.
+   next.roster=[...new Set(ids===null?[...names,...Object.keys(progress)].map(ref=>resolve(ref)?.id||ref):ids)];
+   for(const [name,value] of Object.entries(progress)){
+    const id=resolve(name)?.id;
+    if(id&&!Object.hasOwn(next.characters,id))next.characters[id]=value;
+    else next.legacyProgress[name]=value;
+   }
+  });
+ }
  function exportData(){return {format:'wuwa-companion-backup',version:1,createdAt:new Date().toISOString(),records:Object.fromEntries(PERSONAL.map(key=>[key,localStorage.getItem(key)]))};}
  function validateBackup(raw){
   if(typeof raw!=='string'||raw.length>8*1024*1024)throw Error('Backup is too large');
@@ -69,12 +113,7 @@ const CompanionStore=(()=>{
    if(key===KEY)validate(parsed);
    else if(key==='wwc_account_data'){
     if(!object(parsed))throw Error('Invalid progress');
-    for(const p of Object.values(parsed)){
-     if(!object(p)||(p.level!=null&&(!Number.isInteger(p.level)||!number(p.level,1,90)))||(p.sequence!=null&&(!Number.isInteger(p.sequence)||!number(p.sequence,0,6))))throw Error('Invalid character progress');
-     if(p.skills){if(!object(p.skills))throw Error('Invalid skills');for(const v of Object.values(p.skills))if(!Number.isInteger(v)||!number(v,1,10))throw Error('Invalid skill level');}
-     if(p.forteNodes&&(!object(p.forteNodes)||Object.values(p.forteNodes).some(v=>typeof v!=='boolean')))throw Error('Invalid passive');
-     if(p.weapon!=null&&(!object(p.weapon)||typeof p.weapon.name!=='string'||(p.weapon.level!=null&&(!Number.isInteger(p.weapon.level)||!number(p.weapon.level,1,90)))||(p.weapon.rank!=null&&(!Number.isInteger(p.weapon.rank)||!number(p.weapon.rank,1,5)))))throw Error('Invalid equipped weapon');
-    }
+    validateProgress(parsed);
    }else if(!Array.isArray(parsed)||!parsed.every(x=>typeof x==='string'))throw Error('Invalid roster');
   }
   return backup;
@@ -92,5 +131,5 @@ const CompanionStore=(()=>{
    throw e;
   }
  }
- return {get:()=>structuredClone(state),update,exportData,validateBackup,restore,error:()=>error,parse};
+ return {get:()=>structuredClone(state),update,migrate,saveCharacter,exportData,validateBackup,restore,error:()=>error,parse};
 })();

@@ -57,3 +57,11 @@ Les inventaires et le Planner disposent maintenant d'une première implémentati
 - [Quotas et éviction, MDN](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria) : traiter l'échec d'écriture, ne pas annoncer une sauvegarde réussie avant sa réussite.
 - [Web Storage, MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API) : événement entre fenêtres ; relire l'état récent avant modification.
 - [Transactions IndexedDB, MDN](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB) : à utiliser pour le futur historique d'invocations volumineux. La couche personnelle compacte reste provisoirement compatible avec le stockage existant ; la migration complète n'est pas annoncée faite.
+
+## Refonte 2 — progression centralisée, sous-étape vérifiée
+
+Le format personnel passe à la version 2 sous la même clé de stockage. La possession et la progression utilisent désormais les identifiants du catalogue ; les anciens enregistrements restent intacts comme copie de migration. Une liste vide reste vide, les identifiants inconnus et les noms non résolus ou en collision sont conservés. Les vues historiques lisent une projection du stockage commun, sans second circuit d’écriture. Le rattachement aux exemplaires d’armes reste à terminer : refonte toujours **1 / 3**, fonctions toujours **3 / 14**.
+
+Tests ajoutés : migration v1, répétition sans changement, échec de stockage et reprise, refus d’écraser une modification plus récente du même personnage, préservation des autres personnages, validation des sauvegardes v2, changement de nom du catalogue, échec réel dans l’éditeur avec maintien du formulaire ouvert. Les anciennes sauvegardes restent importables. La détection des conflits n’est pas une transaction multi-fenêtres garantie : une simultanéité exacte entre deux processus reste une limite du stockage local actuel.
+
+Le test PWA part maintenant de `22a0621` et observe l’activation depuis le service worker : ouvrir une fenêtre de contrôle dans le périmètre du site avant l’activation maintenait l’ancienne version en vie. Vérifications sur navigateur Edge isolé ; aucune validation physique sur tablette n’est déduite de ces tests.

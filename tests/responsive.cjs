@@ -105,13 +105,13 @@ async function inspect(page,label){
    await page.locator('.res-main').click();assert.equal(await page.locator('#accountEditor.open').count(),0);
    await page.locator('.edit-chevron').click();await page.locator('#accountEditor.open').waitFor();
    await page.locator('#editorSave').click();assert.equal(await page.locator('#accountEditor.open').count(),0);
-   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data')).Qingxiao.level),90);
+   assert.equal(await page.evaluate(()=>accountData.Qingxiao.level),90);
    await page.locator('.bottom-nav [data-view="ency"]').click();
    await inspect(page,`${lang} encyclopaedia`);
    await page.locator('.sort-trigger').click();await page.locator('#sortMenu-ency button').first().click();
    assert.ok(await page.locator('.char-card').count()>0);
    await page.reload();await page.locator('.res-row').first().waitFor();
-   const saved=JSON.parse(await page.evaluate(()=>localStorage.getItem('wwc_account_data')));
+   const saved=await page.evaluate(()=>accountData);
    const initial=JSON.parse(stored);
    assert.deepEqual(saved.Qingxiao,initial.Qingxiao);assert.deepEqual(saved.Aalto,initial.Aalto);
    // Real editor, observed source schema; never replace rendered components.
@@ -144,19 +144,30 @@ async function inspect(page,label){
    // A background refresh must preserve unsaved checkbox changes.
    await node.uncheck();await page.evaluate(()=>{editingForteDefs=normalizeForteDefs({...readCharacterDetailCache('1'),SkillTree:[...readCharacterDetailCache('1').SkillTree].reverse()});drawSkillsEditor();});
    assert.equal(await node.isChecked(),false);await page.locator('#editorSave').click();
-   const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data')));
+   const after=await page.evaluate(()=>accountData);
    assert.deepEqual(after.Qingxiao,{...initial.Qingxiao,forteNodes:{'node:9':false,'skill:1000504':true}});
    assert.deepEqual(after.Aalto,initial.Aalto);
    // Missing upstream nodes do not delete stored unlocks on the next save.
    await openQ();await page.evaluate(()=>{editingForteNodes['node:999']=true;editingForteDefs=editingForteDefs.filter(d=>d.key!=='skill:1000504');drawSkillsEditor();});
    await node.check();await page.locator('#editorSave').click();
-   const preserved=await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data')).Qingxiao.forteNodes);
+   const preserved=await page.evaluate(()=>accountData.Qingxiao.forteNodes);
    assert.equal(preserved['node:999'],true);assert.equal(preserved['skill:1000504'],true);
    await page.locator('#ownedSearch').fill('Aalto');await page.locator('.edit-chevron').click();
    await page.waitForFunction(()=>document.querySelector('#forteEditor').textContent.includes('unavailable')||document.querySelector('#forteEditor').textContent.includes('indisponibles'));
    assert.equal(await page.locator('#forteEditor input').count(),0,'Missing data must not reuse another character’s nodes');
    await page.locator('#editorSave').click();
-   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('wwc_account_data')).Aalto),{level:null,sequence:0,weapon:null,skills:{}});
+   assert.deepEqual(await page.evaluate(()=>accountData.Aalto),{level:null,sequence:0,weapon:null,skills:{}});
+   // Failed writes must keep the actual editor open without changing saved data.
+   await page.locator('#ownedSearch').fill('Qingxiao');await page.locator('.edit-chevron').click();
+   const beforeFailure=await page.evaluate(()=>CompanionStore.exportData().records.wwc_companion_v1);
+   await page.evaluate(()=>{window.originalSetItem=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='wwc_companion_v1')throw Error('Test quota');return window.originalSetItem.call(this,key,value);};editingLevel=89;});
+   await page.locator('#editorSave').click();assert.equal(await page.locator('#accountEditor.open').count(),1);
+   assert.equal(await page.evaluate(()=>CompanionStore.exportData().records.wwc_companion_v1),beforeFailure);
+   await page.evaluate(()=>{Storage.prototype.setItem=window.originalSetItem;delete window.originalSetItem;});
+   await page.locator('#editorClose').click();
+   // A catalogue rename must not detach personal progress.
+   await page.evaluate(()=>{DATA.find(r=>r.name==='Qingxiao').name='Renamed test character';render();});
+   assert.equal(await page.evaluate(()=>accountData['Renamed test character'].level),90);
    assert.deepEqual(errors,[]);
    await context.close();
   }

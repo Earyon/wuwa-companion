@@ -51,7 +51,8 @@ document.querySelector('#view').addEventListener('change',async event=>{
  try{
   const file=event.target.files[0];if(!file)return;if(file.size>8*1024*1024)throw Error('File too large');
   pendingBackup=CompanionStore.validateBackup(await file.text());
-  const roster=JSON.parse(pendingBackup.records.wwc_owned_ids||'[]');
+  const canonical=JSON.parse(pendingBackup.records.wwc_companion_v1||'null');
+  const roster=canonical?.roster??JSON.parse(pendingBackup.records.wwc_owned_ids||'[]');
   preview.innerHTML=`<p>${tr('Sauvegarde valide','Valid backup')} · ${roster.length} ${tr('Résonateurs enregistrés','saved Resonators')}</p>${companionButton('restore-backup',tr('Restaurer cette sauvegarde','Restore this backup'))}`;
  }catch(error){preview.textContent=tr('Fichier incompatible ou invalide. Aucune donnée n’a été modifiée.','Incompatible or invalid file. No data was changed.');}
 });

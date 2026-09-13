@@ -1,20 +1,18 @@
 const PROFILE={name:"Earyon",uid:"534230812",playerId:"601844929",unionLevel:68,sol3Rank:7,birthday:"13/12"};
 const detected=new Set(["Aalto","Aemeath","Baizhi","Buling","Calcharo","Changli","Chixia","Danjin","Denia","Encore","Jianxin","Lingyang","Lumi","Luuk Herssen","Lynae","Mortefi","Qingxiao","Sanhua","Suisui","Taoqi","Verina","Yangyang","Youhu","Yuanwu"]);
 const personalReadErrors=[];
-function readPersonalJSON(key,fallback){
- try{
-  const value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));
-  if(Array.isArray(fallback)?(!Array.isArray(value)||value.some(x=>typeof x!=='string')):(!value||typeof value!=='object'||Array.isArray(value)))throw Error('Invalid personal record');
-  return value;
- }catch(error){personalReadErrors.push(key);console.warn('Personal record retained but unreadable',key);return fallback;}
-}
 function canWritePersonalData(){
- if(!personalReadErrors.length)return true;
- alert(lang==='fr'?'Des données locales sont illisibles. Exporte ta sauvegarde dans Plus avant de restaurer une copie valide.':'Some local data is unreadable. Export your backup in More before restoring a valid copy.');return false;
+ if(!personalReadErrors.length&&!CompanionStore.error()&&CompanionStore.get().roster!==null)return true;
+ alert(lang==='fr'?'Les données ne peuvent pas être enregistrées. Exporte ta sauvegarde dans Plus avant toute restauration.':'Data cannot be saved. Export your backup in More before restoring.');return false;
 }
-let owned=readPersonalJSON("wwc_owned",[]);
-let ownedIds=readPersonalJSON("wwc_owned_ids",[]);
-let accountData=readPersonalJSON("wwc_account_data",{});
+// Compatibility projection for existing views; all writes use CompanionStore.
+let owned=[],ownedIds=[],accountData={};
+function syncPersonalViews(){
+ const state=CompanionStore.get();
+ ownedIds=state.roster||[];
+ owned=ownedIds.map(id=>DATA.find(r=>r.id===id)?.name).filter(Boolean);
+ accountData=Object.fromEntries(DATA.filter(r=>Object.hasOwn(state.characters,r.id)).map(r=>[r.name,state.characters[r.id]]));
+}
 
 function normalizedLookupName(v){
  return String(v||"")
@@ -33,42 +31,17 @@ function resolveResonatorRef(ref){
  const key=normalizedLookupName(raw);
  return DATA.find(x=>normalizedLookupName(x.name)===key)||null;
 }
-function persistCanonicalOwnership(){
- if(personalReadErrors.length)return;
- ownedIds=[...new Set(ownedIds)];
- owned=ownedIds.map(id=>DATA.find(r=>r.id===id)?.name).filter(Boolean);
- localStorage.setItem("wwc_owned_ids",JSON.stringify(ownedIds));
- // Keep legacy storage synced during prototype migration.
- localStorage.setItem("wwc_owned",JSON.stringify(owned));
-}
 function migrateOwnershipToCanonical(){
- if(!DATA.length||personalReadErrors.length)return;
- // A saved ID list, including [], is authoritative. Do not resurrect a removed
- // Resonator from retained progress, or discard IDs absent from a newer cache.
- if(localStorage.getItem('wwc_owned_ids')!==null){persistCanonicalOwnership();return;}
- const resolvedIds=new Set();
-
- // New stable-ID storage wins.
- for(const id of ownedIds){
-   const r=resolveResonatorRef(id);
-   if(r)resolvedIds.add(r.id);
- }
-
- // Migrate the old name-based list.
- for(const name of owned){
-   const r=resolveResonatorRef(name);
-   if(r)resolvedIds.add(r.id);
- }
-
- // Recover characters that had account-specific data even if the old owned list
- // was lost/corrupted during a prototype catalogue migration.
- for(const name of Object.keys(accountData||{})){
-   const r=resolveResonatorRef(name);
-   if(r)resolvedIds.add(r.id);
- }
-
- ownedIds=[...resolvedIds];
- persistCanonicalOwnership();
+ if(!DATA.length)return;
+ try{CompanionStore.migrate(resolveResonatorRef);personalReadErrors.length=0;}
+ catch(error){personalReadErrors.splice(0,personalReadErrors.length,'account');console.warn('Personal records preserved; migration unavailable',error);}
+ syncPersonalViews();
+}
+function changeOwnership(id,add){
+ try{
+  CompanionStore.update(state=>{state.roster=add?[...new Set([...state.roster,id])]:state.roster.filter(value=>value!==id);});
+  syncPersonalViews();return true;
+ }catch(error){companionMessage(lang==='fr'?'Modification non enregistrée. Vérifie l’espace de stockage.':'Change not saved. Check available storage.',true);return false;}
 }
 let lang=localStorage.getItem("wwc_lang")||"fr";
 let encySort="alpha";
@@ -279,6 +252,7 @@ function auditOrderingAndOwnership(){
 }
 
 function render(){
+ syncPersonalViews();
  if(DATA.length){auditOrderingAndOwnership();auditRoverUniqueness();}
  setActiveNav();
  const html=currentView==="account"?account():currentView==="ency"?encyclopedia():currentView==="daily"?daily():currentView==="planner"?planner():more();
@@ -318,8 +292,7 @@ function removeOwned(name){
  const msg=lang==="fr"?`Retirer ${name} de Mes Résonateurs ?`:`Remove ${name} from My Resonators?`;
  if(!confirm(msg))return;
  const r=resolveResonatorRef(name);
- if(r)ownedIds=ownedIds.filter(id=>id!==r.id);
- persistCanonicalOwnership();
+ if(r&&!changeOwnership(r.id,false))return;
  render();
 }
 function filterOwned(){ renderOwnedList(); }
@@ -339,7 +312,7 @@ function drawSelector(){
 function confirmOwned(name){
  if(!canWritePersonalData())return;
  const r=resolveResonatorRef(name);
- if(r&&!ownedIds.includes(r.id)){ownedIds.push(r.id);persistCanonicalOwnership()}
+ if(r&&!ownedIds.includes(r.id)&&!changeOwnership(r.id,true))return;
  document.querySelector("#selector").classList.remove("open");render();
 }
 function openDetail(name){

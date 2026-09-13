@@ -154,6 +154,7 @@ async function fetchCanonicalLists(newPayload=null){
   const nc=keepPlayableMaleRovers(rawChars.map(normalizeCharacter).filter(x=>x.name));
   validateCanonical(nc,nw);
   DATA=nc; WEAPONS=nw;
+  migrateOwnershipToCanonical();
   catalogState={
     status:"ready",source:"Encore API / WW_Data",error:null,
     gameVersion:first(newPayload,["GameVer","gameVersion"])||null,
