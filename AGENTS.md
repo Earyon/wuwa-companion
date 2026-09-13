@@ -1,5 +1,10 @@
 # WuWa Companion — règles de travail
 
+## Directive permanente de qualité — lecture obligatoire
+- Lire et appliquer [QUALITY.md](QUALITY.md) avant toute intervention sur ce projet. Ce document conserve la directive professionnelle permanente demandée par l'utilisateur le 13 septembre 2026 et complète les présentes règles.
+- Consigne actualisée le 13 septembre 2026 : cette directive déclenche une refonte incluant les parties qui fonctionnent déjà. Cette demande remplace la restriction précédente. Conserver le design, les comportements validés et les données personnelles ; procéder par ensembles cohérents, après inspection des dépendances et avec vérifications avant/après. L'autorisation de refonte ne justifie pas des dépendances ou abstractions sans bénéfice concret.
+- Ordre de priorité : intégrité et fiabilité des données → absence de régressions → maintenabilité du code → simplicité → performances → expérience utilisateur → évolutivité → rapidité de développement.
+
 ## Cadre utilisateur
 - Communiquer en français, clairement et brièvement. L'utilisateur ne développe pas : il ne doit pas assurer le contrôle technique à notre place.
 - Conserver le design bleu nuit/doré, les fonctions validées et les clés de stockage personnelles. Ne pas reconstruire l'application ni ajouter un framework sans besoin démontré.

@@ -21,6 +21,18 @@ Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue
 
 ## Contraintes
 
+La directive permanente `QUALITY.md`, référencée par `AGENTS.md`, s'applique à tous les travaux. Son actualisation explicite inclut une refonte des parties déjà fonctionnelles. Les deux premiers lots cochés indiquent leur état de référence validé ; ils devront repasser les vérifications après refonte. Le compteur actuel ne prétend pas que cette nouvelle refonte est déjà faite.
+
+## Refonte du socle — périmètre autorisé
+
+Point de départ : version fonctionnelle `8401350`, avec ses tests de référence. L'amorce non terminée du lien inventaire/équipement a été retirée avant cette refonte ; elle n'a pas été publiée ni comptée comme terminée.
+
+1. Cartographier les dépendances et séparer les responsabilités encore regroupées dans le script de `index.html` : catalogue, état personnel, navigation et éditeurs. Garantir un démarrage explicite une fois tous les composants disponibles.
+2. Unifier la progression et l'équipement autour des identifiants stables. Éviter deux mécanismes concurrents ; prévoir une migration conservant les données existantes et des tests d'échec de stockage/restauration.
+3. Reprendre les composants d'interface et leurs événements, réduire le couplage et préserver le rendu validé. Mesurer démarrage/requêtes, vérifier FR/EN et les parcours tactiles, puis exécuter les tests de non-régression et de mise à jour PWA.
+
+Les nouvelles fonctions continuent ensuite sur le socle refondu. Aucune réécriture graphique, nouvelle dépendance ou réinitialisation du compte n'est implicite dans cette autorisation.
+
 Le résumé historique de l'autre conversation est du contexte, pas une preuve de réalisation. Aucun inventaire personnel ne sera déduit d'anciennes captures. Les dates de bannières, taux, coûts et recommandations exigent une source vérifiée ; une valeur indisponible reste inconnue.
 
 État de départ vérifié : commit `5da557a`. Les rubriques armes/Échos/ressources, Planner et tâches contiennent encore des ébauches dans cette version.
