@@ -7,6 +7,8 @@
 <title>WuWa Companion V0.5.7</title>
 <link rel="stylesheet" href="./styles.css">
 <link rel="stylesheet" href="./layout.css">
+<link rel="stylesheet" href="./companion.css">
+<script src="./account-store.js"></script>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./assets/icon-192.png">
 <script src="./pwa.js" defer></script>
@@ -366,9 +368,21 @@ function dataErrorScreen(err){
 
 const PROFILE={name:"Earyon",uid:"534230812",playerId:"601844929",unionLevel:68,sol3Rank:7,birthday:"13/12"};
 const detected=new Set(["Aalto","Aemeath","Baizhi","Buling","Calcharo","Changli","Chixia","Danjin","Denia","Encore","Jianxin","Lingyang","Lumi","Luuk Herssen","Lynae","Mortefi","Qingxiao","Sanhua","Suisui","Taoqi","Verina","Yangyang","Youhu","Yuanwu"]);
-let owned=JSON.parse(localStorage.getItem("wwc_owned")||"[]");
-let ownedIds=JSON.parse(localStorage.getItem("wwc_owned_ids")||"[]");
-let accountData=JSON.parse(localStorage.getItem("wwc_account_data")||"{}");
+const personalReadErrors=[];
+function readPersonalJSON(key,fallback){
+ try{
+  const value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));
+  if(Array.isArray(fallback)?(!Array.isArray(value)||value.some(x=>typeof x!=='string')):(!value||typeof value!=='object'||Array.isArray(value)))throw Error('Invalid personal record');
+  return value;
+ }catch(error){personalReadErrors.push(key);console.warn('Personal record retained but unreadable',key);return fallback;}
+}
+function canWritePersonalData(){
+ if(!personalReadErrors.length)return true;
+ alert(lang==='fr'?'Des données locales sont illisibles. Exporte ta sauvegarde dans Plus avant de restaurer une copie valide.':'Some local data is unreadable. Export your backup in More before restoring a valid copy.');return false;
+}
+let owned=readPersonalJSON("wwc_owned",[]);
+let ownedIds=readPersonalJSON("wwc_owned_ids",[]);
+let accountData=readPersonalJSON("wwc_account_data",{});
 
 function normalizedLookupName(v){
  return String(v||"")
@@ -388,14 +402,18 @@ function resolveResonatorRef(ref){
  return DATA.find(x=>normalizedLookupName(x.name)===key)||null;
 }
 function persistCanonicalOwnership(){
- ownedIds=[...new Set(ownedIds)].filter(id=>DATA.some(r=>r.id===id));
+ if(personalReadErrors.length)return;
+ ownedIds=[...new Set(ownedIds)];
  owned=ownedIds.map(id=>DATA.find(r=>r.id===id)?.name).filter(Boolean);
  localStorage.setItem("wwc_owned_ids",JSON.stringify(ownedIds));
  // Keep legacy storage synced during prototype migration.
  localStorage.setItem("wwc_owned",JSON.stringify(owned));
 }
 function migrateOwnershipToCanonical(){
- if(!DATA.length)return;
+ if(!DATA.length||personalReadErrors.length)return;
+ // A saved ID list, including [], is authoritative. Do not resurrect a removed
+ // Resonator from retained progress, or discard IDs absent from a newer cache.
+ if(localStorage.getItem('wwc_owned_ids')!==null){persistCanonicalOwnership();return;}
  const resolvedIds=new Set();
 
  // New stable-ID storage wins.
@@ -429,8 +447,8 @@ let ownedElement="All";
 let currentView="account", accountTab="res", element="All";
 
 const I18N={
- fr:{daily:"Accueil",ency:"Encyclopédie",account:"Mon compte",planner:"Planner",more:"Plus",back:"Retour",res:"Mes Résonateurs",weap:"Mes Armes",echo:"Mes Échos",resources:"Mes Ressources"},
- en:{daily:"Home",ency:"Encyclopedia",account:"My Account",planner:"Planner",more:"More",back:"Back",res:"My Resonators",weap:"My Weapons",echo:"My Echoes",resources:"My Resources"}
+ fr:{daily:"Tâches quotidiennes",ency:"Encyclopédie",account:"Mon compte",planner:"Planner",more:"Plus",back:"Retour",res:"Mes Résonateurs",weap:"Mes Armes",echo:"Mes Échos",resources:"Mes Ressources"},
+ en:{daily:"Daily Tasks",ency:"Encyclopedia",account:"My Account",planner:"Planner",more:"More",back:"Back",res:"My Resonators",weap:"My Weapons",echo:"My Echoes",resources:"My Resources"}
 };
 const WEAPON_LABELS={fr:{Sword:"Sabre",Broadblade:"Épée",Pistols:"Pistolets",Gauntlets:"Gantelets",Rectifier:"Amplificateur",Unknown:"Inconnu"},en:{Sword:"Sword",Broadblade:"Broadblade",Pistols:"Pistols",Gauntlets:"Gauntlets",Rectifier:"Rectifier",Unknown:"Unknown"}};
 const t=k=>I18N[lang][k]||k;
@@ -540,9 +558,9 @@ document.addEventListener("click",closeSortMenus);
 function account(){
  setHeader(t("account"),lang==="fr"?"Gérez vos Résonateurs, armes et ressources.":"Manage your Resonators, weapons and resources.");
  accountTabs();
+ if(personalReadErrors.length)return `<div class="content-panel"><p>${lang==='fr'?'Données personnelles illisibles : elles ont été conservées sans modification. Ouvre Plus pour exporter ou restaurer une sauvegarde.':'Personal data is unreadable and has been preserved without changes. Open More to export or restore a backup.'}</p></div>`;
  if(accountTab!=="res"){
-   const name=accountTab==="weap"?t("weap"):accountTab==="echo"?t("echo"):t("resources");
-   return `<div class="content-panel"><div class="panel-head"><div><h2>${name}</h2><p>${lang==="fr"?"Structure visuelle prête pour l’itération dédiée.":"Visual structure ready for its dedicated iteration."}</p></div></div><div class="empty">${lang==="fr"?"Cette section sera remplie progressivement.":"This section will be populated progressively."}</div></div>`;
+   return personalInventory();
  }
  return `<div class="content-panel">
    <div class="panel-head"><div><h2>${lang==="fr"?`Mes Résonateurs (${ownedIds.length})`:`My Resonators (${ownedIds.length})`}</h2><p>${lang==="fr"?"Ajoutez les Résonateurs que vous possédez et suivez leur progression.":"Add the Resonators you own and track their progression."}</p></div>
@@ -581,19 +599,19 @@ function drawCards(){
      return rarity||alpha;
    });
  document.querySelectorAll(".filters button").forEach(b=>b.classList.toggle("active",(element==="All"&&(b.textContent==="Tous"||b.textContent==="All"))||b.textContent===element));
- document.querySelector("#grid").innerHTML=a.map(x=>`<article class="char-card" onclick='openDetail(${JSON.stringify(x.name)})'><div class="pic">${x.image?`<img src="${x.image}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">`:""}</div><div class="info"><b>${esc(x.name)}</b><small>${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</small></div></article>`).join("");
+ document.querySelector("#grid").innerHTML=a.map(x=>`<article class="char-card" onclick='openDetail(${esc(JSON.stringify(x.name))})'><div class="pic">${x.image?`<img src="${x.image}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">`:""}</div><div class="info"><b>${esc(x.name)}</b><small>${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</small></div></article>`).join("");
 }
 function daily(){
  setHeader(t("daily"),lang==="fr"?"Votre tableau de bord personnel.":"Your personal dashboard.");document.querySelector("#accountTabs").innerHTML="";
- return `<div class="content-panel"><div class="panel-head"><div><h2>${lang==="fr"?"Priorités du jour":"Today's priorities"}</h2><p>${lang==="fr"?"Cette page restera légère et personnalisée.":"This page will stay lightweight and personalized."}</p></div></div><div class="empty">${lang==="fr"?"Aucun objectif actif configuré pour le moment.":"No active goal configured yet."}</div></div>`;
+ return personalDaily();
 }
 function planner(){
  setHeader(t("planner"),lang==="fr"?"Préparez un seul objectif actif à la fois.":"Prepare one active goal at a time.");document.querySelector("#accountTabs").innerHTML="";
- return `<div class="content-panel"><div class="panel-head"><div><h2>${lang==="fr"?"Objectif actif":"Active goal"}</h2><p>${lang==="fr"?"Un seul Résonateur peut être prioritaire.":"Only one Resonator can be prioritized."}</p></div></div><div class="empty">Hiyuki · ${lang==="fr"?"Souhait / préparation future":"Wishlist / future preparation"}</div></div>`;
+ return personalPlanner();
 }
 function more(){
  setHeader(t("more"),lang==="fr"?"Réglages, import, historique et autres fonctions.":"Settings, import, history and more.");document.querySelector("#accountTabs").innerHTML="";
- return `<div class="content-panel"><div class="panel-head"><div><h2>${lang==="fr"?"Langue":"Language"}</h2></div></div><div class="filters"><button class="${lang==="fr"?"active":""}" onclick="setLang('fr')">Français</button><button class="${lang==="en"?"active":""}" onclick="setLang('en')">English</button></div><div class="empty" style="margin-top:18px">${lang==="fr"?"Données du jeu":"Game data"} : <b>${esc(catalogState.source||"—")}</b><br>${DATA.length} ${lang==="fr"?"Résonateurs":"Resonators"} · ${WEAPONS.length} ${lang==="fr"?"armes":"weapons"}${catalogState.gameVersion?` · v${esc(catalogState.gameVersion)}`:""}<br><small>${catalogState.status==="cached"?(lang==="fr"?"Démarrage local rapide · vérification réseau non bloquante":"Fast local startup · non-blocking network check"):(lang==="fr"?"Base canonique validée":"Validated canonical database")}</small></div></div>`;
+ return companionMore();
 }
 
 
@@ -651,7 +669,7 @@ function accountStatus(name){
    const wl=d.weapon.level?`${lang==="fr"?"Niv.":"Lv."}${d.weapon.level}`:"";
    const wr=d.weapon.rank?`R${d.weapon.rank}`:"";
    const sub=[wl,wr].filter(Boolean).join(" · ");
-   return `<div class="status-main">${top}</div><div class="status-weapon"><span class="status-weapon-icon"><img src="${w?.image||""}" alt="" data-candidates='${JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||""))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></span><span class="status-weapon-copy"><b>${esc(d.weapon.name)}</b>${sub?`<small>${sub}</small>`:""}</span></div>`;
+   return `<div class="status-main">${top}</div><div class="status-weapon"><span class="status-weapon-icon"><img src="${w?.image||""}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></span><span class="status-weapon-copy"><b>${esc(d.weapon.name)}</b>${sub?`<small>${sub}</small>`:""}</span></div>`;
  }
  return `<div class="status-main">${top}</div>`;
 }
@@ -863,7 +881,7 @@ function updateEditorControls(){
  if(editingWeapon){
    const w=WEAPONS.find(x=>x.name===editingWeapon);
    wc.classList.remove("empty");
-   wc.innerHTML=`<div class="equipped-img-wrap"><img src="${w?.image||""}" alt="" data-candidates='${JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||""))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(editingWeapon)}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
+   wc.innerHTML=`<div class="equipped-img-wrap"><img src="${w?.image||""}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(editingWeapon)}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
    ws.innerHTML=`<button class="weapon-setting" onclick="openWeaponLevelPicker()"><b>${lang==="fr"?"Niveau":"Level"}</b>${editingWeaponLevel||"—"}</button><div class="weapon-setting"><b>${lang==="fr"?"Syntonisation":"Syntony"}</b><div class="rank-row">${[1,2,3,4,5].map(n=>`<button class="rank-btn ${editingWeaponRank===n?"active":""}" onclick="event.stopPropagation();editingWeaponRank=${n};updateEditorControls()">R${n}</button>`).join("")}</div></div>`;
  } else {
    wc.classList.add("empty");
@@ -955,7 +973,7 @@ function drawWeapons(){
  const list=WEAPONS
    .filter(w=>w.type===type && w.name.toLowerCase().includes(q))
    .sort((a,b)=>(b.rarity-a.rarity)||a.name.localeCompare(b.name));
- document.querySelector("#weaponGrid").innerHTML=list.length?list.map(w=>`<button class="weapon-card" onclick="selectWeaponByIndex(${WEAPONS.indexOf(w)})"><div class="weapon-img-wrap"><img src="${w.image}" alt="${esc(w.name)}" loading="lazy" decoding="async" fetchpriority="low" data-candidates='${JSON.stringify(weaponImageCandidates(w.name,w.image))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><b>${esc(w.name)}</b><small>${"★".repeat(w.rarity)}</small></button>`).join(""):`<div class="empty">${lang==="fr"?"Aucune arme compatible trouvée dans le catalogue actuel.":"No compatible weapon found in the current catalogue."}</div>`;
+ document.querySelector("#weaponGrid").innerHTML=list.length?list.map(w=>`<button class="weapon-card" onclick="selectWeaponByIndex(${WEAPONS.indexOf(w)})"><div class="weapon-img-wrap"><img src="${w.image}" alt="${esc(w.name)}" loading="lazy" decoding="async" fetchpriority="low" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w.name,w.image)))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><b>${esc(w.name)}</b><small>${"★".repeat(w.rarity)}</small></button>`).join(""):`<div class="empty">${lang==="fr"?"Aucune arme compatible trouvée dans le catalogue actuel.":"No compatible weapon found in the current catalogue."}</div>`;
 }
 function selectWeaponByIndex(i){
  const w=WEAPONS[i], expected=currentResonatorWeaponType();
@@ -992,7 +1010,7 @@ function drawLevels(){
  document.querySelector("#levelGrid").innerHTML=nums.map(n=>`<button class="level-btn ${editingLevel===n?"active":""}" onclick="editingLevel=${n};document.querySelector('#levelPicker').classList.remove('open');updateEditorControls()">${n}</button>`).join("");
 }
 function saveAccountEditor(){
- if(!editingName)return;
+ if(!editingName||!canWritePersonalData())return;
  accountData[editingName]={...(accountData[editingName]||{}),level:editingLevel,sequence:editingSeq,weapon:editingWeapon?{name:editingWeapon,level:editingWeaponLevel,rank:editingWeaponRank}:null,skills:{...editingSkills}};
  if(editingForteChanged)accountData[editingName].forteNodes={...editingForteNodes};
  localStorage.setItem("wwc_account_data",JSON.stringify(accountData));
@@ -1015,15 +1033,16 @@ function renderOwnedList(){
    <img src="${x.image||""}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">
    <div class="res-main"><b>${esc(x.name)}</b><div class="res-meta"><span class="element">✦ ${x.element}</span><span>${weaponLabel(x.weapon)}</span></div><div class="rarity-stars">${"★".repeat(x.rarity)}</div></div>
    <div class="status">${accountStatus(x.name)}</div>
-   <button class="remove-res trash-btn" title="${lang==="fr"?"Retirer":"Remove"}" aria-label="${lang==="fr"?"Retirer "+esc(x.name):"Remove "+esc(x.name)}" onclick='event.stopPropagation();removeOwned(${JSON.stringify(x.name)})'>
+   <button class="remove-res trash-btn" title="${lang==="fr"?"Retirer":"Remove"}" aria-label="${lang==="fr"?"Retirer "+esc(x.name):"Remove "+esc(x.name)}" onclick='event.stopPropagation();removeOwned(${esc(JSON.stringify(x.name))})'>
      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.8 11H7.8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg>
    </button>
-   <button class="chev edit-chevron" title="${lang==="fr"?"Modifier":"Edit"}" aria-label="${lang==="fr"?"Modifier "+esc(x.name):"Edit "+esc(x.name)}" onclick='openAccountEditor(${JSON.stringify(x.name)})'>›</button>
+   <button class="chev edit-chevron" title="${lang==="fr"?"Modifier":"Edit"}" aria-label="${lang==="fr"?"Modifier "+esc(x.name):"Edit "+esc(x.name)}" onclick='openAccountEditor(${esc(JSON.stringify(x.name))})'>›</button>
  </div>`).join(""):`<div class="empty">${q?(lang==="fr"?"Aucun Résonateur ne correspond à la recherche.":"No Resonator matches your search."):(lang==="fr"?"Aucun Résonateur confirmé.":"No confirmed Resonator yet.")}</div>`;
  const footer=document.querySelector(".footer-row span");
  if(footer) footer.textContent=lang==="fr"?`Affichage : ${rows.length} sur ${ownedIds.length}`:`Showing: ${rows.length} of ${ownedIds.length}`;
 }
 function removeOwned(name){
+ if(!canWritePersonalData())return;
  const msg=lang==="fr"?`Retirer ${name} de Mes Résonateurs ?`:`Remove ${name} from My Resonators?`;
  if(!confirm(msg))return;
  const r=resolveResonatorRef(name);
@@ -1043,9 +1062,10 @@ function drawSelector(){
  const list=DATA
    .filter(x=>!ownedIds.includes(x.id)&&x.name.toLowerCase().includes(q))
    .sort((a,b)=>(Number(b.rarity)-Number(a.rarity))||a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"}));
- document.querySelector("#selectorGrid").innerHTML=list.map(x=>`<button class="select-card ${detected.has(x.name)?"detected":""}" onclick='confirmOwned(${JSON.stringify(x.name)})'>${x.image?`<img src="${x.image}" alt="${esc(x.name)}">`:""}<span>${esc(x.name)}</span></button>`).join("");
+ document.querySelector("#selectorGrid").innerHTML=list.map(x=>`<button class="select-card ${detected.has(x.name)?"detected":""}" onclick='confirmOwned(${esc(JSON.stringify(x.name))})'>${x.image?`<img src="${x.image}" alt="${esc(x.name)}">`:""}<span>${esc(x.name)}</span></button>`).join("");
 }
 function confirmOwned(name){
+ if(!canWritePersonalData())return;
  const r=resolveResonatorRef(name);
  if(r&&!ownedIds.includes(r.id)){ownedIds.push(r.id);persistCanonicalOwnership()}
  document.querySelector("#selector").classList.remove("open");render();
@@ -1082,5 +1102,8 @@ auditCompanionData();
 bootstrapCanonicalCatalog().catch(err=>dataErrorScreen(err));
 </script>
 <script src="./forte.js"></script>
+<script src="./companion-ui.js"></script>
+<script src="./inventory.js"></script>
+<script src="./planning.js"></script>
 </body>
 </html>

@@ -1,0 +1,28 @@
+/* New personal-management components. Existing card and filter layout stays in layout.css. */
+.companion-panel h2{font-size:25px;font-weight:500;margin:0 0 18px}
+.companion-panel p{color:var(--muted);line-height:1.6}
+.companion-panel a{color:var(--gold)}
+.companion-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.companion-button{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;min-height:44px;max-width:100%;padding:10px 14px;border:1px solid #38516c;border-radius:10px;background:#0a1d2e;color:var(--gold);cursor:pointer;font-size:14px;text-decoration:none;overflow-wrap:anywhere;text-align:center}
+.companion-file{position:relative}
+.companion-file input[type=file]{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.companion-file:focus-within{outline:2px solid var(--gold);outline-offset:3px}
+.companion-note{font-size:12px;line-height:1.6;color:var(--muted)}
+.companion-error{color:#ffb0b0!important}
+.companion-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:14px;align-items:end}
+.companion-form label{display:grid;gap:7px;min-width:0;font-size:13px;color:var(--muted)}
+.companion-form input,.companion-form select,.companion-form textarea{width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #38516c;border-radius:9px;background:#091a2a;color:var(--text);font-size:14px}
+.companion-form textarea{resize:vertical;min-height:80px}
+.companion-form .wide{grid-column:1/-1}
+.companion-button:focus-visible,.companion-form :is(input,select,textarea):focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.companion-list{display:grid;gap:12px;margin-top:18px}
+.companion-card{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0a1a2a;min-width:0}
+.companion-card img{width:54px;height:64px;object-fit:contain}
+.companion-card b{font-size:16px;overflow-wrap:anywhere}
+.companion-card small{display:block;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.companion-card .companion-actions{grid-column:1/-1;margin:0}
+.companion-history{list-style:none;padding:0;display:grid;gap:12px}
+.companion-history li{display:grid;gap:4px;border-bottom:1px solid var(--line);padding-bottom:12px;overflow-wrap:anywhere}
+.companion-history time{font-size:11px;color:var(--muted)}
+.companion-message{position:fixed;z-index:300;bottom:90px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);padding:15px;background:#102d3d;border:1px solid var(--gold);border-radius:10px;color:var(--text);box-shadow:var(--shadow);font-size:14px}
+.companion-message.error{border-color:#ec8787}

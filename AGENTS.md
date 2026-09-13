@@ -6,6 +6,8 @@
 - Les corrections demandées sont autorisées à être vérifiées, commitées et publiées sur main sans nouvelle confirmation (autorisation explicite du 10 septembre 2026). Jamais de push forcé ni de publication de changements étrangers à la demande. Respecter les permissions de l'environnement.
 - Pas de nouvel abonnement, recharge, API payante ou autre dépense. Les crédits déjà achetés peuvent être utilisés. Pas de sous-agents sans demande explicite.
 - Recommander un changement de modèle seulement quand la difficulté le justifie ; ne pas interrompre une étape ordinaire pour cela.
+- Demande du 13 septembre : développer l'ensemble avant la revue utilisateur finale, sans validations intermédiaires systématiques. Fournir après chaque lot terminé un compteur de lots vérifiés sur le total de `DEVELOPMENT.md`. Ne pas inventer un pourcentage ni compter du code non testé comme terminé.
+- Favoriser les pratiques professionnelles éprouvées. Cibler et regrouper les recherches nécessaires, conserver leurs références et éviter les requêtes répétées sans information nouvelle ; réduire les crédits sans supprimer les vérifications utiles.
 
 ## Erreurs observées et prévention
 - Des correctifs CSS ajoutés en cascade ont laissé plusieurs grilles concurrentes. Modifier la règle propriétaire d'un composant ; retirer les règles obsolètes au lieu d'ajouter une nouvelle couche en fin de fichier.

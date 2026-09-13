@@ -50,14 +50,18 @@ Les tests utilisent Node.js, Playwright 1.62.1 et Microsoft Edge installé. Play
 
 ```
 node tests/responsive.cjs
+node tests/features.cjs
 node tests/pwa-update.cjs
 git diff --check
 ```
 
 - `responsive.cjs` exécute les vrais scripts de l'application avec un catalogue synthétique dans un navigateur isolé : 42 cas de dimensions/langue, rotations, noms longs, placement et absence de chevauchement, tri, filtres, recherche, édition et conservation après rechargement. Il utilise aussi un extrait réel des champs de passifs de Sanhua pour vérifier les identifiants, doublons, données absentes, annulation, sauvegarde, rafraîchissement et isolation entre Résonateurs. Les captures sont produites dans `test-results/`, exclu de Git.
-- `pwa-update.cjs` vérifie le passage du commit `9d62571` au shell courant avec deux anciennes fenêtres ouvertes, l'attente d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne incluant le nouveau script Forte.
+- `features.cjs` vérifie les nouveaux parcours réels FR/EN : exemplaires d'armes, Échos équipés, ressources inconnues/zéro, objectifs séparés de l'état actuel, export téléchargé puis réimporté, rejet des fichiers invalides, retour arrière sur erreur de stockage, données illisibles conservées et retrait durable d'un Résonateur.
+- `pwa-update.cjs` vérifie le passage du commit `5da557a` au shell courant avec deux anciennes fenêtres ouvertes, l'attente d'activation, la conservation du stockage personnel et d'un cache indépendant, puis un rechargement hors ligne incluant tous les nouveaux scripts.
 - Examiner les captures, la syntaxe JavaScript et le diff avant publication. Après publication, comparer les fichiers réellement servis par Pages avec les fichiers livrés.
 
 Ces essais ne constituent pas une validation sur la tablette physique et ne vérifient pas l'exactitude des données des services de jeu. Ils ne modifient jamais le navigateur ni les données de l'utilisateur.
+
+Le développement complet et ses fonctions restant à terminer sont suivis dans `DEVELOPMENT.md`. Les nouvelles interfaces d'inventaire et de Planner sont une première étape fonctionnelle ; elles ne constituent pas encore l'ensemble du produit prévu.
 
 Références des choix techniques : [container queries, MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Container_queries) et [cycle de vie du service worker, web.dev](https://web.dev/articles/service-worker-lifecycle).
