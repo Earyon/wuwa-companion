@@ -47,50 +47,53 @@
   <button data-view="more"><b>•••</b><small>Plus</small></button>
 </nav>
 
-<section class="selector-overlay" id="selector">
+<dialog class="selector-overlay" id="selector" aria-labelledby="selectorTitle">
  <div class="selector-sheet">
   <div class="selector-head"><h2 id="selectorTitle">Ajouter un Résonateur</h2><button class="closebtn" id="selectorClose">✕</button></div>
   <input class="selector-search" id="selectorQ" placeholder="Rechercher…" oninput="drawSelector()">
   <div class="selector-grid" id="selectorGrid"></div>
  </div>
-</section>
+</dialog>
 
 
-<section class="selector-overlay" id="accountEditor">
- <div class="selector-sheet account-editor-sheet">
-  <div class="selector-head">
-   <div><h2 id="editorName">Résonateur</h2><div class="editor-sub" id="editorSub"></div></div>
+<dialog class="selector-overlay" id="accountEditor" aria-labelledby="editorName">
+ <div class="account-editor-sheet">
+  <header class="editor-header">
+   <div><p class="editor-eyebrow" id="editorEyebrow">Mon compte / Résonateur</p><h2 id="editorName">Résonateur</h2><div class="editor-sub" id="editorSub"></div></div>
    <button class="closebtn" id="editorClose">✕</button>
-  </div>
-  <div class="editor-block">
-   <div class="editor-label" id="levelLabel">Niveau</div>
-   <button class="level-current" id="levelCurrent" onclick="openLevelPicker()">À définir</button>
-  </div>
-  <div class="editor-block">
-   <div class="editor-label" id="sequenceLabel">Séquence</div>
-   <div class="seq-row" id="seqRow"></div>
-  </div>
-  <div class="editor-block">
-   <div class="editor-label" id="weaponLabel">Arme équipée</div>
-   <button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button>
-   <div class="weapon-settings" id="weaponSettings"></div>
-  </div>
-  <div class="editor-block skill-state">
-   <div class="skill-head">
-    <b id="skillsLabel">Compétences / Forte</b>
-    <small id="skillsSource"></small>
+  </header>
+  <div class="editor-workspace">
+   <nav class="editor-nav" id="editorTabs" role="tablist" aria-label="Résonateur"></nav>
+   <div class="editor-stage" id="editorStage">
+    <section class="editor-panel" id="editor-overview" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-overview">
+     <div class="resonator-overview">
+      <div class="resonator-portrait"><div class="resonator-orbit" aria-hidden="true"></div><img id="editorPortrait" alt=""><span class="portrait-fallback" id="editorPortraitFallback" aria-hidden="true"></span></div>
+      <div class="overview-details"><p class="editor-eyebrow" id="overviewLabel">Aperçu</p><h3 id="overviewName"></h3><p id="overviewElement"></p>
+       <div class="editor-block"><div class="editor-label" id="levelLabel">Niveau</div><button class="level-current" id="levelCurrent" onclick="openLevelPicker()">À définir</button></div>
+       <dl class="overview-summary" id="editorSummary"></dl><p class="editor-hint" id="overviewHint"></p>
+      </div>
+     </div>
+    </section>
+    <section class="editor-panel" id="editor-weapon" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-weapon" hidden>
+     <div class="editor-panel-heading"><p class="editor-eyebrow" id="weaponEyebrow">Équipement</p><h3 id="weaponLabel">Arme équipée</h3><p class="editor-hint" id="weaponHint"></p></div>
+     <div class="editor-block"><button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button><div class="weapon-settings" id="weaponSettings"></div></div>
+    </section>
+    <section class="editor-panel" id="editor-forte" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-forte" hidden>
+     <div class="editor-panel-heading skill-head"><h3 id="skillsLabel">Compétences / Forte</h3><small id="skillsSource"></small></div>
+     <div id="skillsEditor"><div class="skill-loading">Chargement…</div></div><div id="forteEditor"></div>
+    </section>
+    <section class="editor-panel" id="editor-sequence" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-sequence" hidden>
+     <div class="editor-panel-heading"><p class="editor-eyebrow" id="sequenceEyebrow">Résonance</p><h3 id="sequenceLabel">Séquence</h3><p class="editor-hint" id="sequenceHint"></p></div>
+     <div class="sequence-stage"><div class="sequence-emblem" aria-hidden="true"><span id="sequenceValue">S0</span></div><div class="seq-row" id="seqRow"></div></div>
+    </section>
    </div>
-   <div id="skillsEditor"><div class="skill-loading">Chargement…</div></div>
-   <div id="forteEditor"></div>
   </div>
-  <div class="editor-actions">
-   <button class="goldbtn" id="editorSave" onclick="saveAccountEditor()">Enregistrer</button>
-  </div>
+  <footer class="editor-actions"><span id="editorSaveHint"></span><button class="goldbtn" id="editorSave" onclick="saveAccountEditor()">Enregistrer</button></footer>
  </div>
-</section>
+</dialog>
 
 
-<section class="selector-overlay" id="weaponPicker">
+<dialog class="selector-overlay" id="weaponPicker" aria-labelledby="weaponPickerTitle">
  <div class="selector-sheet weapon-sheet">
   <div class="selector-head"><h2 id="weaponPickerTitle">Choisir une arme</h2><button class="closebtn" id="weaponPickerClose">✕</button></div>
   <input class="selector-search" id="weaponQ" placeholder="Rechercher une arme…" oninput="drawWeapons()">
@@ -98,22 +101,22 @@
   <p class="companion-note" id="weaponPickerNote"></p>
   <div class="weapon-grid" id="weaponGrid"></div>
  </div>
-</section>
+</dialog>
 
-<section class="selector-overlay" id="weaponLevelPicker">
+<dialog class="selector-overlay" id="weaponLevelPicker" aria-labelledby="weaponLevelTitle">
  <div class="selector-sheet level-sheet">
   <div class="selector-head"><h2 id="weaponLevelTitle">Niveau de l’arme</h2><button class="closebtn" id="weaponLevelClose">✕</button></div>
   <input class="selector-search" id="weaponLevelQ" inputmode="numeric" placeholder="Rechercher un niveau…" oninput="drawWeaponLevels()">
   <div class="level-grid" id="weaponLevelGrid"></div>
  </div>
-</section>
-<section class="selector-overlay" id="levelPicker">
+</dialog>
+<dialog class="selector-overlay" id="levelPicker" aria-labelledby="levelPickerTitle">
  <div class="selector-sheet level-sheet">
   <div class="selector-head"><h2 id="levelPickerTitle">Choisir le niveau</h2><button class="closebtn" id="levelPickerClose">✕</button></div>
   <input class="selector-search" id="levelQ" inputmode="numeric" placeholder="Rechercher un niveau…" oninput="drawLevels()">
   <div class="level-grid" id="levelGrid"></div>
  </div>
-</section>
+</dialog>
 <section class="detail" id="detail">
  <div class="detail-inner">
   <button class="back" id="back"><span class="arrow"><svg viewBox="0 0 24 24" width="15" height="15"><path d="M15.5 5 8.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="backLabel">Retour</span></button>
@@ -122,8 +125,10 @@
 </section>
 
 <script src="./catalog.js" defer></script>
+<script src="./dialogs.js" defer></script>
 <script src="./app.js" defer></script>
 <script src="./skills.js" defer></script>
+<script src="./editor-view.js" defer></script>
 <script src="./account-editor.js" defer></script>
 <script src="./forte.js" defer></script>
 <script src="./companion-ui.js" defer></script>

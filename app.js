@@ -305,7 +305,7 @@ function openSelector(){
  document.querySelector("#selectorTitle").textContent=lang==="fr"?"Ajouter un Résonateur":"Add a Resonator";
  document.querySelector("#selectorQ").placeholder=lang==="fr"?"Rechercher un Résonateur…":"Search a Resonator…";
  document.querySelector("#selectorQ").value="";
- document.querySelector("#selector").classList.add("open");drawSelector();
+ openDialog('selector');drawSelector();
 }
 function drawSelector(){
  const q=(document.querySelector("#selectorQ").value||"").toLowerCase();
@@ -318,7 +318,7 @@ function confirmOwned(name){
  if(!canWritePersonalData())return;
  const r=resolveResonatorRef(name);
  if(r&&!ownedIds.includes(r.id)&&!changeOwnership(r.id,true))return;
- document.querySelector("#selector").classList.remove("open");render();
+ closeDialog('selector');render();
 }
 function openDetail(name){
  const x=DATA.find(v=>v.name===name);if(!x)return;
@@ -327,11 +327,11 @@ function openDetail(name){
 }
 function setLang(v){lang=v;localStorage.setItem("wwc_lang",v);render()}
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{currentView=b.dataset.view;render()});
-document.querySelector("#selectorClose").onclick=()=>document.querySelector("#selector").classList.remove("open");
-document.querySelector("#editorClose").onclick=()=>document.querySelector("#accountEditor").classList.remove("open");
-document.querySelector("#levelPickerClose").onclick=()=>document.querySelector("#levelPicker").classList.remove("open");
-document.querySelector("#weaponPickerClose").onclick=()=>document.querySelector("#weaponPicker").classList.remove("open");
-document.querySelector("#weaponLevelClose").onclick=()=>document.querySelector("#weaponLevelPicker").classList.remove("open");
+document.querySelector("#selectorClose").onclick=()=>closeDialog('selector');
+document.querySelector("#editorClose").onclick=()=>closeDialog('accountEditor');
+document.querySelector("#levelPickerClose").onclick=()=>closeDialog('levelPicker');
+document.querySelector("#weaponPickerClose").onclick=()=>closeDialog('weaponPicker');
+document.querySelector("#weaponLevelClose").onclick=()=>closeDialog('weaponLevelPicker');
 document.querySelector("#back").onclick=()=>document.querySelector("#detail").classList.remove("open");
 
 function auditCompanionData(){

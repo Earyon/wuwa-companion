@@ -115,11 +115,11 @@ async function inspect(page,label){
    const initial=JSON.parse(stored);
    assert.deepEqual(saved.Qingxiao,initial.Qingxiao);assert.deepEqual(saved.Aalto,initial.Aalto);
    // Real editor, observed source schema; never replace rendered components.
-   const openQ=async()=>{await page.locator('#ownedSearch').fill('Qingxiao');await page.locator('.edit-chevron').click();await page.waitForFunction(()=>document.querySelectorAll('#forteEditor input').length===10);};
+   const openQ=async()=>{await page.locator('#ownedSearch').fill('Qingxiao');await page.locator('.edit-chevron').click();await page.locator('#editor-tab-forte').click();await page.waitForFunction(()=>document.querySelectorAll('#forteEditor input').length===10);};
    await openQ();
    // Explicitly adding the legacy equipped weapon carries over known values;
    // cancelling still creates no inventory copy.
-   await page.locator('#weaponCurrent').click();await page.locator('#weaponQ').fill('Glint of Clouds');await page.locator('#weaponGrid .weapon-card').click();
+   await page.locator('#editor-tab-weapon').click();await page.locator('#weaponCurrent').click();await page.locator('#weaponQ').fill('Glint of Clouds');await page.locator('#weaponGrid .weapon-card').click();
    assert.deepEqual(await page.evaluate(()=>({level:editingWeaponLevel,rank:editingWeaponRank})),{level:90,rank:1});
    await page.locator('#editorClose').click();assert.equal(await page.evaluate(()=>CompanionStore.get().weapons.length),0);await openQ();
    const normalized=await page.evaluate(fixture=>{
@@ -167,6 +167,7 @@ async function inspect(page,label){
    const beforeFailure=await page.evaluate(()=>CompanionStore.exportData().records.wwc_companion_v1);
    await page.evaluate(()=>{window.originalSetItem=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='wwc_companion_v1')throw Error('Test quota');return window.originalSetItem.call(this,key,value);};editingLevel=89;});
    await page.locator('#editorSave').click();assert.equal(await page.locator('#accountEditor.open').count(),1);
+   assert.equal(await page.locator('#accountEditor #companionMessage').isVisible(),true,'Save error is visible inside the native dialog');
    assert.equal(await page.evaluate(()=>CompanionStore.exportData().records.wwc_companion_v1),beforeFailure);
    await page.evaluate(()=>{Storage.prototype.setItem=window.originalSetItem;delete window.originalSetItem;});
    await page.locator('#editorClose').click();

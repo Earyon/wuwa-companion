@@ -4,7 +4,9 @@ const companionPanel=(title,body)=>`<section class="content-panel companion-pane
 const companionButton=(action,label,value='')=>`<button type="button" class="companion-button" data-action="${action}" data-value="${esc(value)}">${esc(label)}</button>`;
 function companionMessage(message,error=false){
  let box=document.querySelector('#companionMessage');
- if(!box){box=document.createElement('div');box.id='companionMessage';box.setAttribute('role','status');document.body.append(box);}
+ if(!box){box=document.createElement('div');box.id='companionMessage';box.setAttribute('role','status');}
+ const surface=[...document.querySelectorAll('dialog[open]')].at(-1)||document.body;
+ surface.append(box);
  box.textContent=message;box.className=error?'companion-message error':'companion-message';
  clearTimeout(companionMessage.timer);companionMessage.timer=setTimeout(()=>box.remove(),7000);
 }

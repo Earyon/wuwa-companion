@@ -112,6 +112,7 @@ function auditCoreSkillIcons(){
 function drawSkillsEditor(state="ready"){
  drawForteEditor(state);
  const box=document.querySelector("#skillsEditor"); if(!box)return;
+ const focusedType=box.contains(document.activeElement)?document.activeElement.dataset.skillLevel:null;
  document.querySelector("#skillsLabel").textContent=lang==="fr"?"Compétences / Forte":"Skills / Forte";
  const src=document.querySelector("#skillsSource");
  if(state==="loading"&&!editingSkillDefs.length){
@@ -131,19 +132,22 @@ function drawSkillsEditor(state="ready"){
    return;
  }
  box.innerHTML=`<div class="skill-grid-edit">${editingSkillDefs.map(def=>{
-   const lv=Number(editingSkills[def.type]||1);
+   const lv=editingSkills[def.type]??null;
    return `<div class="skill-edit-row">
      ${def.icon?`<span class="skill-icon-wrap"><img src="${def.icon}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="skill-icon-fallback">✦</span></span>`:`<span class="skill-icon-wrap"><span class="skill-icon-fallback" style="display:grid">✦</span></span>`}
-     <div class="skill-edit-copy"><b>${esc(SKILL_LABELS[lang][def.type]||def.type)}</b><small>${lang==="fr"?"Niveau actuel":"Current level"}</small>
-       <div class="skill-levels">${Array.from({length:10},(_,i)=>i+1).map(n=>`<button class="${lv===n?"active":""}" onclick="event.stopPropagation();setEditingSkillLevel('${def.type}',${n})">${n}</button>`).join("")}</div>
+     <div class="skill-edit-copy"><b>${esc(SKILL_LABELS[lang][def.type]||def.type)}</b><label>${lang==='fr'?'Niveau actuel':'Current level'}
+       <select data-skill-level="${esc(def.type)}" aria-label="${esc(SKILL_LABELS[lang][def.type]||def.type)}"><option value="" ${lv===null?'selected':''}>?</option>${Array.from({length:10},(_,i)=>i+1).map(n=>`<option value="${n}" ${lv===n?'selected':''}>${n} / 10</option>`).join('')}</select></label>
      </div>
-     <button class="skill-level-btn" onclick="event.stopPropagation()">${lang==="fr"?"Niv.":"Lv."} ${lv}</button>
    </div>`;
  }).join("")}</div>`;
+ if(focusedType)box.querySelector(`[data-skill-level="${CSS.escape(focusedType)}"]`)?.focus({preventScroll:true});
 }
 function setEditingSkillLevel(type,level){
- editingSkills[type]=level;
- drawSkillsEditor();
+ if(!SKILL_ORDER.includes(type))return;
+ if(level===null)delete editingSkills[type];
+ else if(Number.isInteger(level)&&level>=1&&level<=10)editingSkills[type]=level;
+ else return;
+ const input=document.querySelector(`[data-skill-level="${CSS.escape(type)}"]`);if(input)input.value=level===null?'':String(level);
 }
 async function loadEditorSkills(resonator){
  const token=++skillDetailRequestToken;
@@ -179,3 +183,5 @@ async function loadEditorSkills(resonator){
  }
 }
 
+
+document.getElementById('skillsEditor').addEventListener('change',event=>{const input=event.target.closest('[data-skill-level]');if(input)setEditingSkillLevel(input.dataset.skillLevel,input.value===''?null:Number(input.value));});

@@ -25,7 +25,7 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(new
    await page.locator('[data-action="edit-weapon"]').first().click();await page.locator('[name="rank"]').selectOption('2');await page.locator('#weaponInventoryForm button').click();
    assert.deepEqual((await page.evaluate(()=>CompanionStore.get().weapons.map(w=>w.rank))).sort(),[1,2]);
    const beforeEquipment=await page.evaluate(()=>CompanionStore.exportData());
-   const openCharacter=async name=>{await tab('res');await page.locator('#ownedSearch').fill(name);await page.locator('.edit-chevron').click();};
+   const openCharacter=async name=>{await tab('res');await page.locator('#ownedSearch').fill(name);await page.locator('.edit-chevron').click();await page.locator('#editor-tab-weapon').click();};
    const chooseCopy=async id=>{await page.locator('#weaponCurrent').click();await page.locator(`[data-copy="${id}"]`).click();};
    await openCharacter('Qingxiao');await chooseCopy(copies[0].id);await page.locator('#editorClose').click();
    assert.equal(await page.evaluate(()=>CompanionStore.get().characters['resonator:1'].weaponCopyId),undefined,'Cancel does not equip or create copies');

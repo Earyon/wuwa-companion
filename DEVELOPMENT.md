@@ -77,3 +77,21 @@ Vérifications : tests du stockage (liens, doublons, compatibilité, échecs d�
 Avancement actuel : **4 / 14 lots fonctionnels**, **2 / 3 étapes de refonte du socle**. Les paragraphes précédents décrivent les étapes historiques et leurs anciens compteurs.
 
 La nouvelle direction visuelle est inscrite dans `DESIGN.md` et `AGENTS.md` : elle couvre aussi tous les écrans existants. La refonte graphique complète vers les menus du jeu reste à réaliser et à vérifier ; les présentes modifications d’équipement ne sont pas présentées comme son achèvement.
+
+## Refonte 3 en cours — fiche de progression du Résonateur vérifiée
+
+La fiche existante devient un espace à quatre rubriques : Aperçu, Arme, Forte et Séquence. La navigation passe d’une barre horizontale à une barre latérale selon la largeur disponible. L’aperçu réutilise le portrait déjà référencé par le catalogue, avec un visuel de remplacement propre au projet si l’image manque. Les composants et ornements sont réalisés en HTML/CSS ; aucune nouvelle ressource extraite du jeu n’a été ajoutée.
+
+Les réglages restent en mémoire lors du changement de rubrique et sont enregistrés ensemble. Fermer ou utiliser Échap annule les changements non enregistrés. Le niveau d’une compétence non renseignée apparaît comme inconnu ; le sélecteur permet de le renseigner ou de le rendre à nouveau inconnu. Les identifiants et les déblocages Forte sont conservés, sans inventer un arbre de prérequis.
+
+Les dialogues natifs remplacent l’ancien affichage manuel des fenêtres. Un défaut de placement initial du focus a été reproduit : rendre le contenu visible seulement après `showModal()` laissait le focus hors de la fiche. Le contenu est maintenant rendu visible avant l’ouverture native, et ce comportement est testé. Les retours du focus après modification du rang et après fermeture du sélecteur de niveau sont également vérifiés. Les messages d’échec d’enregistrement sont placés dans le dialogue actif, pour rester visibles.
+
+Vérifications : 64 cas rubrique/écran/langue (FR/EN, 320 à 1536 pixels CSS, portrait et paysage), sélection au clavier, focus, Échap imbriqué, annulation puis réouverture, sauvegarde commune des rubriques, niveaux inconnus, équipement partagé, et captures examinées. Les suites responsive (42 cas), features, stockage et mise à jour PWA passent. Le test PWA part de `b9265c8` et vérifie aussi les nouveaux scripts hors ligne. Aucun test sur tablette physique n’est revendiqué.
+
+Sur navigateur Edge isolé, 10 ouvertures avec données de test déjà en cache atteignent la prochaine frame en environ 7 à 13 ms ; ce n’est ni une mesure de démarrage réseau, ni une comparaison de vitesse avec la version précédente, ni une mesure sur l’appareil utilisateur. Le changement de rubrique n’effectue aucune requête de données de jeu, vérification automatisée à l’appui.
+
+La refonte des autres écrans reste à réaliser. Compteurs inchangés : **4 / 14 lots fonctionnels**, **2 / 3 étapes complètes de refonte du socle**. Cette fiche constitue une sous-étape vérifiée de la troisième étape.
+
+Autorisation complémentaire de l’utilisateur : une remise à zéro de ses saisies peut être utilisée si elle simplifie réellement la refonte. Elle n’a pas été nécessaire pour cette étape et n’a pas été effectuée.
+
+Références techniques : [onglets accessibles, W3C APG](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) et [dialogue natif, MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog). Les recherches d’images de menus Forte ont fourni des exemples historiques ; elles ne prouvent pas la correspondance exacte avec la toute dernière version du jeu. L’objectif d’une interface inspirée des menus actuels reste à affiner lors des étapes suivantes.

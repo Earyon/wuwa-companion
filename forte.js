@@ -31,6 +31,7 @@ function forteCountLabel(){
 }
 function drawForteEditor(state='ready'){
  const box=document.querySelector('#forteEditor');if(!box)return;
+ const focusedKey=box.contains(document.activeElement)?document.activeElement.dataset.forteKey:null;
  if(!editingForteDefs.length){
   box.innerHTML=state==='loading'?'':`<p class="forte-note">${lang==='fr'?'Données des passifs indisponibles. Les déblocages déjà enregistrés sont conservés.':'Passive data unavailable. Saved unlocks are preserved.'}</p>`;
   return;
@@ -45,6 +46,7 @@ function drawForteEditor(state='ready'){
    <span class="forte-node-copy"><b>${esc(def.name)} <small>· ${fr?'Nœud':'Node'} ${index+1}</small></b><span>${esc(def.description)}</span></span>
   </label>`).join('')}</div></fieldset>`;
  }).join('')}`;
+ if(focusedKey)box.querySelector(`[data-forte-key="${CSS.escape(focusedKey)}"]`)?.focus({preventScroll:true});
 }
 document.querySelector('#forteEditor').addEventListener('change',event=>{
  const input=event.target;
