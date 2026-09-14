@@ -2,7 +2,7 @@
 let editingEchoes=null,echoFormState=null,echoPickerSlot=1,selectedEchoSlot=1;
 let echoQuery='',echoFilter='all';
 let echoMenuTab='equipment';
-const echoRow=e=>extendedCatalog.echo.find(r=>r.id===e.catalogId);
+const echoRow=e=>extendedCatalog.echo.find(r=>r.id===e?.catalogId);
 const echoName=e=>(echoRow(e)?gameLabel(echoRow(e)):gameText(e.name||e.catalogId));
 const echoOwner=e=>e.owner?(gameLabel(DATA.find(c=>c.id===e.owner))||e.owner):tr('Non équipé','Unequipped');
 const ECHO_PROPERTY_IDS={hp:2,hpPct:2,atk:7,atkPct:7,def:10,defPct:10,critRate:8,critDmg:9,energy:11,healing:35,glacio:22,fusion:23,electro:24,aero:25,spectro:26,havoc:27,basic:17,heavy:18,skill:14,liberation:19};
@@ -27,8 +27,9 @@ function echoInventoryCards(){
 }
 function prepareEditorEchoes(state,owner){selectedEchoSlot=1;echoMenuTab='equipment';editingEchoes={owner,before:structuredClone(state.echoes),after:structuredClone(state.echoes)};drawEditorEchoes();}
 function echoTotalsHTML(total){return `<dl class="game-stat-list">${total.values.map(s=>`<div><dt>${esc(statLabel(s.type).replace(/ %$/,''))}</dt><dd>${menuNumber(s.value,EchoRules.stats[s.type]?.[2])}</dd></div>`).join('')}</dl><p class="editor-hint">${total.incomplete?tr('Certaines valeurs ne sont pas renseignées. Le cumul reste partiel.','Some values are not recorded. This total is incomplete.'):total.values.length?tr('Somme des valeurs renseignées sur les exemplaires équipés.','Sum of the recorded values on equipped copies.'):tr('Aucun attribut renseigné.','No attributes recorded.')}</p>`;}
-function equippedSonatasHTML(equipped){
+function equippedSonatasHTML(equipped,selectedSets=null){
  const counts=new Map();for(const e of equipped){if(!e.setId)continue;if(!counts.has(e.setId))counts.set(e.setId,new Set());counts.get(e.setId).add(e.catalogId);}
+ if(selectedSets){for(const id of counts.keys())if(!selectedSets.includes(id))counts.delete(id);for(const id of selectedSets)if(!counts.has(id))counts.set(id,new Set());}
  if(!sonataData&&!sonataPending&&!sonataError)loadSonatas().then(()=>{if(document.getElementById('accountEditor').open&&editorSection==='echo')drawEditorEchoes();});
  return [...counts].map(([id,types])=>{const set=sonataData?.sets.find(s=>s.id===id),name=set?localText(set.name):gameText(echoRow(equipped.find(e=>e.setId===id))?.sets.find(s=>s.id===id)?.name)||id;return `<section class="equipped-sonata"><h4>${esc(name)} <span>${types.size}</span></h4>${set?set.effects.map(effect=>`<div class="${types.size>=effect.pieces?'is-active':''}"><b>${effect.pieces} ${tr('pièces','pieces')}</b><p>${esc(localText(effect.description))}</p></div>`).join(''):`<p>${tr('Détails indisponibles.','Details unavailable.')}</p>`}</section>`;}).join('')||`<p class="editor-hint">${tr('Aucun effet de Sonate renseigné.','No Sonata effect recorded.')}</p>`;
 }
@@ -47,22 +48,6 @@ function drawEditorEchoes(){
  selectedBox.insertAdjacentHTML('afterbegin',tabs);
  if(focus)document.querySelector('#editor-echo [data-echo-action="'+CSS.escape(focus.action==='unequip'?'pick':focus.action||'pick')+'"][data-value="'+CSS.escape(focus.value||'')+'"]')?.focus({preventScroll:true});
 }
-function openEchoPicker(slot){
- echoPickerSlot=Number(slot);selectedEchoSlot=echoPickerSlot;ensureEchoCatalogue();
- document.getElementById('echoPickerTitle').textContent=tr('Écho · emplacement ','Echo · slot ')+slot;
- const search=document.getElementById('echoPickerQuery');search.value='';search.placeholder=tr('Rechercher un exemplaire…','Search a copy…');
- document.getElementById('echoPickerAdd').textContent=tr('Ajouter un nouvel exemplaire','Add a new copy');
- document.getElementById('echoPickerCostLabel').textContent=tr('Coût','Cost');document.getElementById('echoPickerCost').value='';document.getElementById('echoPickerCost').options[0].textContent=tr('Tous','All');
- drawEchoPicker();openDialog('echoPicker');document.querySelector('.echo-picker-sheet').scrollTop=0;
-}
-function drawEchoPicker(){
- const q=document.getElementById('echoPickerQuery').value.toLocaleLowerCase(),cost=document.getElementById('echoPickerCost').value;
- const list=editingEchoes.after.filter(e=>echoName(e).toLocaleLowerCase().includes(q)&&(!cost||String(e.cost)===cost));
- document.getElementById('echoPickerList').innerHTML=echoCatalogueStatus()+list.map(e=>{
-  const other=e.owner!==null&&e.owner!==editingEchoes.owner;
-  return `<button type="button" class="echo-choice" data-echo-action="choose" data-value="${esc(e.id)}" ${other?'disabled':''}><img src="${esc(echoRow(e)?.image||'./assets/portrait-placeholder.svg')}" alt="" loading="lazy" width="80" height="80">${echoDescription(e)}<small>${esc(echoOwner(e))}${e.owner?' · '+e.slot:''}</small></button>`;
- }).join('')+(list.length?'':`<p>${tr('Ajoute ton premier exemplaire pour l’équiper.','Add your first copy to equip it.')}</p>`);
-}
 function assignDraftEcho(record,slot){
  const owner=editingEchoes.owner;
  // A move releases the previous slot. A replacement releases, never deletes, the old copy.
@@ -77,6 +62,7 @@ function echoStatFields(prefix,title,value,types){
 }
 function echoCatalogueLabel(row){return gameLabel(row);}
 function selectedEchoRow(value){
+ if(echoFormState?.catalogueId&&value===echoFormState.catalogueValue)return extendedCatalog.echo.find(e=>e.id===echoFormState.catalogueId);
  const original=echoFormState?.original;
  if(original&&value===echoFormState.inputValue)return echoRow(original);
  const matches=extendedCatalog.echo.filter(r=>echoCatalogueLabel(r)===value);
@@ -88,6 +74,7 @@ function openEchoForm(id,{draft=false,slot=null}={}){
  const e=record||{quality:null,cost:null,level:null,setId:null,main:null,secondary:null,substats:[]};
  document.getElementById('echoFormTitle').textContent=record?tr('Modifier l’Écho','Edit Echo'):tr('Ajouter un Écho','Add Echo');
  document.getElementById('echoFormContent').innerHTML=`<form id="echoInventoryForm" class="companion-form"><div class="wide" id="echoFormStatus">${echoCatalogueStatus()}</div>
+ <div class="wide echo-form-choice"><div id="echoFormImage"></div>${echoButton('browse-catalogue',tr('Choisir en images','Choose by image'))}</div>
  <label class="wide">${tr('Écho du catalogue','Catalogue Echo')}<input name="echo" list="echoCatalogue" autocomplete="off" required value="${esc(echoFormState.inputValue)}"></label>${catalogOptions(extendedCatalog.echo,'echoCatalogue')}
  <div class="wide echo-metadata"><label>${tr('Qualité','Quality')}<select name="quality"><option value="">?</option>${[2,3,4,5].map(q=>`<option value="${q}" ${e.quality===q?'selected':''}>${'★'.repeat(q)}</option>`).join('')}</select></label>
  <label>${tr('Coût','Cost')}<select name="cost"><option value="">?</option>${[1,3,4].map(c=>`<option value="${c}" ${e.cost===c?'selected':''}>${c}</option>`).join('')}</select></label>
@@ -105,6 +92,7 @@ function refreshEchoFormCatalogue(){
  const rows=extendedCatalog.echo;
  document.getElementById('echoCatalogue').innerHTML=rows.map(r=>`<option value="${esc(echoCatalogueLabel(r))}"></option>`).join('');
  const row=selectedEchoRow(input.value);
+ document.getElementById('echoFormImage').innerHTML=row?echoThumbnail(row):'';
  const select=form.elements.setId;
  const selected=select.dataset.ready?select.value:original?.setId||'';select.dataset.ready='true';
  form.elements.setId.innerHTML='<option value="">?</option>'+(row?.sets||[]).map(s=>`<option value="${esc(s.id)}">${esc(gameText(s.name))}</option>`).join('')+(selected&&!row?.sets.some(s=>s.id===selected)?`<option value="${esc(selected)}">${esc(selected)}</option>`:'');
@@ -147,9 +135,6 @@ document.getElementById('echoFormContent').addEventListener('change',event=>{
  }
 });
 document.getElementById('echoForm').addEventListener('close',()=>{if(!document.getElementById('echoForm').open)document.getElementById('echoFormContent').replaceChildren();});
-document.getElementById('echoPickerQuery').addEventListener('input',drawEchoPicker);
-document.getElementById('echoPickerCost').addEventListener('change',drawEchoPicker);
-document.getElementById('echoPickerAdd').addEventListener('click',()=>{closeDialog('echoPicker');openEchoForm(null,{draft:true,slot:echoPickerSlot});});
 document.getElementById('echoPickerClose').addEventListener('click',()=>closeDialog('echoPicker'));
 document.getElementById('echoFormClose').addEventListener('click',()=>closeDialog('echoForm'));
 document.getElementById('view').addEventListener('submit',event=>{if(event.target.id!=='echoSearch')return;event.preventDefault();const data=new FormData(event.target);echoQuery=data.get('query');echoFilter=data.get('filter');document.getElementById('echoInventoryList').innerHTML=echoInventoryCards();});
@@ -164,10 +149,8 @@ function echoAction(event){
   if(action==='draft-edit')openEchoForm(value,{draft:true});
   if(action==='owner'){const c=DATA.find(c=>c.id===value);if(c)openAccountEditor(c.name,'echo');}
   if(action==='pick')openEchoPicker(value);
-  if(action==='choose'){
-   const e=editingEchoes.after.find(e=>e.id===value);if(!e||(e.owner!==null&&e.owner!==editingEchoes.owner))return;
-   assignDraftEcho({...e,owner:editingEchoes.owner,slot:echoPickerSlot},echoPickerSlot);closeDialog('echoPicker');document.querySelector('#editor-echo [data-echo-action="pick"][data-value="'+echoPickerSlot+'"]')?.focus({preventScroll:true});
-  }
+  if(action==='choose')selectEchoCandidate(value);
+  if(action==='browse-catalogue')openEchoCatalogue();
   if(action==='unequip'){
    const e=editingEchoes.after.find(e=>e.owner===editingEchoes.owner&&e.slot===Number(value));if(e)assignDraftEcho({...e,owner:null,slot:null},null);
   }

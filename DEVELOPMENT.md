@@ -6,25 +6,31 @@ Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue
 
 Retour utilisateur : le lien public ouvre encore l'ancienne présentation sur PC. Le déploiement `79b8c78` est réussi et les 195 empreintes publiques sont à jour ; le navigateur personnel n'est pas accessible aux outils. Le mécanisme existant conserve l'ancien shell tant qu'un autre client reste ouvert, et son avertissement n'apparaît que dans les réglages. L'état exact du navigateur de l'utilisateur reste à distinguer de cette reproduction isolée.
 
-Suivi : **2 / 3 lots vérifiés**.
+Suivi : **3 / 3 lots vérifiés**.
 
 - [x] Reproduire l'ancienne version après actualisation et examiner les conditions d'activation.
 - [x] Fournir un accès de mise à jour indépendant de l'ancien shell et un avertissement visible, sans interrompre une édition ni effacer les données.
-- [ ] Vérifier les mises à jour, les blocages, le hors ligne et les petits écrans ; publier et contrôler le site réellement servi.
+- [x] Vérifier les mises à jour, les blocages, le hors ligne et les petits écrans ; publier et contrôler le site réellement servi.
 
 `pwa-update` et `pwa-recovery` passent depuis le commit publié `79b8c78`. Le second utilise de vrais workers et reproduit l'ancienne version après rechargement, deux onglets bloquants, le refus d'une demande d'activation depuis l'application, l'installation après fermeture des autres fenêtres, les données conservées, une première installation, l'échec réseau et le hors ligne. L'avertissement FR/EN est contrôlé à 320, 720 et 1152 pixels. Les captures ont été examinées. La page autonome `mise-a-jour.html` privilégie le réseau, avec repli local après sa première installation. Aucun rechargement automatique de l'application ouverte et aucune suppression du stockage personnel. Le fonctionnement suit le [cycle de vie documenté par web.dev](https://web.dev/articles/service-worker-lifecycle) ; l'activation anticipée est réservée au cas où seules les pages de mise à jour sont encore ouvertes dans le périmètre de Companion.
 
 La revue finale a également reproduit un défaut de chargement tardif dans le formulaire de configuration conservé pour la seconde phase : l'arrivée des recommandations reconstruisait le formulaire et effaçait son brouillon. Le rendu différé respecte désormais le formulaire ouvert ; un test retarde explicitement la réponse. `final-review` et `recommendations` passent après cette correction ; les recommandations restent masquées dans l'application publiée.
 
+Publication du correctif `12beb21` confirmée par [Pages 34826584533](https://github.com/Earyon/wuwa-companion/actions/runs/34826584533). Les empreintes des 196 fichiers servis, dont l'accès autonome de mise à jour, correspondent au commit. Le parcours public isolé passe. Le lien a été transmis à l'utilisateur ; son navigateur personnel n'a pas été manipulé et son activation locale n'est pas présentée comme confirmée.
+
 ## Sélection visuelle des Échos — demande complémentaire du 14 septembre 2026
 
 La vidéo 01:32–01:49 est la référence : rail des cinq emplacements, grille de miniatures, coûts Tous/1/3/4, sélection distincte de l'équipement, illustration et attributs à droite, retrait/changement et amélioration. La demande inclut aussi le choix visuel d'un type d'Écho lors de l'ajout d'un exemplaire, auparavant limité à une liste de noms.
 
-Suivi : **0 / 3 lots vérifiés**.
+Suivi : **2 / 3 lots vérifiés**.
 
-- [ ] Examiner la vidéo et les parcours de sélection, y compris ajout, équipement, déplacement et remplacement.
-- [ ] Intégrer une grille visuelle commune, ses filtres et le détail préalable à l'action, avec les miniatures officielles.
+- [x] Examiner la vidéo et les parcours de sélection, y compris ajout, équipement, déplacement et remplacement.
+- [x] Intégrer une grille visuelle commune, ses filtres et le détail préalable à l'action, avec les miniatures officielles.
 - [ ] Vérifier interactions, données, chargement, responsive et publication.
+
+Les 26 suites ont été exécutées sur l'intégration. L'assertion de géométrie de `menu-completion` a été précisée pour examiner le rail de l'éditeur, sans compter celui du sélecteur fermé. Les suites restantes, puis `echo-selector`, `echoes` et `pwa-update`, ont passé après revue. Le test dédié couvre 12 dispositions FR/EN (320 à 1724 pixels CSS, dont 720 × 450), les miniatures officielles, l'absence de chevauchement, les cinq cibles accessibles, l'aperçu sans équipement, les transferts annulés/enregistrés, le plafond de coût, les filtres, les données chargées en retard, les identifiants du catalogue et les saisies conservées. Un exemplaire appartenant à un autre Résonateur doit d'abord être explicitement transféré pour modifier ses valeurs dans la fiche courante.
+
+Les images sont chargées à la demande ; les descriptions partagent le cache de l'encyclopédie et les effets de Sonate partagent le comptage des espèces déjà utilisé par l'éditeur. Aucun nouveau catalogue parallèle ni aucune migration des données personnelles. Le cache PWA passe de 23 à 24, avec le nouveau sélecteur intégré au shell. Les captures des grilles et des petits écrans ont été examinées. Mesures du banc isolé existant, trois essais sans bridage de CPU/débit : médianes Collection/portraits froids 177/195 ms, réouverture 126/142 ms. Ces mesures ne constituent pas un essai sur la tablette physique.
 
 ## Reproduction complète — reprise du 14 septembre 2026
 

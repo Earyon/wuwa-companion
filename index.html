@@ -137,7 +137,16 @@
   <div class="level-grid" id="levelGrid"></div>
  </div>
 </dialog>
-<dialog class="selector-overlay" id="echoPicker" aria-labelledby="echoPickerTitle"><div class="selector-sheet echo-picker-sheet"><div class="selector-head"><h2 id="echoPickerTitle">Écho</h2><button class="closebtn" id="echoPickerClose" aria-label="Fermer / Close">✕</button></div><input class="selector-search" id="echoPickerQuery" aria-label="Rechercher / Search"><label class="menu-picker-order"><span id="echoPickerCostLabel">Coût</span><select id="echoPickerCost"><option value="">Tous</option><option>1</option><option>3</option><option>4</option></select></label><button class="companion-button" id="echoPickerAdd"></button><div id="echoPickerList" class="companion-list"></div></div></dialog>
+<dialog class="selector-overlay" id="echoPicker" aria-labelledby="echoPickerTitle"><div class="selector-sheet echo-picker-sheet">
+ <div class="selector-head"><button type="button" id="echoPickerBack" class="companion-button"></button><h2 id="echoPickerTitle">Écho</h2><button class="closebtn" id="echoPickerClose" aria-label="Fermer / Close">✕</button></div>
+ <div class="echo-picker-layout"><nav id="echoPickerRail" class="echo-picker-rail" aria-label="Échos équipés / Equipped Echoes"></nav>
+ <section class="echo-picker-browser"><div id="echoPickerCostTabs" class="echo-picker-costs" role="group" aria-label="Coût / Cost"></div>
+ <input type="search" class="selector-search" id="echoPickerQuery" aria-label="Rechercher / Search">
+ <details class="echo-picker-filters"><summary id="echoPickerFilters"></summary><select id="echoPickerSet" aria-label="Sonate / Sonata"></select><select id="echoPickerOwner" aria-label="Équipement / Equipment"></select><select id="echoPickerOrder" aria-label="Trier / Sort"></select></details>
+ <div id="echoPickerEmpty" role="status"></div><div id="echoPickerList"></div><footer><span id="echoPickerCount"></span><button class="companion-button" id="echoPickerAdd"></button></footer></section>
+ <div id="echoPickerArtwork" class="echo-picker-art" aria-hidden="true"></div>
+ <section class="echo-picker-preview"><div id="echoPickerDetail"></div><div id="echoPickerActions"></div></section>
+ </div></div></dialog>
 <dialog class="selector-overlay" id="echoForm" aria-labelledby="echoFormTitle"><div class="selector-sheet echo-form-sheet"><div class="selector-head"><h2 id="echoFormTitle">Écho</h2><button class="closebtn" id="echoFormClose" aria-label="Fermer / Close">✕</button></div><div id="echoFormContent"></div></div></dialog>
 <dialog class="profile-dialog" id="detail" aria-labelledby="profileName">
  <div class="detail-inner">
@@ -161,6 +170,7 @@
 <script src="./companion-ui.js" defer></script>
 <script src="./inventory.js" defer></script>
 <script src="./echoes.js" defer></script>
+<script src="./echo-selector.js" defer></script>
 <script src="./menu-stats.js" defer></script>
 <script src="./resonator-menu.js" defer></script>
 <script src="./progression-data.js" defer></script>

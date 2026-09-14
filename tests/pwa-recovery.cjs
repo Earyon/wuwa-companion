@@ -8,7 +8,7 @@ const oldFiles=Object.fromEntries([...new Set(['sw.js',...shell.filter(p=>p!=='.
  let latest=false,future=false,fail=false;
  const {server,base}=await startServer({handle(req,res){const file=new URL(req.url,'http://local').pathname.slice(1)||'index.html';
   if(file==='sw.js'&&fail){res.writeHead(503).end();return true;}
-  const data=!latest&&oldFiles[file]?oldFiles[file]:file==='sw.js'&&future?fs.readFileSync(path.join(root,'sw.js'),'utf8').replace('057-pwa-23','057-pwa-24-test'):null;
+  const data=!latest&&oldFiles[file]?oldFiles[file]:file==='sw.js'&&future?fs.readFileSync(path.join(root,'sw.js'),'utf8').replace(/057-pwa-\d+/, '057-pwa-next-test'):null;
   if(data){res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':'text/html');res.end(data);return true;}
  }}),browser=await chromium.launch({headless:true,channel:'msedge'});
  try{
