@@ -80,4 +80,25 @@ Conserver GitHub Pages pour le site. Ajouter une authentification Companion et u
 
 **Firebase Spark** est une option à privilégier pour le premier déploiement : pas de compte de facturation, pas d’activation de Blaze, authentification adaptée et accès aux documents limité à leur propriétaire. Les quotas gratuits limitent l’usage ; ils ne constituent pas une promesse de service illimité. Aucun projet cloud, aucune règle d’accès ni connexion utilisateur n’a encore été configuré ou testé. La synchronisation n’est donc pas opérationnelle. [Offre Spark](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans), [quotas Firestore](https://firebase.google.com/docs/firestore/quotas), [contrôles d’accès](https://firebase.google.com/docs/firestore/security/rules-conditions).
 
-Le choix de la méthode de collecte précède sa distribution et la validation sur le vrai compte. Le résultat visé demeure « je ne saisis rien » ; le stade actuel est une préparation vérifiée, avec des obstacles techniques identifiés, et non un add-on fini.
+La méthode Windows OCR a été choisie par l’utilisateur le 14 septembre 2026. Le résultat visé demeure « je ne saisis rien » ; le stade actuel est une préparation vérifiée, avec des obstacles techniques identifiés, et non un add-on fini.
+
+## Développement après le choix — 14 septembre 2026
+
+Le nouveau lecteur utilise **RapidOCR 3.9.2 / ONNX Runtime 1.30.0**, en local et sur CPU. Les versions installées sont figées ; le contrôle des dépendances ne signale pas d’incompatibilité. Le paquet RapidOCR comprend ici les modèles PP-OCRv6 retenus. Le chargement du moteur et les huit lectures de référence ont réussi avec les connexions réseau refusées. [Documentation du moteur](https://rapidai.github.io/RapidOCRDocs/main/en/install_usage/rapidocr/install/), [API et paramètres](https://rapidai.github.io/RapidOCRDocs/main/install_usage/rapidocr/usage/).
+
+| Image originale fournie | Champs exactement retrouvés | Image entière | Zones ciblées |
+| --- | --- | --- | --- |
+| Attributs | Hiyuki, niveau 90, palier 6 | 5 250 ms | 2 296 ms |
+| Arme sélectionnée | Gelure, niveau 90, palier 6, rang 5 | 7 890 ms | 4 531 ms |
+| Compétences | 6 / 6 / 6 / 9 / 6, dans l’ordre du stockage réel | 6 063 ms | 3 750 ms |
+| Écho | Sabot-de-fer, niveau 25, coût 3, qualité 5 et sept statistiques | 6 906 ms | 6 469 ms |
+
+Mesures du même essai, deux threads CPU, jeu ouvert ; initialisation du moteur : 1 750 ms. Ce sont des mesures ponctuelles d’OCR, sans navigation ni transfert, et non une durée annoncée de synchronisation du compte. Le test de l’Écho sépare le texte des icônes de statistiques, qui étaient parfois reconnues comme des lettres. Le début de la description n’appartient pas à la zone des statistiques.
+
+Les variantes portant un même nom ne sont pas fusionnées. Une projection de 311 identités depuis `BinData_phantom_phantomitem` fournit leurs qualités possibles. Dans l’exemple de la vidéo, le niveau 25 exclut la variante homonyme qui existe seulement en qualité 2. Une observation encore ambiguë reste refusée. Les identifiants ne sont pas choisis d’après le premier résultat ou l’image partagée.
+
+Le menu des attributs réel du PC a été capturé après la mise à jour 3.6.15, au format 1280 × 720. La lecture a retrouvé Hiyuki, niveau 90 et palier 6 en 3 656 ms. Les images et résultats privés restent exclus de Git. Cela ne démontre ni la lecture de tous les personnages, ni un scan automatique de l’inventaire.
+
+**Pilotage encore bloqué dans l’environnement d’essai :** le jeu est exécuté au niveau d’intégrité Windows élevé (12288), le processus local au niveau moyen (8192). Les essais de clics sur l’onglet Arme n’ont pas changé le menu. Cette différence de niveaux bloque les entrées synthétiques selon la protection UIPI de Windows ; le contrôle préalable du module détecte maintenant ce cas. Aucun accès à la mémoire du jeu ni modification des protections Windows n’a été effectué. Le lancement avec les droits adaptés devra être traité explicitement dans le module avant les essais de navigation ; augmenter les droits ne suffirait pas à certifier sa compatibilité. [Règle de `SendInput`, Microsoft](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput), [lecture des métadonnées de permissions](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation).
+
+Quatorze tests de lecteurs/pagination passent, avec 292 combinaisons total/grille, les limites de pages, les homonymes, les pourcentages manquants, les niveaux ambigus, la prévisualisation de syntonisation, les lectures incomplètes et les totaux qui changent. Cette pagination reste un plan : le pilote devra prouver la première ligne réellement affichée et relire les compteurs. Elle ne crée pas d’identifiant durable de copie. La résolution des copies OCR, le pilote, les nœuds Forte, la distribution et le service privé demeurent ouverts.

@@ -1,5 +1,5 @@
 'use strict';
-// Developer-only staging command. A provider and the final user flow remain to be selected.
+// Developer-only staging command. Windows OCR is selected; its end-to-end user flow is not ready.
 const fs=require('node:fs'),path=require('node:path');
 const {create,key}=require('./account-context.cjs'),{prepare}=require('./import-plan.cjs');
 const root=path.resolve(__dirname,'..');

@@ -337,7 +337,7 @@ Le 13 septembre : contrôles reproductibles des projections locales réussis sur
 
 ## Import automatique du compte — périmètre du 14 septembre 2026
 
-Objectif demandé : aucune saisie manuelle des possessions, avec module local facultatif et accès depuis le site/tablette. La reconnaissance d’image est acceptée si les données structurées ne suffisent pas. Dernière consigne : préparer et comparer les méthodes, y compris celles potentiellement contraires aux conditions Kuro ; l’utilisateur choisira la méthode ensuite. L’accord d’étude ne choisit pas à sa place une intervention sur son compte. Les règles permanentes restent inchangées.
+Objectif demandé : aucune saisie manuelle des possessions, avec module local facultatif et accès depuis le site/tablette. Après comparaison des méthodes, l’utilisateur a choisi le 14 septembre la méthode recommandée : module Windows qui lit les menus affichés, reconnaissance locale et synchronisation avec Companion. Le développement et les essais de cette méthode sont autorisés. Les règles permanentes restent inchangées.
 
 | Lot | Résultat attendu | État |
 | --- | --- | --- |
@@ -345,8 +345,8 @@ Objectif demandé : aucune saisie manuelle des possessions, avec module local fa
 | 2 | Comparatif sourcé des méthodes et audit du code candidat | Vérifié, voir `ADDON_METHODS.md` |
 | 3 | Prototype local vérifié sur données de référence, couverture mesurée | Vérifié sur cinq observations de la vidéo, couverture partielle explicite |
 | 4 | Import commun validé, conservation des données et doublons | Vérifié en mémoire et dans Edge isolé ; fournisseur réel restant à choisir |
-| 5 | Distribution et synchronisation privée, sans service payant | À réaliser après choix de la méthode et configuration du service |
-| 6 | Parcours réel complet sur le compte, publication et revue finale | À réaliser après choix de la méthode |
+| 5 | Collecteur Windows, distribution et synchronisation privée, sans service payant | En cours : méthode OCR choisie ; configuration du service à établir |
+| 6 | Parcours réel complet sur le compte, publication et revue finale | À réaliser après développement du collecteur |
 
 **Avancement de ce nouveau périmètre : 4 / 6 lots vérifiés.** Ce compteur est distinct du périmètre historique de 14 lots ; il ne prétend pas que l’import automatique est opérationnel. Les lots 2 à 4 constituent la préparation demandée avant le choix de la méthode. Aucun pourcentage de couverture du compte réel n’est établi.
 
@@ -358,4 +358,12 @@ Lots 2–3 : ressources locales et sources publiques comparées ; audit de WuWa 
 
 Lot 4 : nouveau prototype séparé `addon/`, sans effet sur les ressources chargées par le site. Validation par le véritable `account-store`, préparation sans mutation, copies distinctes, références contrôlées, versions/serveurs/comptes, relevés anciens, champs inconnus, répétition et modification concurrente. `addon-import` et `addon-browser` réussis ; compte synthétique restauré dans l’application réelle avec personnage, arme équipée, Écho possédé et rechargement. `account-store` revérifié. Les nœuds Forte réels, l’identité durable des copies OCR et les suppressions d’un inventaire complet restent à traiter avec le collecteur sélectionné ; ils ne sont pas déclarés résolus par le format de staging.
 
-Lots 5–6 : restent le choix du collecteur, son développement, sa distribution, la configuration de synchronisation privée gratuite et le parcours complet sur le compte réel. Firebase Spark est une proposition documentée, pas un service configuré. Aucune dépense, aucun abonnement ou service payant n’a été engagé.
+Lots 5–6 : le collecteur Windows OCR a été choisi. Restent son développement complet, sa distribution, la configuration de synchronisation privée gratuite et le parcours complet sur le compte réel. Firebase Spark est une proposition documentée, pas un service configuré. Aucune dépense, aucun abonnement ou service payant n’a été engagé.
+
+### Lot 5 — lecture d’images vérifiée, pilotage non validé
+
+RapidOCR 3.9.2 / ONNX Runtime 1.30.0 installés dans un environnement Python isolé ; dépendances figées et `pip check` réussi. Lecteurs des attributs, arme, compétences et Écho vérifiés sur les quatre images originales de la vidéo, en lecture entière et ciblée, connexions réseau refusées pendant le chargement et l’inférence. Les sept statistiques de Sabot-de-fer sont exactes. Homonymes distingués par les qualités possibles projetées depuis les fichiers locaux, avec refus des ambiguïtés restantes. Les références restent celles du snapshot 3.6.13 explicitement identifié.
+
+Le jeu s’est mis à jour vers les ressources 3.6.15. Sur le menu réel du PC ouvert par l’utilisateur, la reconnaissance retrouve Hiyuki, niveau 90 et palier 6 (1280 × 720, 3 656 ms). La navigation automatique n’est pas vérifiée : les clics d’onglet restent sans effet ; diagnostic Windows en lecture seule : jeu élevé (12288), processus local moyen (8192), différence incompatible avec les entrées synthétiques. Le module ne tente pas d’élévation automatique ni de modification des protections.
+
+`tests/addon-readers.py` : 14 tests passent, dont 292 combinaisons de pagination sur grilles 6 × 4 et 3 × 5, cas invalides et couverture incomplète. Les cases de dernière page déjà visitées ne sont pas relues comme de nouvelles copies ; leur position reste un indice de visite temporaire. L’observation de la première ligne visible par le futur pilote, l’identité durable des copies et les nœuds réels restent à résoudre. Aucun collecteur complet, installateur ou service distant n’est déclaré opérationnel. **Le compteur reste 4 lots vérifiés sur 6.**

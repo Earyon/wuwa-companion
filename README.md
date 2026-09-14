@@ -56,7 +56,7 @@ Les projections de données sont reproductibles avec `scripts/refresh-progressio
 
 ## Limites explicites
 
-- Import automatique du compte : préparation et prototype local dans [addon/README.md](addon/README.md), comparaison des méthodes dans [ADDON_METHODS.md](ADDON_METHODS.md). Aucun collecteur complet ni synchronisation cloud opérationnelle à ce stade ; la méthode reste à choisir.
+- Import automatique du compte : module Windows OCR choisi, en développement dans [addon/README.md](addon/README.md), comparaison des méthodes dans [ADDON_METHODS.md](ADDON_METHODS.md). Lecture d’images vérifiée ; aucun collecteur complet ni synchronisation cloud opérationnelle à ce stade.
 
 - Aucun simulateur de dégâts du compte : les recommandations donnent des repères contextualisés, et l’optimisation répartit les stocks connus entre objectifs sans les dépenser.
 - Les coûts partent du début du niveau actuel ; l’EXP déjà acquise dans ce niveau n’est pas déduite. Les données manquantes rendent le calcul partiel. Le pré-farm d’un Résonateur sans arme équipée n’établit pas les coûts d’une future arme inconnue.
