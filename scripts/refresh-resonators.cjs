@@ -23,12 +23,14 @@ const clean=value=>String(value||'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[
   for(const n of layout)assert.ok(n.parents.every(p=>layout.some(x=>x.index===p)),`${character.name}: missing parent`);
   const locales={};
   for(const language of ['en','fr']){
+   const richText=(id,parameters=[])=>String(maps[language].get(id)||'').replace(/\{(\d+)\}/g,(match,index)=>parameters[index]??match).trim();
    const text=(id,parameters=[])=>clean(maps[language].get(id)).replace(/\{(\d+)\}/g,(match,index)=>parameters[index]??match);
    const base=bases.find(b=>b.Id===role.PropertyId);assert.ok(base);
    locales[language]={Id:role.Id,Introduction:text(role.Introduction),Properties:role.ShowProperty.map(id=>{const p=properties.find(p=>p.Id===id);assert.ok(p&&Number.isFinite(base[p.Key]));return {Name:text(p.Name),BaseValue:p.IsPercent?base[p.Key]/100+'%':base[p.Key]};}),Skills:kit.map(s=>{
     const node=tree.find(n=>n.SkillId===s.Id);
-    return {SkillId:s.Id,SkillType:clean(maps.en.get(`SkillType_${s.SkillType}_TypeName`)),TypeLabel:text(`SkillType_${s.SkillType}_TypeName`),SkillName:text(s.SkillName),SkillDescribe:text(s.SkillDescribe,(s.SkillDetailNum||[]).map(x=>x.ArrayString?.join(' / ')??String(x))),Icon:s.Icon,Consumes:node?.Consume?.length?[{Consume:node.Consume}]:[]};
-   }),SkillTree:tree.filter(n=>n.PropertyNodeTitle).map(n=>({Id:n.Id,PropertyNodeTitle:text(n.PropertyNodeTitle),PropertyNodeDescribe:text(n.PropertyNodeDescribe,n.PropertyNodeParam),Icon:n.PropertyNodeIcon})),ResonantChain:chains.filter(c=>c.GroupId===role.ResonantChainGroupId).map(c=>({Id:c.Id,GroupIndex:c.GroupIndex,NodeName:text(c.NodeName),NodeIcon:c.NodeIcon,AttributesDescription:text(c.AttributesDescription,c.AttributesDescriptionParams)}))};
+    const parameters=(s.SkillDetailNum||[]).map(x=>x.ArrayString?.join(' / ')??String(x));
+    return {SkillId:s.Id,SkillType:clean(maps.en.get(`SkillType_${s.SkillType}_TypeName`)),TypeLabel:text(`SkillType_${s.SkillType}_TypeName`),SkillName:text(s.SkillName),SkillDescribe:text(s.SkillDescribe,parameters),SkillDescribeRich:richText(s.SkillDescribe,parameters),Icon:s.Icon,Consumes:node?.Consume?.length?[{Consume:node.Consume}]:[]};
+   }),SkillTree:tree.filter(n=>n.PropertyNodeTitle).map(n=>({Id:n.Id,PropertyNodeTitle:text(n.PropertyNodeTitle),PropertyNodeDescribe:text(n.PropertyNodeDescribe,n.PropertyNodeParam),Icon:n.PropertyNodeIcon})),ResonantChain:chains.filter(c=>c.GroupId===role.ResonantChainGroupId).map(c=>({Id:c.Id,GroupIndex:c.GroupIndex,NodeName:text(c.NodeName),NodeIcon:c.NodeIcon,AttributesDescription:text(c.AttributesDescription,c.AttributesDescriptionParams),AttributesDescriptionRich:richText(c.AttributesDescription,c.AttributesDescriptionParams)}))};
    assert.ok(locales[language].Skills.length,`${character.name}: empty skills`);
    assert.equal(locales[language].ResonantChain.length,6,`${character.name}: incomplete chain`);
    assert.ok(!/\{\d+\}|\[object Object\]/.test(JSON.stringify(locales[language])),`${character.name}: unresolved source parameters`);

@@ -115,6 +115,9 @@ function auditCoreSkillIcons(){
 }
 
 function drawSkillsEditor(state="ready"){
+ document.getElementById('editorStage').dataset.talentSelection='false';
+ document.getElementById('accountEditor').dataset.treeReady='false';
+ document.getElementById('accountEditor').dataset.talentDetail='false';
  if(drawTalentEditor(state))return;
  drawForteEditor(state);
  const box=document.querySelector("#skillsEditor"); if(!box)return;

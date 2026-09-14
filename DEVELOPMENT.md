@@ -2,6 +2,20 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
+## Fidélité au menu du jeu — correction du 14 septembre 2026
+
+Le bilan fonctionnel Collection ci-dessous ne validait pas une copie conforme. Le retour utilisateur a révélé des écarts réels : marges transparentes des cadres ignorées, grille estimée, colonnes latérales conservées lors de la sélection et mise en forme officielle du texte supprimée.
+
+Suivi de cette intervention : **2 / 3 lots vérifiés**.
+
+- [x] Source primaire : onze prefabs de menus décodés sans erreur ; positions, dimensions, états et références de sprites identifiés et comparés à la vidéo.
+- [x] Intégration : arbre et chaîne depuis les coordonnées sources, navigation commune, détail séparé et texte officiel mis en forme ; tests de tous les parcours concernés.
+- [ ] Livraison : revue des captures, contrôles complets, mise à jour PWA et vérification des ressources publiées.
+
+Validation exécutée : les 23 suites ont passé sur l'intégration. La dernière revue visuelle a ensuite déplacé l'enregistrement pour dégager les libellés et séparé le défilement de la description des commandes. Après ces ajustements, `talent-editor`, `collection` et `pwa-update` ont été relancés avec succès. Le premier contrôle couvre 116 arbres (58 personnages × 2 langues), 56 dispositions de détail et dix parcours de chaîne avec rotations simulées. Il compare aussi les centres à la vidéo, vérifie les zones réellement accessibles, le focus, le texte officiel mis en forme, le filtrage du balisage, le brouillon, l'annulation et la lecture indépendante. Les captures finales en 1724 × 1080, 720 × 450 et téléphone ont été examinées. Les 58 projections se régénèrent à l'identique ; en retirant uniquement leurs nouveaux champs de texte enrichi, leur contenu est identique au commit précédent. Syntaxe et `git diff --check` passent.
+
+Le compteur porte sur cette correction et ne signifie pas que tous les menus sont des copies conformes. Restent des différences explicites : illustration 2D du personnage, police système, animations et effets de matériaux du moteur du jeu, sous-écrans de statistiques/dégâts et actions propres au jeu. Les contrôles Companion enregistrent la progression déclarée, sans simuler une consommation de ressources dans le compte Kuro. Les petits écrans conservent des adaptations tactiles.
+
 ## Phase Collection — 4 / 4 lots vérifiés
 
 Reprise expressément autorisée le 13 septembre 2026 : réaliser la phase en une traite, tests et publication inclus. L'encyclopédie doit partager le code graphique de toute l'application. Les nouvelles recommandations et les objectifs restent pour une seconde phase ; leurs données existantes sont conservées.

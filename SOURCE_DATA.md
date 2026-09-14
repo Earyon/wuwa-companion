@@ -58,3 +58,12 @@ node scripts/refresh-inventory.cjs --check
 Les projections locales refusent un instantané dont les empreintes diffèrent du manifeste. Pour une future version, revoir ensemble les tables, traductions, identifiants, ressources et leurs empreintes avant de mettre à jour le manifeste. La conversion des nouvelles images doit conserver leurs dimensions et coordonnées originales, produire des noms fondés sur le contenu, puis actualiser les deux manifestes. Ne pas réutiliser un ancien script d'extraction privé sans le comparer au format actuel.
 
 Après une évolution : tester les personnages concernés et les composants communs, vérifier les données personnelles existantes, incrémenter le shell PWA si nécessaire et contrôler les fichiers réellement servis après publication. Les noms et images appartiennent à Kuro Games ; leur provenance et cette attribution ne constituent pas une licence de réutilisation.
+
+
+### Complément visuel du 14 septembre : composition des menus
+
+Onze prefabs locaux ont été lus en complément des images : racine Résonateur, attributs, liste/élément de chaîne, arbre/vue/détail, compétences A/B/C et compétences supplémentaires. Les propriétés décodées comprennent la hiérarchie, les ancres, positions, dimensions, tailles de police et références de sprites ; les flux inspectés ne signalent aucune erreur de décodage. Les coordonnées utilisées et les limites sont détaillées dans `DESIGN.md`. Les fichiers bruts restent privés.
+
+Onze sprites supplémentaires de l'atlas `TPI_UiRole_RoleSkillTree` sont conservés avec leurs rectangles et empreintes dans `assets/game-ui/sources.json`, sans redessin et en WebP sans perte. Les états affichés distinguent les cadres actifs, inactifs et sélectionnés, ainsi que le cadre propre aux compétences supplémentaires. Le total vérifié est de 2 848 fichiers d'images officiels.
+
+La projection des 58 Résonateurs conserve maintenant, en plus des descriptions simples, la mise en forme locale des compétences et chaînes : titres, couleurs nommées et termes. Elle occupe 3 382 191 octets avant compression HTTP, répartis par personnage et chargés à la demande. Les tables et textes sources sont inchangés ; seul un champ de mise en forme supplémentaire par compétence ou séquence est projeté. Aucun attribut HTML libre ni lien provenant du texte n'est exécuté.

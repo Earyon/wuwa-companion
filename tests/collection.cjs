@@ -61,6 +61,7 @@ const {startServer,root}=require('./support.cjs'),catalogue=require('../data/cat
    await page.locator('[data-skill-step="1"]').click();assert.equal(await page.locator('[data-skill-level]').inputValue(),'9');await page.locator('[data-skill-step="-1"]').click();assert.equal(await page.locator('[data-skill-level]').inputValue(),'8');
    await page.locator('[data-talent="node:876"]').click();await page.locator('[data-talent-state="yes"]').click();
    assert.deepEqual(await page.evaluate(()=>CompanionStore.exportData().records),record,'Draft does not write before Save');
+   await page.locator('[data-talent-back]').click();
    await page.locator('[data-editor-character="resonator:1102"]').click();await page.locator('#editorSwitchPrompt').waitFor();await page.locator('[data-switch-choice="stay"]').click();
    assert.equal(await page.evaluate(()=>editingName),'Hiyuki');
    await page.locator('[data-editor-character="resonator:1102"]').click();await page.locator('[data-switch-choice="save"]').click();

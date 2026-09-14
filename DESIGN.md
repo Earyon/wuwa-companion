@@ -64,3 +64,26 @@ Dernière demande explicite de l’utilisateur : reprendre au maximum à l’ide
 - Tutoriel en cinq étapes, facultatif et rejouable ; pas de second système de bulles d'aide. Objectifs et recommandations masqués, données et code conservés.
 
 Les captures examinées utilisent les vrais composants et images locales avec un compte synthétique : arbre FR/EN à 320 et 1152 pixels CSS, attributs, arme, cinq Échos et chaîne à 1152 pixels CSS. Les tests vérifient aussi les dimensions intermédiaires, les rotations simulées et les zones tactiles. Ils ne constituent pas un essai sur la tablette physique. Une reproduction exacte des modèles 3D, des animations, de toutes les statistiques calculées du jeu ou de son serveur de compte n'est pas revendiquée.
+
+
+## Correctif de fidélité — prefabs locaux, 14 septembre 2026
+
+La comparaison utilisateur invalide la qualification de « copie conforme » de la livraison Collection. Les cadres avaient été récupérés, mais pas encore leur composition exacte. Onze prefabs sont maintenant décodés : racine du menu, attributs, liste et élément de chaîne, arbre, panneau détaillé, vue, nœuds A/B/C et compétences supplémentaires. Aucun échec dans les flux de propriétés décodés. Les fichiers bruts, outils et la vidéo restent privés dans `test-results`.
+
+`UiItem_RoleSkillTree` utilise un canevas 2560 × 1440. Les acteurs `PnlSkill1` (100317), `PnlSkill2` (100321), `PnlPassiveSkill` (100006), `PnlSkill3` (100325) et `PnlSkill4` (100329), avec leurs instances imbriquées, donnent ces centres arrondis au pixel source :
+
+| Branche | X | Y compétence | Y intermédiaire | Y supérieur |
+| --- | ---: | ---: | ---: | ---: |
+| Attaques normales | 623 | 1180 | 837 | 540 |
+| Compétence résonatrice | 923 | 1000 | 657 | 360 |
+| Forte Circuit | 1287 | 937 | 596 | 300 |
+| Libération résonatrice | 1643 | 1000 | 657 | 360 |
+| Intro | 1940 | 1180 | 837 | 540 |
+
+Outro et Interruption de tonalité : (1126, 1252) et (1450, 1252). Les cadres font 312 × 312 unités **marges transparentes incluses** ; les icônes principales 78 × 78 ; les icônes supplémentaires 66 × 66. Les niveaux utilisent 28/40 unités typographiques. Le panneau source du détail fait 842 unités ; le décalage de sélection de 400 unités est recoupé avec la vidéo. Le canevas est centré et mis à l'échelle sans déformer ses proportions sur les vues larges ; les vues plus étroites cadrent son contenu et préservent des cibles de 44 pixels minimum. Le téléphone affiche la description avec un retour à l'arbre.
+
+Les centres de chaîne proviennent de `UiItem_RoleDeviceList`, `PnlList` et `PnlDeviceItem01` à `06`, en tenant compte des ancres droites : (1262,1295), (1530,1233), (1746,1099), (1918,908), (2025,681), (2060,373). La sélection masque les rails ; le retour les rétablit. La progression reste le brouillon commun existant.
+
+La mise en forme des descriptions provient du texte local : titres, termes soulignés et couleurs nommées. Un formateur commun échappe le texte et accepte seulement une liste fixe de styles ; aucun HTML actif, lien source ou taille arbitraire n'est inséré. Les descriptions simples restent présentes pour les consommateurs existants. Les 58 références restent chargées à la demande.
+
+Limites de conformité : pas de modèle 3D animé, de police extraite, de rendu Niagara ni de simulation d'effets de matériaux. Les onglets de dégâts détaillés et les statistiques finales du personnage ne sont pas reproduits par des chiffres supposés. Le bouton Enregistrer reste nécessaire à Companion. Les autres sous-écrans gardent des contrôles adaptés à un inventaire déclaré. Il serait incorrect de qualifier l'ensemble de copie conforme malgré l'amélioration de l'arbre et de la chaîne.

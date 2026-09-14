@@ -178,6 +178,138 @@
         164
       ],
       "sha256": "4873bc9db4caf737c634c35cf5f1a1607f6ef818c8b03076cda8a52430cc88e7"
+    },
+    {
+      "file": "SP_SkillCircleBNor.webp",
+      "sha256": "275c67c0543458258c2d7294d0302c3ed188442425efda7104a2a59890f81cf9",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillCircleBNor.SP_SkillCircleBNor",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        4,
+        1228,
+        312,
+        312
+      ]
+    },
+    {
+      "file": "SP_SkillCircleBHold.webp",
+      "sha256": "921b1054745acdd504c8314086c4be51c4ad0b1eb4998c2f2d392d0b57aee872",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillCircleBHold.SP_SkillCircleBHold",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        4,
+        912,
+        312,
+        312
+      ]
+    },
+    {
+      "file": "SP_SkillCircleSNor.webp",
+      "sha256": "b2554ba836989518c21fd4dd6c3411aeef4803787c1f7b6e455ffcb986d08aaf",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillCircleSNor.SP_SkillCircleSNor",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        636,
+        952,
+        312,
+        312
+      ]
+    },
+    {
+      "file": "SP_SkillCircleSSele.webp",
+      "sha256": "feed3c588f62ee3e51df866d54b53affd877ab0e5faa6cdfd85e6fc7a28b56b4",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillCircleSSele.SP_SkillCircleSSele",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        636,
+        1268,
+        312,
+        312
+      ]
+    },
+    {
+      "file": "SP_SkillFrmSNor.webp",
+      "sha256": "f17264c7d68670aa711fe1d1c3c384001628def8cfefccde9ad85290504a4d6a",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillFrmSNor.SP_SkillFrmSNor",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        1584,
+        952,
+        312,
+        312
+      ]
+    },
+    {
+      "file": "SP_SkillFrmSSele.webp",
+      "sha256": "83f97226f30cbe07e451db9f145f9f97aab376d483172a9b19bd07d3d130775b",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillFrmSSele.SP_SkillFrmSSele",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        1584,
+        1268,
+        312,
+        312
+      ]
+    },
+    {
+      "file": "SP_SkillNameBg.webp",
+      "sha256": "442bf6b000a640001849406b1402f78ee3b95dfc703047cc5dddaff122a1fd5e",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillNameBg.SP_SkillNameBg",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        44,
+        396,
+        56,
+        44
+      ]
+    },
+    {
+      "file": "SP_RoleSkillTreeNotActive0.webp",
+      "sha256": "db373eae2e36677f2d448d5ed8a56d70697d90591a840f3e30e0a8561a3a26a2",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_RoleSkillTreeNotActive0.SP_RoleSkillTreeNotActive0",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        4,
+        4,
+        36,
+        512
+      ]
+    },
+    {
+      "file": "SP_RoleSkillTreeNotActive1.webp",
+      "sha256": "695f0e00fdf9edbe8bedf83b192f7450df52da1d738ef6a2cf0b33b4a2129aa8",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_RoleSkillTreeNotActive1.SP_RoleSkillTreeNotActive1",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        4,
+        520,
+        104,
+        388
+      ]
+    },
+    {
+      "file": "SP_SkillFrmArrow.webp",
+      "sha256": "fd9f3c8316b34f68ad2d0853fc1cfee4dc9d2593bac80f290dde04d118c672e5",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillFrmArrow.SP_SkillFrmArrow",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        44,
+        444,
+        28,
+        28
+      ]
+    },
+    {
+      "file": "SP_SkillCircleArrow.webp",
+      "sha256": "3be3fd0c158ddbeb6153d49f31f811a8ab6f27f4ba0939e68c4450cf6bf0dbc1",
+      "source": "/Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillCircleArrow.SP_SkillCircleArrow",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        44,
+        476,
+        52,
+        24
+      ]
     }
   ],
   "patchVersion": "3.6.13",

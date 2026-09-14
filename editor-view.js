@@ -6,13 +6,19 @@ const EDITOR_SECTIONS=[
  {id:'forte',fr:'Compétences',en:'Skills',icon:'zhanji'},
  {id:'sequence',fr:'Chaîne',en:'Chain',icon:'gongminglian'}
 ];
-let editorSection='overview',editorOpeningState='',pendingEditorCharacter=null;
+let editorSection='overview',editorOpeningState='',pendingEditorCharacter=null,sequenceInspection=false;
 const editorWide=matchMedia('(min-width: 680px)');
 function editorOrientation(){document.getElementById('editorTabs').setAttribute('aria-orientation',editorWide.matches?'vertical':'horizontal');}
 editorWide.addEventListener('change',editorOrientation);
 function selectEditorSection(id,{focus=false}={}){
  if(!EDITOR_SECTIONS.some(section=>section.id===id))return;
  editorSection=id;
+ const section=EDITOR_SECTIONS.find(s=>s.id===id),dialog=document.getElementById('accountEditor');
+ dialog.dataset.section=id;
+ sequenceInspection=false;dialog.dataset.sequenceDetail='false';
+ dialog.dataset.talentDetail=String(id==='forte'&&!!talentSelection);
+ document.getElementById('editorSectionTitle').textContent=id==='overview'?tr('Détails des attributs','Attribute details'):section[lang];
+ document.getElementById('editorSectionIcon').src='./assets/game-ui/SP_RoleTabicon'+section.icon+'.webp';
  document.getElementById('editorStage').dataset.section=id;
  for(const tab of document.querySelectorAll('#editorTabs [role="tab"]')){
   const selected=tab.dataset.editorSection===id;
@@ -24,6 +30,7 @@ function selectEditorSection(id,{focus=false}={}){
  updateEditorSummary();
  if(id==='echo'){ensureEchoCatalogue();drawEditorEchoes();}
  if(id==='forte')requestAnimationFrame(fitTalentBoard);
+ if(id==='sequence')requestAnimationFrame(fitSequenceBoard);
 }
 function prepareEditorView(character,section){
  const fr=lang==='fr',set=(id,text)=>document.getElementById(id).textContent=text;
@@ -44,7 +51,7 @@ function prepareEditorView(character,section){
  if(character.image)portrait.src=characterArtwork(character);else portrait.removeAttribute('src');
  const sequencePortrait=document.getElementById('sequencePortrait');sequencePortrait.hidden=!character.image;if(character.image)sequencePortrait.src=characterArtwork(character);else sequencePortrait.removeAttribute('src');
  const tabs=document.getElementById('editorTabs');tabs.setAttribute('aria-label',fr?'Rubriques du Résonateur':'Resonator sections');
- tabs.innerHTML=EDITOR_SECTIONS.map(s=>`<button id="editor-tab-${s.id}" role="tab" aria-controls="editor-${s.id}" aria-selected="false" tabindex="-1" data-editor-section="${s.id}"><img src="./assets/game-ui/SP_RoleTabicon${s.icon}.webp" alt="" width="40" height="40"><b>${fr&&s.id==='forte'?'<span class="talent-label-full">Compétences</span><span class="talent-label-short">Forte</span>':fr?s.fr:s.en}</b></button>`).join('');
+ tabs.innerHTML=EDITOR_SECTIONS.map(s=>`<button id="editor-tab-${s.id}" role="tab" aria-controls="editor-${s.id}" aria-selected="false" tabindex="-1" data-editor-section="${s.id}" aria-label="${s[lang]}" title="${s[lang]}"><img src="./assets/game-ui/SP_RoleTabicon${s.icon}.webp" alt="" width="40" height="40"><b>${fr&&s.id==='forte'?'<span class="talent-label-full">Compétences</span><span class="talent-label-short">Forte</span>':fr?s.fr:s.en}</b></button>`).join('');
  editorOrientation();selectEditorSection(section);
  drawEditorRoster();drawEditorSequence();
 }
@@ -60,11 +67,31 @@ function requestEditorCharacter(id){
  openAccountEditor(row.name,editorSection);
 }
 function drawEditorSequence(){
+ const real=!!currentResonatorReference();
+ document.getElementById('accountEditor').dataset.sequenceReady=String(real);
+ document.getElementById('accountEditor').dataset.sequenceDetail=String(real&&sequenceInspection);
  for(const button of document.querySelectorAll('[data-sequence]')){const number=Number(button.dataset.sequence),chain=editingCharacterDetail?.ResonantChain?.find(c=>c.GroupIndex===number),icon=assetUrl(chain?.NodeIcon);button.setAttribute('aria-label',number?`S${number} · ${content(chain?.NodeName)||tr('Séquence','Sequence')}`:tr('S0 · Aucune séquence','S0 · No sequence'));button.innerHTML=(icon?`<img class="sequence-icon" src="${esc(icon)}" alt="" data-official-icon>`:'')+'<span>S'+number+'</span>';}
  let box=document.getElementById('sequenceDetail');if(!box){box=document.createElement('div');box.id='sequenceDetail';document.getElementById('editor-sequence').append(box);}
  const chain=editingCharacterDetail?.ResonantChain?.find(c=>c.GroupIndex===editingSeq);
- box.innerHTML=chain?`<p class="editor-eyebrow">${tr('Séquence','Sequence')} ${editingSeq}</p><h3>${esc(content(chain.NodeName))}</h3><p class="source-description">${esc(content(chain.AttributesDescription))}</p>`:`<p class="editor-hint">${editingSeq===0?tr('Aucune séquence supplémentaire débloquée.','No additional sequence unlocked.'):tr('Description indisponible pour le moment. Le niveau renseigné est conservé.','Description unavailable at the moment. The recorded sequence is preserved.')}</p>`;
+ box.innerHTML=chain?`<p class="sequence-numeral">${['','I','II','III','IV','V','VI'][editingSeq]}</p><h3>${esc(content(chain.NodeName))}</h3><p class="source-description">${gameRichText(chain.AttributesDescriptionRich||content(chain.AttributesDescription))}</p>`:`<p class="editor-hint">${editingSeq===0?tr('Aucune séquence supplémentaire débloquée.','No additional sequence unlocked.'):tr('Description indisponible pour le moment. Le niveau renseigné est conservé.','Description unavailable at the moment. The recorded sequence is preserved.')}</p>`;
+ let back=document.getElementById('sequenceBack');if(!back){back=document.createElement('button');back.type='button';back.id='sequenceBack';back.className='talent-return';back.textContent='»';back.addEventListener('click',()=>{sequenceInspection=false;drawEditorSequence();document.querySelector(`#seqRow [data-sequence="${editingSeq}"]`)?.focus({preventScroll:true});});document.getElementById('editor-sequence').append(back);}
+ back.setAttribute('aria-label',tr('Retour à la chaîne','Back to the chain'));back.hidden=!real||!sequenceInspection;
+ requestAnimationFrame(fitSequenceBoard);
 }
+// Centers from UiItem_RoleDeviceList, including the parent PnlList offset.
+const SEQUENCE_CENTERS=[[1262,1295],[1530,1233],[1746,1099],[1918,908],[2025,681],[2060,373]];
+function fitSequenceBoard(){
+ if(editorSection!=='sequence'||!currentResonatorReference())return;
+ if(!editorWide.matches){for(const button of document.querySelectorAll('#seqRow [data-sequence]')){button.style.removeProperty('left');button.style.removeProperty('top');}return;}
+ const board=document.getElementById('seqRow'),stage=document.getElementById('editorStage'),w=stage.clientWidth,h=stage.clientHeight,scale=Math.min(w/2560,h/1440);
+ board.style.setProperty('--sequence-unit',scale+'px');
+ for(const button of board.querySelectorAll('[data-sequence]')){
+  const n=Number(button.dataset.sequence);if(!n)continue;
+  button.style.left=((w-2560*scale)/2+SEQUENCE_CENTERS[n-1][0]*scale)+'px';
+  button.style.top=((h-1440*scale)/2+SEQUENCE_CENTERS[n-1][1]*scale)+'px';
+ }
+}
+new ResizeObserver(fitSequenceBoard).observe(document.getElementById('editorStage'));
 document.getElementById('editorRoster').addEventListener('click',event=>{const button=event.target.closest('[data-editor-character]');if(button)requestEditorCharacter(button.dataset.editorCharacter);});
 document.getElementById('editorSwitchPrompt').addEventListener('click',event=>{
  const choice=event.target.dataset.switchChoice;if(!choice)return;
@@ -90,6 +117,7 @@ document.getElementById('editorTabs').addEventListener('keydown',event=>{
 document.getElementById('seqRow').addEventListener('click',event=>{
  const button=event.target.closest('[data-sequence]');if(!button)return;
  editingSeq=Number(button.dataset.sequence);updateEditorControls();
+ sequenceInspection=!!currentResonatorReference();
  drawEditorSequence();
  document.querySelector(`#seqRow [data-sequence="${editingSeq}"]`).focus();
 });
