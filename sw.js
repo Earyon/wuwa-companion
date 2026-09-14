@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='wuwa-companion-shell-';
-const CACHE_NAME=CACHE_PREFIX+'057-pwa-24';
+const CACHE_NAME=CACHE_PREFIX+'057-pwa-25';
 const IMAGE_CACHE='wuwa-companion-images-v2',IMAGE_LIMIT=160,IMAGE_AGE=7*24*60*60*1000,IMAGE_BYTES=24*1024*1024;
 let imageWrites=Promise.resolve();
 const imageRequests=new Map();
@@ -47,7 +47,8 @@ const updateURL=new URL('./mise-a-jour.html',self.registration.scope);
 const artworkPath=new URL('./assets/game/',self.registration.scope).pathname;
 const referencePath=new URL('./data/resonators/',self.registration.scope).pathname;
 self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(SHELL)));
+  // A new shell must not reuse still-fresh files from the previous HTTP cache.
+  event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(SHELL.map(file=>new Request(new URL(file,self.registration.scope),{cache:'reload'})))));
   // Waiting worker activates after all old app windows close: no interrupted edits.
 });
 self.addEventListener('activate',event=>{

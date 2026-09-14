@@ -1,5 +1,5 @@
 // Real workers and published baseline, isolated profiles. Never clears user storage.
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{execFileSync}=require('node:child_process');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{execFileSync}=require('node:child_process'),{createHash}=require('node:crypto');
 const {chromium}=require('playwright'),{startServer,root}=require('./support.cjs');
 const read=file=>execFileSync('git',['show',`79b8c78:${file}`],{cwd:root,maxBuffer:8*1024*1024});
 const oldWorker=read('sw.js'),shell=vm.runInNewContext(oldWorker.toString().match(/const SHELL=(\[[^;]+\]);/)[1]);
@@ -9,11 +9,14 @@ const oldFiles=Object.fromEntries([...new Set(['sw.js',...shell.filter(p=>p!=='.
  const {server,base}=await startServer({handle(req,res){const file=new URL(req.url,'http://local').pathname.slice(1)||'index.html';
   if(file==='sw.js'&&fail){res.writeHead(503).end();return true;}
   const data=!latest&&oldFiles[file]?oldFiles[file]:file==='sw.js'&&future?fs.readFileSync(path.join(root,'sw.js'),'utf8').replace(/057-pwa-\d+/, '057-pwa-next-test'):null;
-  if(data){res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':'text/html');res.end(data);return true;}
+  if(data){res.setHeader('Cache-Control',file==='sw.js'?'no-store':'public, max-age=3600');res.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':'text/html');res.end(data);return true;}
  }}),browser=await chromium.launch({headless:true,channel:'msedge'});
  try{
-  const context=await browser.newContext(),page=await context.newPage();await context.route('https://**/*',r=>r.abort());
-  await context.addInitScript(()=>localStorage.setItem('wwc_tutorial_v1','seen'));
+  const context=await browser.newContext(),page=await context.newPage();
+  // Playwright routing disables the HTTP cache, hiding stale precache bugs.
+  // Stub only external page fetches; local HTTP and worker caching stay real.
+  const isolate=()=>{const original=window.fetch;window.fetch=(input,options)=>String(input?.url||input).startsWith('https://')?Promise.reject(new TypeError('External service disabled in test')):original(input,options);localStorage.setItem('wwc_tutorial_v1','seen');};
+  await context.addInitScript(isolate);
   await page.goto(base);await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   await page.evaluate(async()=>{localStorage.setItem('UPDATE_TEST','KEEP');await(await caches.open('unrelated-cache')).put('/keep',new Response('keep'));});
   const second=await context.newPage();await second.goto(base);await second.locator('#ownedSearch').fill('UNSAVED SEARCH');
@@ -23,7 +26,10 @@ const oldFiles=Object.fromEntries([...new Set(['sw.js',...shell.filter(p=>p!=='.
   await page.close();await helper.locator('#retry').click();await helper.locator('#status[data-state="blocked"]').waitFor();
   await helper.screenshot({path:path.join(root,'test-results/update-blocked.png')});
   await second.close();await helper.locator('#retry').click();await helper.waitForURL(base+'/');await helper.waitForFunction(()=>!!pwaState.registration?.active);
-  assert.equal(await helper.evaluate(()=>fetch('./pwa.js').then(r=>r.text())),fs.readFileSync(path.join(root,'pwa.js'),'utf8'));
+  const currentShell=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8').match(/const SHELL=(\[[^;]+\]);/)[1]);
+  const expected=Object.fromEntries(currentShell.map(file=>[file,createHash('sha256').update(fs.readFileSync(path.join(root,file==='./'?'index.html':file))).digest('hex')]));
+  const served=await helper.evaluate(async files=>Object.fromEntries(await Promise.all(files.map(async file=>[file,Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await(await fetch(file)).arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('')]))),currentShell);
+  assert.deepEqual(served,expected,'Every installed shell file is current despite a fresh HTTP cache from the old release');
   assert.equal(await helper.evaluate(()=>localStorage.getItem('UPDATE_TEST')),'KEEP');assert.ok(await helper.evaluate(()=>caches.has('unrelated-cache')));
   assert.equal(await helper.locator('#pwaNotice').isVisible(),false);
   // Future notification is visible in the app, localized, and does not navigate it.
@@ -37,7 +43,7 @@ const oldFiles=Object.fromEntries([...new Set(['sw.js',...shell.filter(p=>p!=='.
   fail=true;const errorPage=await context.newPage();await errorPage.goto(base+'/mise-a-jour.html');await errorPage.locator('#status[data-state="error"]').waitFor();assert.equal(await errorPage.locator('html').getAttribute('lang'),'en');assert.equal(await errorPage.evaluate(()=>localStorage.getItem('UPDATE_TEST')),'KEEP');await errorPage.close();
   await context.setOffline(true);const offline=await context.newPage();await offline.goto(base+'/mise-a-jour.html');await offline.locator('#status[data-state="error"]').waitFor();assert.equal(await offline.evaluate(()=>localStorage.getItem('UPDATE_TEST')),'KEEP');await context.close();
   fail=false;future=false;
-  const fresh=await browser.newContext(),start=await fresh.newPage();await fresh.route('https://**/*',r=>r.abort());await start.goto(base+'/mise-a-jour.html');await start.waitForURL(base+'/');await start.waitForFunction(()=>!!navigator.serviceWorker.controller);await fresh.close();
-  console.log('PASS: old reload reproduced; recovery blocks other tabs and unauthorized messages, preserves data, activates safely, works on first install; FR/EN notice, narrow screens, failed network and offline recovery.');
+  const fresh=await browser.newContext(),start=await fresh.newPage();await fresh.addInitScript(isolate);await start.goto(base+'/mise-a-jour.html');await start.waitForURL(base+'/');await start.waitForFunction(()=>!!navigator.serviceWorker.controller);await fresh.close();
+  console.log('PASS: old reload and fresh HTTP cache reproduced; every new shell file verified; recovery blocks other tabs and unauthorized messages, preserves data, activates safely, works on first install; FR/EN notice, narrow screens, failed network and offline recovery.');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

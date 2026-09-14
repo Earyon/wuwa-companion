@@ -18,6 +18,8 @@ La revue finale a également reproduit un défaut de chargement tardif dans le f
 
 Publication du correctif `12beb21` confirmée par [Pages 34826584533](https://github.com/Earyon/wuwa-companion/actions/runs/34826584533). Les empreintes des 196 fichiers servis, dont l'accès autonome de mise à jour, correspondent au commit. Le parcours public isolé passe. Le lien a été transmis à l'utilisateur ; son navigateur personnel n'a pas été manipulé et son activation locale n'est pas présentée comme confirmée.
 
+Contrôle complémentaire : une ancienne réponse HTTP encore fraîche pouvait être copiée dans le nouveau shell. Le défaut a été reproduit avec les réponses historiques conservées une heure et sans routage Playwright, car ce routage désactive le cache HTTP et masquait ce cas. L'installation utilise désormais des requêtes `cache: 'reload'`, conformément au [comportement documenté par MDN](https://developer.mozilla.org/en-US/docs/Web/API/Request/cache). Le test `pwa-recovery` compare les empreintes de tous les fichiers installés depuis la version 22 ; il échouait avant la correction et passe après. `pwa-update` passe également depuis `8ebbf5e` (24 → 25), avec fermeture de tous les anciens clients, lecture hors ligne et conservation du compte. Aucune activation forcée sous une fenêtre d'édition.
+
 ## Sélection visuelle des Échos — demande complémentaire du 14 septembre 2026
 
 La vidéo 01:32–01:49 est la référence : rail des cinq emplacements, grille de miniatures, coûts Tous/1/3/4, sélection distincte de l'équipement, illustration et attributs à droite, retrait/changement et amélioration. La demande inclut aussi le choix visuel d'un type d'Écho lors de l'ajout d'un exemplaire, auparavant limité à une liste de noms.
