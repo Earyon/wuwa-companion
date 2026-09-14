@@ -24,15 +24,17 @@ Contrôle complémentaire : une ancienne réponse HTTP encore fraîche pouvait �
 
 La vidéo 01:32–01:49 est la référence : rail des cinq emplacements, grille de miniatures, coûts Tous/1/3/4, sélection distincte de l'équipement, illustration et attributs à droite, retrait/changement et amélioration. La demande inclut aussi le choix visuel d'un type d'Écho lors de l'ajout d'un exemplaire, auparavant limité à une liste de noms.
 
-Suivi : **2 / 3 lots vérifiés**.
+Suivi : **3 / 3 lots vérifiés**.
 
 - [x] Examiner la vidéo et les parcours de sélection, y compris ajout, équipement, déplacement et remplacement.
 - [x] Intégrer une grille visuelle commune, ses filtres et le détail préalable à l'action, avec les miniatures officielles.
-- [ ] Vérifier interactions, données, chargement, responsive et publication.
+- [x] Vérifier interactions, données, chargement, responsive et publication.
 
 Les 26 suites ont été exécutées sur l'intégration. L'assertion de géométrie de `menu-completion` a été précisée pour examiner le rail de l'éditeur, sans compter celui du sélecteur fermé. Les suites restantes, puis `echo-selector`, `echoes` et `pwa-update`, ont passé après revue. Le test dédié couvre 12 dispositions FR/EN (320 à 1724 pixels CSS, dont 720 × 450), les miniatures officielles, l'absence de chevauchement, les cinq cibles accessibles, l'aperçu sans équipement, les transferts annulés/enregistrés, le plafond de coût, les filtres, les données chargées en retard, les identifiants du catalogue et les saisies conservées. Un exemplaire appartenant à un autre Résonateur doit d'abord être explicitement transféré pour modifier ses valeurs dans la fiche courante.
 
 Les images sont chargées à la demande ; les descriptions partagent le cache de l'encyclopédie et les effets de Sonate partagent le comptage des espèces déjà utilisé par l'éditeur. Aucun nouveau catalogue parallèle ni aucune migration des données personnelles. Le cache PWA passe de 23 à 24, avec le nouveau sélecteur intégré au shell. Les captures des grilles et des petits écrans ont été examinées. Mesures du banc isolé existant, trois essais sans bridage de CPU/débit : médianes Collection/portraits froids 177/195 ms, réouverture 126/142 ms. Ces mesures ne constituent pas un essai sur la tablette physique.
+
+Publication du sélecteur `8ebbf5e` et de la correction de cache `d5ab5df` confirmée par [Pages 34829182290](https://github.com/Earyon/wuwa-companion/actions/runs/34829182290). Les empreintes de **197 fichiers réellement servis** correspondent à `d5ab5df`. Le parcours public dans Edge isolé valide les cinq rubriques, les images visibles des grilles, l'aperçu sans mutation puis l'équipement explicite, les 311 entrées du catalogue, la sauvegarde/relecture et l'accès autonome de mise à jour, sans erreur JavaScript observée. Les captures publiques finales ont été examinées après chargement des images et descriptions. Le compte employé est synthétique ; aucune donnée du navigateur personnel n'a été modifiée. La mise à jour sur l'appareil de l'utilisateur reste non confirmée.
 
 ## Reproduction complète — reprise du 14 septembre 2026
 
