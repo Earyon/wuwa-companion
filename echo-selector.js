@@ -8,7 +8,7 @@ function echoThumbnail(row,large=false){
 function openEchoPicker(slot){
  echoPickerSlot=Number(slot);selectedEchoSlot=echoPickerSlot;
  const selected=editingEchoes.after.find(e=>e.owner===editingEchoes.owner&&e.slot===echoPickerSlot);
- echoPickerState={mode:editingEchoes.after.length?'copies':'catalogue',purpose:editingEchoes.after.length?'equip':'add',selected:selected?.id||null,cost:''};
+ echoPickerState={mode:'copies',purpose:'equip',selected:selected?.id||null,cost:''};
  prepareEchoPicker();
 }
 function openEchoCatalogue(){
@@ -44,7 +44,7 @@ function drawEchoPicker(){
  const s=echoPickerState,copies=s.mode==='copies',list=echoPickerRows(),dialog=document.getElementById('echoPicker');
  dialog.dataset.mode=s.mode;
  document.getElementById('echoPickerTitle').textContent=copies?tr('Changer d’Écho','Change Echo'):tr('Choisir un Écho','Choose an Echo');
- document.getElementById('echoPickerAdd').textContent=copies?tr('Ajouter depuis le catalogue','Add from catalogue'):tr('Mes Échos','My Echoes');
+ document.getElementById('echoPickerAdd').textContent=tr('Ajouter un Écho','Add an Echo');
  document.getElementById('echoPickerAdd').hidden=s.purpose==='form';
  document.getElementById('echoPickerOwner').hidden=!copies;document.getElementById('echoPickerOrder').hidden=!copies;
  document.getElementById('echoPickerCostTabs').hidden=!copies;
@@ -55,7 +55,7 @@ function drawEchoPicker(){
   return `<button type="button" class="echo-choice" data-echo-action="choose" data-value="${esc(e.id)}" data-quality="${copies?e.quality||'':''}" aria-pressed="${s.selected===e.id}" aria-label="${esc(name+(copies?' · '+tr('Niveau ','Level ')+(e.level??'?')+' · '+echoOwner(e):''))}" title="${esc(name)}">${echoThumbnail(row)}${copies?`<span class="echo-choice-cost">${e.cost??'?'}</span><span class="echo-choice-level">+${e.level??'?'}</span>${owner?.image?`<img class="echo-choice-owner" src="${esc(owner.image)}" alt="" loading="lazy" width="24" height="24">`:''}`:`<span class="echo-choice-name">${esc(name)}</span>`}</button>`;
  }).join('');
  document.getElementById('echoPickerCount').textContent=list.length+' '+tr('Échos','Echoes');
- document.getElementById('echoPickerEmpty').innerHTML=echoCatalogueStatus()+(list.length?'':`<p>${tr('Aucun Écho dans cette sélection.','No Echoes in this selection.')}</p>`);
+ document.getElementById('echoPickerEmpty').innerHTML=echoCatalogueStatus()+(list.length?'':`<p>${copies&&!editingEchoes.after.length?tr('Aucun Écho ajouté pour le moment. Ajoute tes exemplaires pour les retrouver ici.','No Echoes added yet. Add your copies to find them here.'):tr('Aucun Écho dans cette sélection.','No Echoes in this selection.')}</p>`);
  drawEchoPickerRail();drawEchoPickerDetail();
  if(focusedCost!==undefined)document.querySelector('[data-echo-picker-cost="'+CSS.escape(focusedCost)+'"]')?.focus({preventScroll:true});
 }
@@ -106,7 +106,7 @@ function chooseEchoFormRow(row){
 function applyEchoCandidate(){
  const s=echoPickerState,e=echoPickerSelection();if(!e)return;
  if(s.mode==='catalogue'){
-  closeDialog('echoPicker');if(s.purpose!=='form')openEchoForm(null,{draft:true,slot:echoPickerSlot});chooseEchoFormRow(e);return;
+  closeDialog('echoPicker');chooseEchoFormRow(e);return;
  }
  const same=e.owner===editingEchoes.owner&&e.slot===echoPickerSlot;
  const cost=editingEchoes.after.filter(x=>x.owner===editingEchoes.owner&&x.id!==e.id&&x.slot!==echoPickerSlot).reduce((n,x)=>n+(x.cost??0),0)+(e.cost??0);
@@ -124,7 +124,7 @@ document.getElementById('echoPicker').addEventListener('click',event=>{
 document.getElementById('echoPickerQuery').addEventListener('input',drawEchoPicker);
 for(const id of ['echoPickerSet','echoPickerOwner','echoPickerOrder'])document.getElementById(id).addEventListener('change',drawEchoPicker);
 document.getElementById('echoPickerBack').addEventListener('click',()=>{document.getElementById('echoPicker').dataset.detail='false';document.querySelector('#echoPickerList [aria-pressed="true"]')?.focus({preventScroll:true});});
-document.getElementById('echoPickerAdd').addEventListener('click',()=>{const catalogue=echoPickerState.mode==='copies';echoPickerState={...echoPickerState,mode:catalogue?'catalogue':'copies',purpose:catalogue?'add':'equip',selected:null,cost:''};prepareEchoPicker();});
+document.getElementById('echoPickerAdd').addEventListener('click',()=>{closeDialog('echoPicker');openEchoForm(null,{draft:true,slot:echoPickerSlot});});
 document.addEventListener('catalogue-ready',event=>{
  if(event.detail!=='echo'||!document.getElementById('echoPicker').open)return;
  refreshEchoPickerSets();

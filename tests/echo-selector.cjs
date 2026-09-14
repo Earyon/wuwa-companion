@@ -8,9 +8,16 @@ const assert=require('node:assert/strict'),path=require('node:path'),{chromium}=
    page.on('pageerror',e=>errors.push(e.message));let descriptions=0,slowId=null,releaseDescription,slowFinished;
    await page.route('https://**/*',async r=>{const match=r.request().url().match(/\/echo\/(\d+)$/);if(match){descriptions++;if(match[1]===slowId)await new Promise(resolve=>releaseDescription=resolve);await r.fulfill({contentType:'application/json',body:JSON.stringify({MonsterId:Number(match[1]),Skill:{SimplyDescription:'TEST DESCRIPTION '+match[1]}})});if(match[1]===slowId)slowFinished=true;return;}return r.abort();});
    await page.addInitScript(language=>{if(localStorage.getItem('echo-selector-test'))return;localStorage.setItem('echo-selector-test','SYNTHETIC');localStorage.setItem('wwc_tutorial_v1','seen');localStorage.setItem('wwc_lang',language);localStorage.setItem('wwc_owned_ids','["resonator:1108","resonator:1102"]');},language);
-   await page.goto(base);await page.locator('.res-row').first().waitFor();await page.evaluate(async()=>{await loadExtended('echo');await loadMenuRules();
+   await page.goto(base);await page.locator('.res-row').first().waitFor();await page.evaluate(async()=>{await loadExtended('echo');await loadMenuRules();openAccountEditor('Hiyuki');selectEditorSection('echo');openEchoPicker(1);});
+   assert.equal(await page.locator('.echo-choice').count(),0,'An empty inventory never falls back to the full catalogue');
+   assert.match(await page.locator('#echoPickerEmpty').innerText(),language==='fr'?/Aucun Écho ajouté/:/No Echoes added/);
+   await page.locator('#echoPickerAdd').click();assert.ok(await page.locator('#echoForm').isVisible());assert.equal(await page.locator('#echoPicker').isVisible(),false);
+   await page.locator('[data-echo-action="browse-catalogue"]').click();assert.equal(await page.locator('.echo-choice').count(),311,'Catalogue requires the explicit image chooser in the add form');
+   await page.locator('#echoPickerClose').click();await page.keyboard.press('Escape');await page.locator('#editorClose').click();
+   await page.evaluate(()=>{
     CompanionStore.update(s=>{s.echoes=extendedCatalog.echo.slice(0,24).map((r,i)=>({id:'SELECTOR_TEST_'+i,catalogId:r.id,name:r.name,owner:i<5?'resonator:1108':i===5?'resonator:1102':null,slot:i<5?i+1:i===5?1:null,quality:5,level:25,cost:i===5?1:[4,3,3,1,1][i%5],setId:r.sets[0]?.id||null,main:{type:'atkPct',value:18},secondary:{type:i===5||i%5>=3?'hp':'atk',value:100},substats:[{type:'critRate',value:8.1}]}));});openAccountEditor('Hiyuki');selectEditorSection('echo');openEchoPicker(5);
    });
+   assert.equal(await page.locator('.echo-choice').count(),24,'Equipment selection contains only recorded copies');
    await page.waitForFunction(()=>[...document.querySelectorAll('#echoPickerList>button')].slice(0,6).every(e=>{const i=e.querySelector('img');return i&&i.complete&&i.naturalWidth>0;}));
    const stored=await page.evaluate(()=>CompanionStore.exportData().records);
    await page.locator('[data-echo-action="choose"][data-value="SELECTOR_TEST_5"]').click();

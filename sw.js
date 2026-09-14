@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='wuwa-companion-shell-';
-const CACHE_NAME=CACHE_PREFIX+'057-pwa-25';
+const CACHE_NAME=CACHE_PREFIX+'057-pwa-26';
 const IMAGE_CACHE='wuwa-companion-images-v2',IMAGE_LIMIT=160,IMAGE_AGE=7*24*60*60*1000,IMAGE_BYTES=24*1024*1024;
 let imageWrites=Promise.resolve();
 const imageRequests=new Map();

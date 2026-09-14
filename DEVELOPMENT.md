@@ -334,3 +334,20 @@ Dernière demande explicite de l’utilisateur : reprendre au maximum à l’ide
 ### Socle Collection vérifié
 
 Le 13 septembre : contrôles reproductibles des projections locales réussis sur les sources versionnées (58 Résonateurs, 122 armes, 311 Échos, 2 339 objets, 2 700 termes français, 632 textes Forte). Les 58 fiches bilingues incluent les statistiques de base, les identifiants et parents des nœuds ainsi que six séquences ; aucune substitution de paramètres non résolue. Les traductions restent séparées des identifiants enregistrés. Les détails de montée servant au calcul des coûts gardent leur circuit existant. Les références se chargent par personnage. Démarrage avec services externes bloqués et parcours FR/EN de Collection vérifiés ; contrôle de vitesse, PWA et validation complète des nouveaux visuels encore en cours.
+
+## Import automatique du compte — périmètre du 14 septembre 2026
+
+Objectif demandé : aucune saisie manuelle des possessions, avec module local facultatif et accès depuis le site/tablette. La reconnaissance d’image est acceptée si les données structurées ne suffisent pas. Dernière consigne : préparer et comparer les méthodes, y compris celles potentiellement contraires aux conditions Kuro ; l’utilisateur choisira la méthode ensuite. L’accord d’étude ne choisit pas à sa place une intervention sur son compte. Les règles permanentes restent inchangées.
+
+| Lot | Résultat attendu | État |
+| --- | --- | --- |
+| 1 | Sélection d’équipement limitée aux Échos possédés | Vérifié localement |
+| 2 | Comparatif sourcé des méthodes et audit du code candidat | En cours |
+| 3 | Prototype local vérifié sur données de référence, couverture mesurée | À réaliser |
+| 4 | Import commun validé, conservation des données et doublons | À réaliser |
+| 5 | Distribution et synchronisation privée, sans service payant | À réaliser après choix de la méthode et configuration du service |
+| 6 | Parcours réel complet sur le compte, publication et revue finale | À réaliser après choix de la méthode |
+
+**Avancement de ce nouveau périmètre : 1 / 6 lots vérifiés localement.** Ce compteur est distinct du périmètre historique de 14 lots ; il ne prétend pas que l’import automatique est opérationnel.
+
+Lot 1 : le sélecteur d’équipement ne bascule plus automatiquement sur les 311 références lorsque l’inventaire est vide. Un état vide explique l’ajout d’exemplaires ; le catalogue est accessible par l’action explicite du formulaire d’ajout. Aucun exemplaire n’est créé par simple consultation. Tests réussis : `echo-selector` (12 dispositions FR/EN, inventaire vide et peuplé), `echoes` (16 dispositions et parcours d’équipement, annulation, enregistrement, transfert, conflits), `pwa-update` depuis `8ea0510` et `pwa-recovery`. Le cache 26 préserve le stockage personnel et les éditions ouvertes. Validation physique sur tablette non effectuée.
