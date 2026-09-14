@@ -3,7 +3,10 @@ const root=path.resolve(__dirname,'..'),catalogue=require('../data/catalogue.jso
 const reviewed=new Set();
 for(const folder of ['game','game-ui']){
  const manifest=require('../assets/'+folder+'/sources.json');assert.equal(manifest.creator,'Kuro Games');
- for(const row of manifest.files){const file=path.join(root,'assets',folder,row.file);assert.ok(file.startsWith(path.join(root,'assets',folder)+path.sep));if(reviewed.has(file))continue;
+ for(const row of manifest.files){const file=path.join(root,'assets',folder,row.file);assert.ok(file.startsWith(path.join(root,'assets',folder)+path.sep));
+  if(row.spriteLayout==='standalone')assert.equal(row.texturePackage.split('/').at(-1),row.source.split('/').at(-1),'Standalone texture identity must match its sprite; the packed-atlas index is not valid here');
+  if(row.spriteLayout)assert.ok(['packed','standalone'].includes(row.spriteLayout)&&row.rect.every(Number.isFinite));
+  if(reviewed.has(file))continue;
   const bytes=fs.readFileSync(file);assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),row.sha256,row.file);assert.equal(bytes.subarray(0,4).toString(),'RIFF');assert.equal(bytes.subarray(8,12).toString(),'WEBP');reviewed.add(file);
  }
 }

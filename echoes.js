@@ -1,10 +1,12 @@
 'use strict';
 let editingEchoes=null,echoFormState=null,echoPickerSlot=1,selectedEchoSlot=1;
 let echoQuery='',echoFilter='all';
+let echoMenuTab='equipment';
 const echoRow=e=>extendedCatalog.echo.find(r=>r.id===e.catalogId);
 const echoName=e=>(echoRow(e)?gameLabel(echoRow(e)):gameText(e.name||e.catalogId));
 const echoOwner=e=>e.owner?(gameLabel(DATA.find(c=>c.id===e.owner))||e.owner):tr('Non équipé','Unequipped');
-const statLabel=type=>{const s=EchoRules.stats[type];return s?(lang==='fr'?s[0]:s[1])+(s[2]?' %':''):type;};
+const ECHO_PROPERTY_IDS={hp:2,hpPct:2,atk:7,atkPct:7,def:10,defPct:10,critRate:8,critDmg:9,energy:11,healing:35,glacio:22,fusion:23,electro:24,aero:25,spectro:26,havoc:27,basic:17,heavy:18,skill:14,liberation:19};
+const statLabel=type=>{const s=EchoRules.stats[type],official=typeof menuRules!=='undefined'&&menuRules?.properties.find(p=>p.id===ECHO_PROPERTY_IDS[type])?.labels[lang];return s?(official||(lang==='fr'?s[0]:s[1]))+(s[2]?' %':''):type;};
 const statText=s=>s?`${statLabel(s.type)} : ${s.value??'?'}`:'?';
 const echoButton=(action,label,value='')=>`<button type="button" class="companion-button" data-echo-action="${action}" data-value="${esc(value)}">${label}</button>`;
 function echoDescription(e){
@@ -23,14 +25,26 @@ function echoInventoryCards(){
  const rows=data.echoes.filter(e=>(echoFilter==='all'||(echoFilter==='free'?e.owner===null:e.owner!==null))&&[echoName(e),echoOwner(e),echoRow(e)?.sets.find(s=>s.id===e.setId)?.name||e.setId||''].some(s=>s.toLocaleLowerCase().includes(query)));
  return echoCatalogueStatus()+`<p class="companion-note">${rows.length} / ${data.echoes.length}</p><div class="companion-list">${rows.map(e=>inventoryCard(echoRow(e),echoDescription(e)+`<small>${esc(echoOwner(e))}${e.owner?' · '+e.slot+(e.slot===1?' · '+tr('Principal','Main'):''):''}</small>`,echoButton('edit',tr('Modifier','Edit'),e.id)+echoButton('delete',tr('Retirer','Remove'),e.id)+(e.owner&&DATA.some(c=>c.id===e.owner)?echoButton('owner',tr('Voir le Résonateur','View Resonator'),e.owner):''))).join('')||`<p>${tr('Aucun Écho dans cette sélection.','No Echoes in this selection.')}</p>`}</div>`;
 }
-function prepareEditorEchoes(state,owner){selectedEchoSlot=1;editingEchoes={owner,before:structuredClone(state.echoes),after:structuredClone(state.echoes)};drawEditorEchoes();}
+function prepareEditorEchoes(state,owner){selectedEchoSlot=1;echoMenuTab='equipment';editingEchoes={owner,before:structuredClone(state.echoes),after:structuredClone(state.echoes)};drawEditorEchoes();}
+function echoTotalsHTML(total){return `<dl class="game-stat-list">${total.values.map(s=>`<div><dt>${esc(statLabel(s.type).replace(/ %$/,''))}</dt><dd>${menuNumber(s.value,EchoRules.stats[s.type]?.[2])}</dd></div>`).join('')}</dl><p class="editor-hint">${total.incomplete?tr('Certaines valeurs ne sont pas renseignées. Le cumul reste partiel.','Some values are not recorded. This total is incomplete.'):total.values.length?tr('Somme des valeurs renseignées sur les exemplaires équipés.','Sum of the recorded values on equipped copies.'):tr('Aucun attribut renseigné.','No attributes recorded.')}</p>`;}
+function equippedSonatasHTML(equipped){
+ const counts=new Map();for(const e of equipped){if(!e.setId)continue;if(!counts.has(e.setId))counts.set(e.setId,new Set());counts.get(e.setId).add(e.catalogId);}
+ if(!sonataData&&!sonataPending&&!sonataError)loadSonatas().then(()=>{if(document.getElementById('accountEditor').open&&editorSection==='echo')drawEditorEchoes();});
+ return [...counts].map(([id,types])=>{const set=sonataData?.sets.find(s=>s.id===id),name=set?localText(set.name):gameText(echoRow(equipped.find(e=>e.setId===id))?.sets.find(s=>s.id===id)?.name)||id;return `<section class="equipped-sonata"><h4>${esc(name)} <span>${types.size}</span></h4>${set?set.effects.map(effect=>`<div class="${types.size>=effect.pieces?'is-active':''}"><b>${effect.pieces} ${tr('pièces','pieces')}</b><p>${esc(localText(effect.description))}</p></div>`).join(''):`<p>${tr('Détails indisponibles.','Details unavailable.')}</p>`}</section>`;}).join('')||`<p class="editor-hint">${tr('Aucun effet de Sonate renseigné.','No Sonata effect recorded.')}</p>`;
+}
+function equippedEchoHTML(record){return `<div class="echo-slot-copy"><img class="echo-artwork" src="${esc(equipmentArtwork(echoRow(record),'echoes')||'./assets/portrait-placeholder.svg')}" alt=""><div>${echoDescription(record)}</div><div class="companion-actions">${echoButton('pick',tr('Remplacer','Replace'),selectedEchoSlot)}${echoButton('draft-edit',tr('Modifier','Edit'),record.id)}${echoButton('unequip',tr('Déséquiper','Unequip'),selectedEchoSlot)}</div></div>`;}
 function drawEditorEchoes(){
  if(!editingEchoes)return;
  const active=document.activeElement,focus=active?.closest('#editor-echo')?{action:active.dataset.echoAction,value:active.dataset.value}:null;
  const equipped=editingEchoes.after.filter(e=>e.owner===editingEchoes.owner),known=equipped.reduce((n,e)=>n+(e.cost??0),0),unknown=equipped.some(e=>e.cost===null),selected=equipped.find(e=>e.slot===selectedEchoSlot);
  document.getElementById('editor-echo').innerHTML=`<div class="editor-panel-heading"><p class="editor-eyebrow">${tr('Équipement','Equipment')}</p><h3>${tr('Échos','Echoes')}</h3><p class="editor-hint">${tr('Le premier emplacement définit l’Écho principal. Remplacer un Écho conserve l’ancien dans l’inventaire.','The first slot defines the main Echo. Replacing an Echo keeps the previous copy in your inventory.')}</p></div>
  <div class="echo-cost ${known>12?'companion-error':''}">${tr('Coût renseigné','Recorded cost')} <strong>${known}${unknown?' + ?':''}</strong> / 12 <small>${tr('Plafond maximal ; ta Banque de données peut limiter le coût à 10.','Maximum cap; your Data Bank may limit cost to 10.')}</small></div>
- <div class="echo-equipment"><nav class="echo-slots" aria-label="${tr('Emplacements équipés','Equipped slots')}">${[1,2,3,4,5].map(slot=>{const e=equipped.find(e=>e.slot===slot);return `<button type="button" class="echo-slot ${slot===1?'echo-main':''}" data-echo-action="slot" data-value="${slot}" aria-pressed="${slot===selectedEchoSlot}" aria-label="${esc((slot===1?tr('Écho principal','Main Echo'):tr('Emplacement','Slot')+' '+slot)+' · '+(e?echoName(e):tr('Vide','Empty')))}">${e?`<img src="${esc(echoRow(e)?.image||'./assets/portrait-placeholder.svg')}" alt="" width="64" height="64">`:'<span aria-hidden="true">+</span>'}<small>${slot===1?tr('Principal','Main'):slot}${e?' · '+tr('Niv.','Lv.')+' '+(e.level??'?'):''}</small></button>`;}).join('')}</nav><div class="echo-selected">${selected?`<div class="echo-slot-copy"><img class="echo-artwork" src="${esc(equipmentArtwork(echoRow(selected),'echoes')||'./assets/portrait-placeholder.svg')}" alt=""><div>${echoDescription(selected)}<div class="companion-actions">${echoButton('pick',tr('Remplacer','Replace'),selectedEchoSlot)}${echoButton('draft-edit',tr('Modifier les statistiques','Edit stats'),selected.id)}${echoButton('unequip',tr('Déséquiper','Unequip'),selectedEchoSlot)}</div></div></div>`:`<div class="echo-empty-slot"><h4>${tr('Emplacement','Slot')} ${selectedEchoSlot}</h4><p>${tr('Aucun Écho équipé','No Echo equipped')}</p>${echoButton('pick',tr('Équiper un Écho','Equip an Echo'),selectedEchoSlot)}</div>`}</div></div>`;
+ <div class="echo-equipment"><nav class="echo-slots" aria-label="${tr('Emplacements équipés','Equipped slots')}">${[1,2,3,4,5].map(slot=>{const e=equipped.find(e=>e.slot===slot);return `<button type="button" class="echo-slot ${slot===1?'echo-main':''}" data-echo-action="slot" data-value="${slot}" aria-pressed="${slot===selectedEchoSlot}" aria-label="${esc((slot===1?tr('Écho principal','Main Echo'):tr('Emplacement','Slot')+' '+slot)+' · '+(e?echoName(e):tr('Vide','Empty')))}">${e?`<img src="${esc(echoRow(e)?.image||'./assets/portrait-placeholder.svg')}" alt="" width="64" height="64">`:'<span aria-hidden="true">+</span>'}<small>${slot===1?tr('Principal','Main'):slot}${e?' · '+tr('Niv.','Lv.')+' '+(e.level??'?'):''}</small></button>`;}).join('')}</nav><div class="echo-selected">${selected?equippedEchoHTML(selected):`<div class="echo-empty-slot"><h4>${tr('Emplacement','Slot')} ${selectedEchoSlot}</h4><p>${tr('Aucun Écho équipé','No Echo equipped')}</p>${echoButton('pick',tr('Équiper un Écho','Equip an Echo'),selectedEchoSlot)}</div>`}</div></div>`;
+ const selectedBox=document.querySelector('.echo-selected');
+ const tabs=`<div class="game-detail-tabs" role="group" aria-label="${tr('Détails des Échos','Echo details')}">${[['equipment',tr('Équipement','Equipment')],['attributes',tr('Attributs','Attributes')],['sonata',tr('Effets de Sonate','Sonata effects')]].map(([id,label])=>`<button type="button" data-echo-action="tab" data-value="${id}" aria-pressed="${echoMenuTab===id}">${label}</button>`).join('')}</div>`;
+ if(echoMenuTab==='attributes')selectedBox.innerHTML=echoTotalsHTML(MenuStats.echoes(equipped));
+ if(echoMenuTab==='sonata')selectedBox.innerHTML=equippedSonatasHTML(equipped);
+ selectedBox.insertAdjacentHTML('afterbegin',tabs);
  if(focus)document.querySelector('#editor-echo [data-echo-action="'+CSS.escape(focus.action==='unequip'?'pick':focus.action||'pick')+'"][data-value="'+CSS.escape(focus.value||'')+'"]')?.focus({preventScroll:true});
 }
 function openEchoPicker(slot){
@@ -38,11 +52,12 @@ function openEchoPicker(slot){
  document.getElementById('echoPickerTitle').textContent=tr('Écho · emplacement ','Echo · slot ')+slot;
  const search=document.getElementById('echoPickerQuery');search.value='';search.placeholder=tr('Rechercher un exemplaire…','Search a copy…');
  document.getElementById('echoPickerAdd').textContent=tr('Ajouter un nouvel exemplaire','Add a new copy');
+ document.getElementById('echoPickerCostLabel').textContent=tr('Coût','Cost');document.getElementById('echoPickerCost').value='';document.getElementById('echoPickerCost').options[0].textContent=tr('Tous','All');
  drawEchoPicker();openDialog('echoPicker');document.querySelector('.echo-picker-sheet').scrollTop=0;
 }
 function drawEchoPicker(){
- const q=document.getElementById('echoPickerQuery').value.toLocaleLowerCase();
- const list=editingEchoes.after.filter(e=>echoName(e).toLocaleLowerCase().includes(q));
+ const q=document.getElementById('echoPickerQuery').value.toLocaleLowerCase(),cost=document.getElementById('echoPickerCost').value;
+ const list=editingEchoes.after.filter(e=>echoName(e).toLocaleLowerCase().includes(q)&&(!cost||String(e.cost)===cost));
  document.getElementById('echoPickerList').innerHTML=echoCatalogueStatus()+list.map(e=>{
   const other=e.owner!==null&&e.owner!==editingEchoes.owner;
   return `<button type="button" class="echo-choice" data-echo-action="choose" data-value="${esc(e.id)}" ${other?'disabled':''}><img src="${esc(echoRow(e)?.image||'./assets/portrait-placeholder.svg')}" alt="" loading="lazy" width="80" height="80">${echoDescription(e)}<small>${esc(echoOwner(e))}${e.owner?' · '+e.slot:''}</small></button>`;
@@ -133,6 +148,7 @@ document.getElementById('echoFormContent').addEventListener('change',event=>{
 });
 document.getElementById('echoForm').addEventListener('close',()=>{if(!document.getElementById('echoForm').open)document.getElementById('echoFormContent').replaceChildren();});
 document.getElementById('echoPickerQuery').addEventListener('input',drawEchoPicker);
+document.getElementById('echoPickerCost').addEventListener('change',drawEchoPicker);
 document.getElementById('echoPickerAdd').addEventListener('click',()=>{closeDialog('echoPicker');openEchoForm(null,{draft:true,slot:echoPickerSlot});});
 document.getElementById('echoPickerClose').addEventListener('click',()=>closeDialog('echoPicker'));
 document.getElementById('echoFormClose').addEventListener('click',()=>closeDialog('echoForm'));
@@ -141,7 +157,8 @@ function echoAction(event){
  const button=event.target.closest('[data-echo-action]');if(!button)return;
  const {echoAction:action,value}=button.dataset;
  try{
-  if(action==='slot'){selectedEchoSlot=Number(value);drawEditorEchoes();}
+  if(action==='tab'){echoMenuTab=value;drawEditorEchoes();}
+  if(action==='slot'){selectedEchoSlot=Number(value);echoMenuTab='equipment';drawEditorEchoes();}
   if(action==='add')openEchoForm(null);
   if(action==='edit')openEchoForm(value);
   if(action==='draft-edit')openEchoForm(value,{draft:true});

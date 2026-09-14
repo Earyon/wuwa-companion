@@ -78,15 +78,19 @@
     <section class="editor-panel" id="editor-overview" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-overview">
      <div class="resonator-overview">
       <div class="resonator-portrait"><img id="editorPortrait" alt=""><span class="portrait-fallback" id="editorPortraitFallback" aria-hidden="true"></span></div>
-      <div class="overview-details"><p class="editor-eyebrow" id="overviewLabel">Aperçu</p><h3 id="overviewName"></h3><p id="overviewElement"></p>
-       <div class="editor-block"><div class="editor-label" id="levelLabel">Niveau</div><button class="level-current" id="levelCurrent" onclick="openLevelPicker()">À définir</button></div>
-       <div class="companion-form" id="ascensionControl"></div><dl class="overview-summary" id="editorSummary"></dl><p class="editor-hint" id="overviewHint"></p>
+      <div class="overview-details"><p class="editor-eyebrow" id="overviewLabel">Aperçu</p><p id="overviewElement"></p><h3 id="overviewName"></h3>
+       <div class="overview-progress-bar" id="overviewProgressBar"></div><div class="overview-progress" id="overviewProgress"></div><div class="overview-stars" id="overviewStars" aria-hidden="true"></div>
+       <div class="overview-edit-controls"><div class="editor-block"><div class="editor-label" id="levelLabel">Niveau</div><button class="level-current" id="levelCurrent" onclick="openLevelPicker()">À définir</button></div>
+       <div class="companion-form" id="ascensionControl"></div></div>
+       <div id="attributeStats"></div><button type="button" class="game-more" id="attributeMore">Détails des attributs</button><p class="editor-hint" id="attributeScope"></p>
+       <h4 id="roleTagsTitle"></h4><div id="roleTags"></div>
+       <dl class="overview-summary" id="editorSummary"></dl><p class="editor-hint" id="overviewHint"></p>
       </div>
      </div>
     </section>
     <section class="editor-panel" id="editor-weapon" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-weapon" hidden>
      <div class="editor-panel-heading"><p class="editor-eyebrow" id="weaponEyebrow">Équipement</p><h3 id="weaponLabel">Arme équipée</h3><p class="editor-hint" id="weaponHint"></p></div>
-     <div class="weapon-display"><button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button><div class="weapon-settings" id="weaponSettings"></div></div>
+     <div class="weapon-display"><button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button><div class="weapon-info"><div id="weaponDescription"></div><div class="weapon-settings" id="weaponSettings"></div></div></div>
     </section>
     <section class="editor-panel" id="editor-echo" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-echo" hidden></section>
     <section class="editor-panel" id="editor-forte" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-forte" hidden>
@@ -105,12 +109,15 @@
 </dialog>
 
 
+<dialog class="selector-overlay" id="attributeDetail" aria-labelledby="attributeDetailTitle"><div class="selector-sheet attribute-detail-sheet"><div class="selector-head"><h2 id="attributeDetailTitle">Détails des attributs</h2><button class="closebtn" id="attributeDetailClose" aria-label="Fermer / Close">✕</button></div><div id="attributeDetailContent"></div></div></dialog>
+
 <dialog class="selector-overlay" id="weaponPicker" aria-labelledby="weaponPickerTitle">
  <div class="selector-sheet weapon-sheet">
   <div class="selector-head"><h2 id="weaponPickerTitle">Choisir une arme</h2><button class="closebtn" id="weaponPickerClose">✕</button></div>
   <input class="selector-search" id="weaponQ" placeholder="Rechercher une arme…" oninput="drawWeapons()">
   <div class="companion-actions" id="weaponSource"></div>
   <p class="companion-note" id="weaponPickerNote"></p>
+  <label class="menu-picker-order"><span id="weaponOrderLabel">Tri</span><select id="weaponOrder"><option value="level">Niveau</option><option value="rank">Rang</option><option value="rarity">Rareté</option></select></label>
   <div class="weapon-grid" id="weaponGrid"></div>
  </div>
 </dialog>
@@ -129,7 +136,7 @@
   <div class="level-grid" id="levelGrid"></div>
  </div>
 </dialog>
-<dialog class="selector-overlay" id="echoPicker" aria-labelledby="echoPickerTitle"><div class="selector-sheet echo-picker-sheet"><div class="selector-head"><h2 id="echoPickerTitle">Écho</h2><button class="closebtn" id="echoPickerClose" aria-label="Fermer / Close">✕</button></div><input class="selector-search" id="echoPickerQuery" aria-label="Rechercher / Search"><button class="companion-button" id="echoPickerAdd"></button><div id="echoPickerList" class="companion-list"></div></div></dialog>
+<dialog class="selector-overlay" id="echoPicker" aria-labelledby="echoPickerTitle"><div class="selector-sheet echo-picker-sheet"><div class="selector-head"><h2 id="echoPickerTitle">Écho</h2><button class="closebtn" id="echoPickerClose" aria-label="Fermer / Close">✕</button></div><input class="selector-search" id="echoPickerQuery" aria-label="Rechercher / Search"><label class="menu-picker-order"><span id="echoPickerCostLabel">Coût</span><select id="echoPickerCost"><option value="">Tous</option><option>1</option><option>3</option><option>4</option></select></label><button class="companion-button" id="echoPickerAdd"></button><div id="echoPickerList" class="companion-list"></div></div></dialog>
 <dialog class="selector-overlay" id="echoForm" aria-labelledby="echoFormTitle"><div class="selector-sheet echo-form-sheet"><div class="selector-head"><h2 id="echoFormTitle">Écho</h2><button class="closebtn" id="echoFormClose" aria-label="Fermer / Close">✕</button></div><div id="echoFormContent"></div></div></dialog>
 <dialog class="profile-dialog" id="detail" aria-labelledby="profileName">
  <div class="detail-inner">
@@ -153,6 +160,8 @@
 <script src="./companion-ui.js" defer></script>
 <script src="./inventory.js" defer></script>
 <script src="./echoes.js" defer></script>
+<script src="./menu-stats.js" defer></script>
+<script src="./resonator-menu.js" defer></script>
 <script src="./progression-data.js" defer></script>
 <script src="./resources.js" defer></script>
 <script src="./planning.js" defer></script>

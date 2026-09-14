@@ -136,7 +136,7 @@ body.has-modal{overflow:hidden}
 .account-tabs::-webkit-scrollbar{display:none}
 .account-tabs button{scroll-snap-align:start}
 .account-editor-sheet{width:100%;height:100dvh;max-height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;background:radial-gradient(ellipse at 45% 50%,#142e43 0,transparent 65%),#07131f;font-family:system-ui,sans-serif}
-#accountEditor{align-items:center;padding:0}
+#accountEditor{align-items:center;padding:0;font-family:system-ui,sans-serif}
 .editor-header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 24px;border-bottom:1px solid var(--line-soft)}
 .editor-header>div{min-width:0}.editor-header h2{margin:4px 0 0;font-size:28px;line-height:1.15;font-weight:500;overflow-wrap:anywhere}
 .editor-header .closebtn{width:44px;height:44px;flex-shrink:0}
@@ -158,12 +158,23 @@ body.has-modal{overflow:hidden}
 .editor-panel[hidden]{display:none}.editor-panel{min-width:0}
 .editor-panel-heading{margin-bottom:24px}.editor-panel h3{font-size:25px;font-weight:500;margin:7px 0 12px}
 .editor-hint{color:var(--muted);font:13px/1.7 system-ui}
-.resonator-overview{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:center;min-height:100%}
+.resonator-overview{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start;min-height:100%;position:relative}
 .resonator-portrait{position:relative;display:grid;place-items:center;min-width:0;height:260px;isolation:isolate}
 .resonator-portrait img{position:relative;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 16px 26px #0008)}
 .portrait-fallback{font:300 84px/1 Georgia,serif;color:var(--gold)}
 .resonator-portrait [hidden]{display:none}
-.overview-details{min-width:0}.overview-details h3{font-size:34px;overflow-wrap:anywhere}.overview-details>p{color:var(--muted)}
+.overview-details{min-width:0;position:relative;z-index:1}.overview-details h3{font-size:34px;overflow-wrap:anywhere;margin:6px 0 14px}.overview-details>p{color:var(--muted)}
+#overviewLabel,#overviewHint,#overviewElement+.editor-eyebrow{display:none}
+.overview-progress-bar{height:6px;border:1px solid #a9b3b980;background:linear-gradient(90deg,#e9da9f var(--progress,0%),#9bafc124 0);margin:8px 0}
+.overview-edit-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:10px;margin:12px 0}.overview-edit-controls .editor-block{margin:0;padding:0;border:0;background:transparent}.overview-edit-controls .editor-label{display:none}.overview-edit-controls .level-current{min-height:44px;padding:8px;font-size:13px}.overview-edit-controls .companion-form{display:block;margin:0}.overview-edit-controls label{font-size:11px}.overview-edit-controls select{padding:7px;min-height:32px;width:100%}
+.overview-progress{display:flex;justify-content:space-between;font-size:20px;color:var(--muted)}.overview-progress b{color:var(--text)}.overview-progress>span+span{font-size:13px;align-self:center}
+.overview-stars{display:flex;gap:3px;min-height:32px;margin:8px 0}.overview-stars img{object-fit:contain;width:32px;height:32px}.overview-stars .is-inactive{opacity:.25}
+.game-stat-list{margin:10px 0;color:#e4e5e4}.game-stat-list>div{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:38px;padding:5px 8px;font-size:clamp(13px,1.35vw,23px);border-bottom:1px solid #b6ccd70d}
+.game-stat-list>div:nth-child(even){background:#b6ccd708}.game-stat-list dt{display:flex;align-items:center;gap:10px;min-width:0}.game-stat-list dd{margin:0;flex-shrink:0;font-variant-numeric:tabular-nums}.game-stat-list img{object-fit:contain;flex:0 0 26px}
+.game-more{border:1px solid #95a3a578;border-radius:30px;min-height:36px;width:100%;color:var(--text);background:#030c1680;font:inherit}
+#attributeScope{font-size:11px;line-height:1.4;margin:10px 0 18px}.game-role-tag{font-size:13px;margin:5px 0}.game-role-tag summary{display:flex;align-items:center;gap:10px;min-height:40px;cursor:pointer}.game-role-tag img{object-fit:contain}.game-role-tag p{color:var(--muted);line-height:1.5}
+.attribute-detail-sheet{max-width:780px}.attribute-detail-sheet #attributeDetailContent{padding:0 24px 24px;overflow:auto;min-height:0}.attribute-detail-sheet h3{color:var(--gold);font-weight:500}
+.menu-picker-order{display:flex;align-items:center;gap:14px;color:var(--muted);font:13px system-ui;min-height:44px;margin:8px 0}.menu-picker-order select{min-height:40px;color:var(--text);background:#0b1b29;border:1px solid var(--line);border-radius:24px;padding:8px 18px}
 .overview-summary{margin:22px 0}.overview-summary>div{display:flex;justify-content:space-between;align-items:baseline;gap:18px;padding:14px 0;border-bottom:1px solid var(--line-soft)}
 .overview-summary dt{font-size:13px;color:var(--muted)}.overview-summary dd{margin:0;text-align:right;font-size:14px;overflow-wrap:anywhere;min-width:0}
 .sequence-stage{display:grid;gap:20px;align-items:start;grid-template-columns:minmax(0,1fr)}
@@ -179,7 +190,7 @@ body.has-modal{overflow:hidden}
  .editor-workspace{position:absolute;inset:0;display:block}.editor-nav{position:absolute;z-index:2;top:17%;bottom:12%;left:0;width:7.8%;min-width:56px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border:0;border-right:1px solid var(--line);padding:0;background:transparent;gap:clamp(8px,2vh,28px)}
  .editor-nav button{width:100%;min-height:44px;height:clamp(44px,7.4vh,80px);padding:0;border-radius:0;flex-direction:column;gap:0}.editor-nav button>img{width:clamp(30px,3.9vw,64px);height:clamp(30px,3.9vw,64px)}.editor-nav button b{display:none}
  .editor-stage{position:absolute;inset:80px max(76px,9%) 70px max(68px,10%);padding:12px 20px}
- .editor-roster{position:absolute;z-index:2;top:17%;bottom:12%;right:2%;width:7%;min-width:56px;flex-direction:column;border:0;padding:0;gap:12px}.editor-roster button{flex:0 0 clamp(56px,8vh,90px);border-radius:0}.editor-roster img{width:clamp(44px,4.6vw,78px);height:clamp(44px,4.6vw,78px)}
+ .editor-roster{position:absolute;z-index:2;top:17%;bottom:12%;right:2%;width:7%;min-width:56px;flex-direction:column;border:0;padding:0;gap:12px;align-items:center}.editor-roster button{flex:0 0 auto;aspect-ratio:1;width:min(100%,78px);border-radius:50%;padding:2px}.editor-roster img{width:100%;height:auto;aspect-ratio:1}
  .editor-actions{position:absolute;z-index:3;inset:auto 3vw 12px;pointer-events:none;border:0;background:transparent;padding:0}.editor-actions>div{pointer-events:auto;max-width:60%}.editor-actions #editorSaveHint{display:none}.editor-actions button{pointer-events:auto}.editor-actions>.goldbtn{margin-left:auto;border-radius:28px;min-height:44px}
  #accountEditor[data-section="forte"][data-tree-ready="true"] .editor-stage{inset:0;padding:0;overflow:hidden}
  #accountEditor[data-section="forte"][data-tree-ready="true"] #editor-forte,#accountEditor[data-section="forte"][data-tree-ready="true"] #skillsEditor{height:100%}
@@ -187,7 +198,7 @@ body.has-modal{overflow:hidden}
  #accountEditor[data-talent-detail="true"] .editor-header,#accountEditor[data-talent-detail="true"] .editor-nav,#accountEditor[data-talent-detail="true"] .editor-roster{display:none}
  #accountEditor[data-talent-detail="true"] .editor-actions,#accountEditor[data-sequence-detail="true"] .editor-actions{left:3vw;right:auto}
  #accountEditor[data-talent-detail="true"] .talent-detail{padding-bottom:72px}
- .resonator-portrait{height:clamp(280px,70vh,840px)}
+ .resonator-overview{display:block;min-height:100%}.overview-details{width:37%;min-width:230px;padding-top:4vh;background:linear-gradient(90deg,#071623 88%,#071623eb 96%,transparent)}.resonator-portrait{position:absolute;left:22%;top:0;width:78%;height:calc(100dvh - 85px);pointer-events:none}.resonator-portrait img{object-fit:contain;object-position:center top}.overview-summary{display:none}
 }
 @media(min-width:680px){
  #accountEditor[data-section="sequence"][data-sequence-ready="true"] .editor-stage{inset:0;padding:0;overflow:hidden}
@@ -205,6 +216,9 @@ body.has-modal{overflow:hidden}
  #accountEditor[data-sequence-ready="true"] .seq-btn.active:after{inset:0;background-size:calc(148*var(--sequence-unit)) calc(148*var(--sequence-unit))}
 }
 .sequence-numeral{font:400 42px/1.2 Georgia,serif;color:#efe5c8;margin:8px 0 18px}
+.game-detail-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}.game-detail-tabs button{flex:1;min-width:0;min-height:44px;padding:8px 12px;color:var(--muted);background:transparent;border:0;border-bottom:2px solid transparent;font:inherit}.game-detail-tabs button[aria-pressed="true"]{color:var(--text);border-bottom-color:var(--gold);background:#eef2e909}
+.talent-multipliers{white-space:normal}.talent-multipliers>p{color:var(--gold)}.talent-multipliers dl>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(60px,auto);gap:12px;border-bottom:1px solid var(--line-soft);padding:11px 0;font-size:clamp(12px,1.15vw,19px)}.talent-multipliers dt{overflow-wrap:anywhere}.talent-multipliers dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;max-width:160px;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:no-preference){.editor-panel:not([hidden]){animation:menu-reveal .16s ease-out}.talent-node .talent-symbol,.seq-btn{transition:filter .15s ease-out,opacity .15s ease-out}.game-detail-tabs button{transition:background-color .15s ease-out}@keyframes menu-reveal{from{opacity:.6}to{opacity:1}}}
 @media(max-width:420px){.editor-header{padding:12px 16px}.editor-header h2{font-size:24px}.editor-stage{padding:18px 14px}.editor-nav button b{font-size:10px;white-space:normal}.resonator-portrait{height:180px}.editor-panel h3{font-size:23px}}
 @media(max-height:550px){.editor-header{padding:10px 16px}.editor-header h2{font-size:22px}.editor-eyebrow{font-size:10px}.editor-nav button{min-height:44px;padding:6px}.editor-stage{padding-top:16px}}
 
@@ -228,7 +242,9 @@ body.has-modal{overflow:hidden}
 .seq-btn{width:52px;height:62px}
 .level-grid{grid-template-columns:repeat(5,1fr)}
 }
-.weapon-display{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:center}.weapon-display>.weapon-current{min-height:270px;flex-direction:column;justify-content:center;border:0;background:transparent;text-align:center;padding:12px}
+.weapon-display{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start}.weapon-display>.weapon-current{min-height:270px;flex-direction:column;justify-content:center;border:0;background:transparent;text-align:center;padding:12px}
+.weapon-info{min-width:0}.weapon-info h4{font-size:18px;font-weight:500}.weapon-info h4>span{color:var(--gold)}.weapon-info .source-description{font-size:15px;line-height:1.55;white-space:pre-line}.weapon-info details{margin:14px 0;font-size:13px;line-height:1.5}.weapon-info summary{cursor:pointer;min-height:36px;padding:8px 0;border-bottom:1px solid var(--line)}.weapon-info h5{font-size:14px;color:var(--gold)}
+#editor-weapon>.editor-panel-heading{margin-bottom:8px}#weaponEyebrow,#weaponHint{display:none}
 .weapon-display .equipped-img-wrap,.weapon-display .equipped-img-wrap img{width:100%;height:240px;max-width:340px;background:transparent;object-fit:contain}
 .weapon-current{width:100%;min-height:66px;border:1px solid #38536f;border-radius:12px;background:#0a1b2b;color:#edf4fc;padding:10px 12px;text-align:left;display:flex;align-items:center;gap:12px}
 .weapon-current img{width:52px;height:52px;object-fit:contain;border-radius:9px;background:rgba(255,255,255,.025)}
@@ -297,7 +313,8 @@ body.has-modal{overflow:hidden}
 .talent-detail{position:absolute;inset:0 auto 0 0;width:var(--talent-detail-width);max-height:var(--talent-panel-height);min-width:0;overflow:auto;overscroll-behavior:contain;padding:clamp(16px,3vw,48px);padding-bottom:72px;background:linear-gradient(90deg,#09151ff5 80%,#09151f00);border:0;border-radius:0;scrollbar-width:thin}
 .talent-detail-heading{display:flex;align-items:center;gap:12px}.talent-detail-heading>div{min-width:0}.talent-detail-heading img{width:clamp(32px,4vw,64px);height:clamp(32px,4vw,64px);object-fit:contain}
 .talent-detail-heading .editor-eyebrow{letter-spacing:0;text-transform:none;font-size:clamp(12px,1.4vw,20px)}.talent-detail h3{font-size:clamp(15px,1.5vw,23px);overflow-wrap:anywhere}
-.talent-detail-caption{flex:none;border-radius:24px;background:#f5f1e8;color:#23272a;text-align:center;padding:7px 12px;margin:12px 0;font-size:clamp(13px,1.3vw,22px)}
+.talent-detail-caption{flex:none;border-radius:0;background:transparent;color:#e4e5e4;text-align:center;padding:0;margin:8px 0;font-size:clamp(13px,1.3vw,22px)}
+@media(min-width:680px) and (max-height:550px){.talent-detail-heading{gap:10px}.talent-detail-heading img{width:32px;height:32px}.talent-detail-heading h3{font-size:15px}.talent-detail-controls .editor-hint{display:none}#talentDetail .source-description{min-height:120px}.talent-multipliers>p{margin:4px 0}.talent-multipliers dl{margin:6px 0}}
 .talent-detail .source-description{line-height:1.6;font-size:clamp(13px,1.7vw,28px);color:#e4e5e4;padding-right:4px;white-space:pre-line}
 .game-text-title{color:#c9bd82;font-size:1.08em}.game-text-highlight{color:#e6dfa6}.game-text-term{text-decoration:underline;text-underline-offset:3px}.game-text-glacio{color:#75c7ed}.game-text-fusion{color:#f3a080}.game-text-electro{color:#c4a4f3}.game-text-aero{color:#8bdbc2}.game-text-spectro{color:#e6d491}.game-text-havoc{color:#e59cc0}
 .talent-detail-controls{border-top:1px solid var(--line);padding-top:16px;margin-top:22px}

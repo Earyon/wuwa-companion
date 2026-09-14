@@ -2,6 +2,28 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
+## Reproduction complète — reprise du 14 septembre 2026
+
+L'utilisateur demande de terminer l'ensemble sans nouvelle validation. Cette reprise couvre les cinq rubriques et leurs commandes de consultation/édition, et non uniquement l'arbre. Les recommandations et objectifs restent masqués.
+
+Suivi : **4 / 5 lots vérifiés**.
+
+- [x] Sources complémentaires : statistiques, détails des compétences, armes, Échos, éléments graphiques et faisabilité des modèles animés.
+- [x] Attributs et arme : panneaux de référence, statistiques sourcées, progression, sélection et syntonisation.
+- [x] Échos : cinq emplacements, attributs cumulés, Sonates, sélection et modification des exemplaires.
+- [x] Compétences, chaîne et navigation : détails chiffrés, états, transitions et cohérence des sous-écrans.
+- [ ] Revue globale : captures comparées à la vidéo, tests, performances, PWA et publication contrôlée.
+
+Les limites réellement rencontrées seront consignées ; aucun compteur ne certifiera une reproduction du moteur 3D ou des transactions du compte Kuro sans réalisation et vérification.
+
+Les 24 suites ont passé sur l'intégration. Après revue visuelle, les corrections de paysage compact et de stabilité du panneau ont été revérifiées par `menu-completion`, `talent-editor`, `echoes`, `collection`, `pwa-update` et `source-data`. Le nouveau contrôle couvre 50 dispositions des cinq menus (FR/EN ; 1724 × 1080, 1152 × 800, 720 × 1122, 720 × 450, 360 × 640), les valeurs de compétences au niveau choisi, les rangs d'armes, les niveaux frontières ambigus, les cumuls d'Échos, les doublons de Sonate, les filtres, les brouillons et leur sauvegarde/rechargement. La revue distingue explicitement statistiques de base et bonus d'équipement. Les arrondis suivent `AttributeModel` : troncature des valeurs entières et des pourcentages à une décimale.
+
+L'audit supplémentaire de 458 sprites confirme les 457 ressources existantes à l'identique ; seule la nouvelle étoile d'ascension utilise le format de texture séparée. Les chemins immuables existants ont été conservés. Les 2 889 images officielles référencées correspondent aux empreintes contrôlées. Les nouvelles courbes, traductions et valeurs par niveau se régénèrent sans différence.
+
+Mesures de cette intégration dans le banc existant (Edge isolé, trois essais, services simulés à 150 ms) : médianes Collection/portraits froids **206 / 224 ms**, réouverture **140 / 160 ms** ; une vérification réseau de version, aucune image distante au démarrage. Ces mesures ne certifient pas la connexion ou la tablette physique de l'utilisateur.
+
+Limites effectives : les illustrations officielles restent en 2D, l'export de la géométrie 3D actuelle échoue avec le lecteur disponible ; les animations/materials du moteur Kuro et sa police commerciale ne sont pas reproduits. Les commandes enregistrent la progression déclarée dans Companion ; elles n'exécutent aucune transaction dans le jeu. Les petits écrans gardent des adaptations tactiles. Les recommandations et objectifs restent masqués. Les cinq rubriques sont opérationnelles dans ce périmètre ; une copie strictement identique du client de jeu n'est pas obtenue.
+
 ## Fidélité au menu du jeu — correction du 14 septembre 2026
 
 Le bilan fonctionnel Collection ci-dessous ne validait pas une copie conforme. Le retour utilisateur a révélé des écarts réels : marges transparentes des cadres ignorées, grille estimée, colonnes latérales conservées lors de la sélection et mise en forme officielle du texte supprimée.

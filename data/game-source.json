@@ -19,7 +19,13 @@
     "BinData_skill_skilltype.json",
     "BinData_weapon_weaponconf.json",
     "en-multitext.json",
-    "fr-multitext.json"
+    "fr-multitext.json",
+    "BinData_property_rolepropertygrowth.json",
+    "BinData_property_weaponpropertygrowth.json",
+    "BinData_skill_skilldescription.json",
+    "BinData_role_roletag.json",
+    "BinData_weapon_weaponreson.json",
+    "CommonParam_RoleAttributeDisplay6.json"
   ],
   "supplementaryFiles": [
     "character-list.json",
@@ -63,7 +69,13 @@
     "fr-weapon-list.json": "74f6e580bbf7064f39ffdcc6a1fc32975e9af0bff2f762e4d6dff43677356ac6",
     "item.json": "192055635d7c333d2da0052ded0201de49d1ec79cbc9f6008e2aff6f5a19d0b5",
     "weapon-list.json": "de5f4a8ffef353aab6920c039be9528406e650022d9aa3dc270229a17b2e2a67",
-    "encore-version.json": "fb9b99b28bbb9adaee66161d88f9eb0880b2abf2c9086adaa3d030ddff629720"
+    "encore-version.json": "fb9b99b28bbb9adaee66161d88f9eb0880b2abf2c9086adaa3d030ddff629720",
+    "BinData_property_rolepropertygrowth.json": "a3b2896b3b6da5da46556b8adb82b8f96b11052d41ce5d1a33dd53f2172d6176",
+    "BinData_property_weaponpropertygrowth.json": "13b8f6229614d71dca4b98831075f3c7fbba1ba480ec5ff5738a3c499195a42c",
+    "BinData_skill_skilldescription.json": "89db83d46f1c03c521e872d1622ba70a839294a2a6bee1f848146367b3228c95",
+    "BinData_role_roletag.json": "931422a292d171c366cadb23e0c141dc72030a99e606a71a317175f388bd673d",
+    "BinData_weapon_weaponreson.json": "98906abf9913c2e9d27a3f8266521d0baf24558f2051d46c8dfa16e1b0af47c0",
+    "CommonParam_RoleAttributeDisplay6.json": "63fb755f87bb475fa3ddd1bffb35a1c62f98467b120a9a31d80c310b9ef10d22"
   },
   "archives": [
     {

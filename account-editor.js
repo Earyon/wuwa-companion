@@ -45,6 +45,7 @@ function openAccountEditor(name,section='overview'){
  updateEditorControls();
  openDialog('accountEditor');
  loadEditorSkills(x);
+ prepareMenuReference(x);
  editorOpeningState=editorDraftSnapshot();
 }
 function updateEditorControls(){
@@ -72,6 +73,9 @@ function updateEditorControls(){
  if(focusId)document.getElementById(focusId)?.focus({preventScroll:true});
  if(focusRank)document.querySelector(`[data-weapon-rank="${CSS.escape(focusRank)}"]`)?.focus({preventScroll:true});
  drawEditorSequence();
+ drawAttributeMenu();
+ const referenceId=weaponMenuReference?.ItemId,currentId=WEAPONS.find(w=>w.name===editingWeapon)?.gameId;
+ if(String(referenceId)!==String(currentId))refreshWeaponMenu();else drawWeaponMenu();
 }
 
 function weaponImageCandidates(name,current){return current?[current]:[];}
@@ -104,6 +108,8 @@ function openWeaponPicker(){
  document.querySelector('#weaponPickerTitle').textContent=lang==='fr'?'Choisir une arme compatible':'Choose a compatible weapon';
  document.querySelector('#weaponQ').placeholder=lang==='fr'?'Rechercher une arme…':'Search a weapon…';
  document.querySelector('#weaponQ').value='';drawWeapons();
+ document.getElementById('weaponOrderLabel').textContent=tr('Trier par','Sort by');
+ [...document.getElementById('weaponOrder').options].forEach((option,i)=>{option.textContent=[tr('Niveau','Level'),tr('Rang','Rank'),tr('Rareté','Rarity')][i];});
  openDialog('weaponPicker');
 }
 function drawWeapons(){
@@ -112,7 +118,8 @@ function drawWeapons(){
  document.querySelector('#weaponSource').innerHTML=`<button class="companion-button" aria-pressed="${weaponPickerMode==='inventory'}" onclick="weaponPickerMode='inventory';drawWeapons()">${tr('Mes exemplaires','My copies')}</button><button class="companion-button" aria-pressed="${weaponPickerMode==='new'}" onclick="weaponPickerMode='new';drawWeapons()">${tr('Ajouter un exemplaire','Add a copy')}</button>`;
  document.querySelector('#weaponPickerNote').textContent=weaponPickerMode==='new'?tr('Le choix sera ajouté à ton inventaire lors de l’enregistrement du Résonateur.','The choice will be added to your inventory when you save the Resonator.'):tr('Un exemplaire ne peut équiper qu’un Résonateur à la fois.','A copy can equip only one Resonator at a time.');
  const rows=weaponPickerMode==='new'?WEAPONS.filter(w=>w.type===type&&gameSearch(w,q)).map(w=>({row:w,copy:null})):data.weapons.map(copy=>({copy,row:WEAPONS.find(w=>w.id===copy.catalogId)})).filter(({row})=>row?.type===type&&gameSearch(row,q));
- rows.sort((a,b)=>(b.row.rarity-a.row.rarity)||a.row.name.localeCompare(b.row.name));
+ const sort=document.getElementById('weaponOrder').value;
+ rows.sort((a,b)=>(sort==='level'?(b.copy?.level??-1)-(a.copy?.level??-1):sort==='rank'?(b.copy?.rank??-1)-(a.copy?.rank??-1):0)||(b.row.rarity-a.row.rarity)||gameLabel(a.row).localeCompare(gameLabel(b.row),lang));
  document.querySelector('#weaponGrid').innerHTML=rows.map(({row,copy})=>{
   const owner=copy?CompanionStore.weaponOwner(data,copy.id):null,unavailable=owner&&owner!==character?.id;
   const selection=copy?`data-copy="${esc(copy.id)}" onclick="selectWeaponCopy(this.dataset.copy)"`:`onclick="selectWeaponByIndex(${WEAPONS.indexOf(row)})"`;
@@ -171,7 +178,7 @@ function saveAccountEditor(){
 }
 
 function ascensionField(name,value,label=tr('Ascension débloquée','Unlocked ascension')){return '<label>'+label+'<select name="'+name+'"><option value="">?</option>'+[20,40,50,60,70,80,90].map((cap,i)=>'<option value="'+i+'" '+(value===i?'selected':'')+'>'+i+' · '+tr('plafond niv. ','level cap ')+cap+'</option>').join('')+'</select></label>';}
-document.getElementById('accountEditor').addEventListener('change',event=>{if(event.target.name==='currentAscension')editingAscension=event.target.value===''?null:Number(event.target.value);if(event.target.name==='currentWeaponAscension')editingWeaponAscension=event.target.value===''?null:Number(event.target.value);});
+document.getElementById('accountEditor').addEventListener('change',event=>{if(event.target.name==='currentAscension'){editingAscension=event.target.value===''?null:Number(event.target.value);drawAttributeMenu();}if(event.target.name==='currentWeaponAscension'){editingWeaponAscension=event.target.value===''?null:Number(event.target.value);drawWeaponMenu();}});
 
 function setEditorLevel(level,weapon=false){
  const asc=weapon?editingWeaponAscension:editingAscension;
