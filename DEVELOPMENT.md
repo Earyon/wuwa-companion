@@ -2,14 +2,14 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Phase Collection — 3 / 4 lots vérifiés
+## Phase Collection — 4 / 4 lots vérifiés
 
 Reprise expressément autorisée le 13 septembre 2026 : réaliser la phase en une traite, tests et publication inclus. L'encyclopédie doit partager le code graphique de toute l'application. Les nouvelles recommandations et les objectifs restent pour une seconde phase ; leurs données existantes sont conservées.
 
 - [x] Socle de consultation : démarrage, textes français sourcés et ressources de référence cohérentes.
 - [x] Collection et encyclopédie : charte commune, recherche et filtres, possessions et inventaires accessibles.
 - [x] Fiche Résonateur : navigation, équipement, arbre de compétences, états de progression et chaîne résonatrice.
-- [ ] Livraison : prise en main, performances mesurées, régressions, responsive et mise à jour publiée vérifiés.
+- [x] Livraison : prise en main, performances mesurées, régressions, responsive et mise à jour publiée vérifiés.
 
 Le compteur porte sur cette nouvelle phase, sans réutiliser les résultats de la livraison précédente. Les tests utilisent des profils isolés ; les essais réels sur la tablette de l'utilisateur restent distingués des simulations.
 
@@ -34,7 +34,9 @@ Mesures reproductibles : comparaison au commit publié `947c7f8`, Edge headless,
 
 La réouverture du texte de collection est 21 ms plus lente dans cette série ; les gains ne concernent donc pas chaque mesure. L'amélioration principale est la suppression de l'attente du catalogue distant et le chargement local des portraits. Une série exploratoire précédente avait donné 441 → 165 ms au démarrage : cette variation rappelle la portée limitée d'un petit banc d'essai. Les rapports détaillés restent dans `test-results/performance-comparison.json`.
 
-La mise à jour PWA depuis `947c7f8` passe avec deux fenêtres, attente d'activation, fermeture puis nouveau shell disponible hors ligne, données et cache non lié préservés. Publication Pages et empreintes servies : contrôle restant avant le quatrième lot.
+La mise à jour PWA depuis `947c7f8` passe avec deux fenêtres, attente d'activation, fermeture puis nouveau shell disponible hors ligne, données et cache non lié préservés. Le commit applicatif `f58cbe1` est publié sur `main` ; le déploiement [Pages 34791533692](https://github.com/Earyon/wuwa-companion/actions/runs/34791533692) a réussi. Les empreintes de **138 ressources réellement servies** correspondent au commit, incluant le shell, les 58 fiches de référence et des illustrations de chaque catégorie. Un navigateur Edge isolé sur le site public a vérifié le tutoriel, les images de l'arbre, une modification suivie d'un enregistrement/rechargement et le contrôle PWA, sans erreur JavaScript. La capture publiée a été examinée. Les rapports privés restent dans `test-results/production-verification.json` et `published-tree-fr.png`.
+
+Permissions : l'écriture dans le projet, le commit et le push sur `main` ont fonctionné ; les métadonnées du dépôt confirment le droit `push`. Aucun push forcé ni changement étranger au périmètre n'a été publié. Les données personnelles n'ont pas été réinitialisées. La phase Collection est livrée ; les recommandations et objectifs restent volontairement masqués pour la seconde phase demandée.
 
 Limites : aucun essai sur tablette physique, Safari ou Firefox ; aucune mesure de débit Internet réel, d'animation 3D ou de connexion au compte Kuro. Les icônes et illustrations 2D officielles sont utilisées à leur résolution disponible. Ces limites ne sont pas présentées comme des contrôles réussis.
 
