@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://api.encore.moe">
 <meta name="theme-color" content="#08121e">
 <title>WuWa Companion</title>
 <link rel="stylesheet" href="./styles.css">
@@ -59,6 +60,7 @@
   <div class="selector-head"><h2 id="selectorTitle">Ajouter un Résonateur</h2><button class="closebtn" id="selectorClose">✕</button></div>
   <input class="selector-search" id="selectorQ" placeholder="Rechercher…" oninput="drawSelector()">
   <div class="selector-grid" id="selectorGrid"></div>
+  <footer class="selector-actions"><span id="selectorCount" role="status"></span><button class="goldbtn" id="selectorSave"></button></footer>
  </div>
 </dialog>
 
@@ -74,7 +76,7 @@
    <div class="editor-stage" id="editorStage">
     <section class="editor-panel" id="editor-overview" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-overview">
      <div class="resonator-overview">
-      <div class="resonator-portrait"><div class="resonator-orbit" aria-hidden="true"></div><img id="editorPortrait" alt=""><span class="portrait-fallback" id="editorPortraitFallback" aria-hidden="true"></span></div>
+      <div class="resonator-portrait"><img id="editorPortrait" alt=""><span class="portrait-fallback" id="editorPortraitFallback" aria-hidden="true"></span></div>
       <div class="overview-details"><p class="editor-eyebrow" id="overviewLabel">Aperçu</p><h3 id="overviewName"></h3><p id="overviewElement"></p>
        <div class="editor-block"><div class="editor-label" id="levelLabel">Niveau</div><button class="level-current" id="levelCurrent" onclick="openLevelPicker()">À définir</button></div>
        <div class="companion-form" id="ascensionControl"></div><dl class="overview-summary" id="editorSummary"></dl><p class="editor-hint" id="overviewHint"></p>
@@ -83,7 +85,7 @@
     </section>
     <section class="editor-panel" id="editor-weapon" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-weapon" hidden>
      <div class="editor-panel-heading"><p class="editor-eyebrow" id="weaponEyebrow">Équipement</p><h3 id="weaponLabel">Arme équipée</h3><p class="editor-hint" id="weaponHint"></p></div>
-     <div class="editor-block"><button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button><div class="weapon-settings" id="weaponSettings"></div></div>
+     <div class="weapon-display"><button class="weapon-current" id="weaponCurrent" onclick="openWeaponPicker()"></button><div class="weapon-settings" id="weaponSettings"></div></div>
     </section>
     <section class="editor-panel" id="editor-echo" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-echo" hidden></section>
     <section class="editor-panel" id="editor-forte" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-forte" hidden>
@@ -92,11 +94,12 @@
     </section>
     <section class="editor-panel" id="editor-sequence" role="tabpanel" tabindex="0" aria-labelledby="editor-tab-sequence" hidden>
      <div class="editor-panel-heading"><p class="editor-eyebrow" id="sequenceEyebrow">Résonance</p><h3 id="sequenceLabel">Séquence</h3><p class="editor-hint" id="sequenceHint"></p></div>
-     <div class="sequence-stage"><div class="sequence-emblem" aria-hidden="true"><span id="sequenceValue">S0</span></div><div class="seq-row" id="seqRow"></div></div>
+     <div class="sequence-stage"><div id="sequenceDetail"></div><div class="sequence-art"><img id="sequencePortrait" alt="" loading="lazy"><div class="seq-row" id="seqRow" role="group" aria-label="Séquence / Sequence"></div></div></div>
     </section>
    </div>
+   <nav class="editor-roster" id="editorRoster" aria-label="Mes Résonateurs / My Resonators"></nav>
   </div>
-  <footer class="editor-actions"><span id="editorSaveHint"></span><button class="goldbtn" id="editorSave" onclick="saveAccountEditor()">Enregistrer</button></footer>
+  <footer class="editor-actions"><div><span id="editorSaveHint"></span><div id="editorSwitchPrompt" role="status" hidden></div></div><button class="goldbtn" id="editorSave" onclick="saveAccountEditor()">Enregistrer</button></footer>
  </div>
 </dialog>
 
@@ -134,13 +137,18 @@
  </div>
 </dialog>
 
+<script src="./catalogue-version.js" defer></script>
 <script src="./catalog.js" defer></script>
 <script src="./dialogs.js" defer></script>
+<script src="./localization.js" defer></script>
+<script src="./resonator-data.js" defer></script>
+<script src="./features.js" defer></script>
 <script src="./app.js" defer></script>
 <script src="./skills.js" defer></script>
 <script src="./editor-view.js" defer></script>
 <script src="./account-editor.js" defer></script>
 <script src="./forte.js" defer></script>
+<script src="./resonator-tree.js" defer></script>
 <script src="./companion-ui.js" defer></script>
 <script src="./inventory.js" defer></script>
 <script src="./echoes.js" defer></script>
@@ -155,6 +163,7 @@
 <script src="./convenes.js" defer></script>
 <script src="./wishlist.js" defer></script>
 <script src="./optimization.js" defer></script>
+<script src="./tutorial.js" defer></script>
 <script src="./bootstrap.js" defer></script>
 </body>
 </html>

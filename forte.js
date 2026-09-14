@@ -38,13 +38,13 @@ function drawForteEditor(state='ready'){
  }
  const fr=lang==='fr';
  box.innerHTML=`<div class="forte-heading"><b>${fr?'Nœuds passifs':'Passive nodes'}</b><span id="forteCount" aria-live="polite">${forteCountLabel()}</span></div>
- <button type="button" class="companion-button" id="confirmForteStates">${fr?'Confirmer les états cochés / non cochés':'Confirm checked / unchecked states'}</button><p class="forte-note">${fr?'Coche les nœuds déjà débloqués en jeu, puis Enregistrer. Noms et descriptions de la source en anglais.':'Check the nodes already unlocked in game, then Save.'}</p>
+ <button type="button" class="companion-button" id="confirmForteStates">${fr?'Confirmer les états cochés / non cochés':'Confirm checked / unchecked states'}</button><p class="forte-note">${fr?'Coche les nœuds déjà débloqués en jeu, puis Enregistrer. Noms et descriptions issus des textes français du jeu.':'Check the nodes already unlocked in game, then Save.'}</p>
  ${['skill','node'].map(kind=>{
   const defs=editingForteDefs.filter(def=>def.kind===kind);if(!defs.length)return '';
-  return `<fieldset class="forte-group"><legend>${kind==='skill'?(fr?'Compétences inhérentes':'Inherent skills'):(fr?'Bonus de statistiques':'Stat bonuses')}</legend><div class="forte-nodes">${defs.map((def,index)=>`<label class="forte-node">
+  return `<fieldset class="forte-group"><legend>${kind==='skill'?(fr?'Compétences inhérentes':'Inherent skills'):(fr?'Bonus de statistiques':'Stat bonuses')}</legend><div class="forte-nodes">${defs.map((original,index)=>{const def=forteLabel(original);return `<label class="forte-node">
    <input type="checkbox" data-forte-key="${def.key}" ${editingForteNodes[def.key]===true?'checked':''}>
    <span class="forte-node-copy"><b>${esc(def.name)} <small>· ${fr?'Nœud':'Node'} ${index+1}</small></b><span>${esc(def.description)}</span></span>
-  </label>`).join('')}</div></fieldset>`;
+  </label>`;}).join('')}</div></fieldset>`;
  }).join('')}`;
  if(focusedKey)box.querySelector(`[data-forte-key="${CSS.escape(focusedKey)}"]`)?.focus({preventScroll:true});
 }

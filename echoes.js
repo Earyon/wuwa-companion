@@ -1,15 +1,15 @@
 'use strict';
-let editingEchoes=null,echoFormState=null,echoPickerSlot=1;
+let editingEchoes=null,echoFormState=null,echoPickerSlot=1,selectedEchoSlot=1;
 let echoQuery='',echoFilter='all';
 const echoRow=e=>extendedCatalog.echo.find(r=>r.id===e.catalogId);
-const echoName=e=>echoRow(e)?.name||e.name||e.catalogId;
-const echoOwner=e=>e.owner?(DATA.find(c=>c.id===e.owner)?.name||e.owner):tr('Non équipé','Unequipped');
+const echoName=e=>(echoRow(e)?gameLabel(echoRow(e)):gameText(e.name||e.catalogId));
+const echoOwner=e=>e.owner?(gameLabel(DATA.find(c=>c.id===e.owner))||e.owner):tr('Non équipé','Unequipped');
 const statLabel=type=>{const s=EchoRules.stats[type];return s?(lang==='fr'?s[0]:s[1])+(s[2]?' %':''):type;};
 const statText=s=>s?`${statLabel(s.type)} : ${s.value??'?'}`:'?';
 const echoButton=(action,label,value='')=>`<button type="button" class="companion-button" data-echo-action="${action}" data-value="${esc(value)}">${label}</button>`;
 function echoDescription(e){
  const set=echoRow(e)?.sets.find(s=>s.id===e.setId);
- return `<b>${esc(echoName(e))}</b><small>${e.quality?'★'.repeat(e.quality):'? ★'} · ${tr('Coût','Cost')} ${e.cost??'?'} · ${tr('Niveau','Level')} ${e.level??'?'}<br>${esc(set?.name||e.setId||tr('Sonate inconnue','Unknown Sonata'))}<br>${esc(statText(e.main))} · ${esc(statText(e.secondary))}${e.substats.length?'<br>'+e.substats.map(s=>esc(statText(s))).join(' · '):''}</small>`;
+ return `<b>${esc(echoName(e))}</b><small>${e.quality?'★'.repeat(e.quality):'? ★'} · ${tr('Coût','Cost')} ${e.cost??'?'} · ${tr('Niveau','Level')} ${e.level??'?'}<br>${esc(gameText(set?.name)||e.setId||tr('Sonate inconnue','Unknown Sonata'))}<br>${esc(statText(e.main))} · ${esc(statText(e.secondary))}${e.substats.length?'<br>'+e.substats.map(s=>esc(statText(s))).join(' · '):''}</small>`;
 }
 function ensureEchoCatalogue(){if(!extendedCatalog.echo.length&&!extendedCatalog.loading.echo&&!extendedCatalog.errors.echo)queueMicrotask(()=>loadExtended('echo'));}
 function echoCatalogueStatus(){return extendedCatalog.errors.echo?`<p class="companion-note">${tr('Catalogue indisponible. Tes Échos enregistrés restent accessibles.','Catalogue unavailable. Your recorded Echoes remain accessible.')}</p>${echoButton('retry',tr('Réessayer','Retry'))}`:extendedCatalog.echo.length?'':`<p class="companion-note">${tr('Chargement du catalogue…','Loading catalogue…')}</p>`;}
@@ -23,18 +23,18 @@ function echoInventoryCards(){
  const rows=data.echoes.filter(e=>(echoFilter==='all'||(echoFilter==='free'?e.owner===null:e.owner!==null))&&[echoName(e),echoOwner(e),echoRow(e)?.sets.find(s=>s.id===e.setId)?.name||e.setId||''].some(s=>s.toLocaleLowerCase().includes(query)));
  return echoCatalogueStatus()+`<p class="companion-note">${rows.length} / ${data.echoes.length}</p><div class="companion-list">${rows.map(e=>inventoryCard(echoRow(e),echoDescription(e)+`<small>${esc(echoOwner(e))}${e.owner?' · '+e.slot+(e.slot===1?' · '+tr('Principal','Main'):''):''}</small>`,echoButton('edit',tr('Modifier','Edit'),e.id)+echoButton('delete',tr('Retirer','Remove'),e.id)+(e.owner&&DATA.some(c=>c.id===e.owner)?echoButton('owner',tr('Voir le Résonateur','View Resonator'),e.owner):''))).join('')||`<p>${tr('Aucun Écho dans cette sélection.','No Echoes in this selection.')}</p>`}</div>`;
 }
-function prepareEditorEchoes(state,owner){editingEchoes={owner,before:structuredClone(state.echoes),after:structuredClone(state.echoes)};drawEditorEchoes();}
+function prepareEditorEchoes(state,owner){selectedEchoSlot=1;editingEchoes={owner,before:structuredClone(state.echoes),after:structuredClone(state.echoes)};drawEditorEchoes();}
 function drawEditorEchoes(){
  if(!editingEchoes)return;
  const active=document.activeElement,focus=active?.closest('#editor-echo')?{action:active.dataset.echoAction,value:active.dataset.value}:null;
- const equipped=editingEchoes.after.filter(e=>e.owner===editingEchoes.owner),known=equipped.reduce((n,e)=>n+(e.cost??0),0),unknown=equipped.some(e=>e.cost===null);
+ const equipped=editingEchoes.after.filter(e=>e.owner===editingEchoes.owner),known=equipped.reduce((n,e)=>n+(e.cost??0),0),unknown=equipped.some(e=>e.cost===null),selected=equipped.find(e=>e.slot===selectedEchoSlot);
  document.getElementById('editor-echo').innerHTML=`<div class="editor-panel-heading"><p class="editor-eyebrow">${tr('Équipement','Equipment')}</p><h3>${tr('Échos','Echoes')}</h3><p class="editor-hint">${tr('Le premier emplacement définit l’Écho principal. Remplacer un Écho conserve l’ancien dans l’inventaire.','The first slot defines the main Echo. Replacing an Echo keeps the previous copy in your inventory.')}</p></div>
  <div class="echo-cost ${known>12?'companion-error':''}">${tr('Coût renseigné','Recorded cost')} <strong>${known}${unknown?' + ?':''}</strong> / 12 <small>${tr('Plafond maximal ; ta Banque de données peut limiter le coût à 10.','Maximum cap; your Data Bank may limit cost to 10.')}</small></div>
- <div class="echo-slots">${[1,2,3,4,5].map(slot=>{const e=equipped.find(e=>e.slot===slot);return `<article class="echo-slot ${slot===1?'echo-main':''}"><h4>${slot===1?tr('Écho principal','Main Echo'):tr('Emplacement','Slot')+' '+slot}</h4>${e?`<div class="echo-slot-copy"><img src="${esc(echoRow(e)?.image||'./assets/icon-192.png')}" alt="">${echoDescription(e)}</div>`:`<p>${tr('Aucun Écho équipé','No Echo equipped')}</p>`}<div class="companion-actions">${echoButton('pick',e?tr('Remplacer','Replace'):tr('Équiper','Equip'),slot)}${e?echoButton('draft-edit',tr('Détails','Details'),e.id)+echoButton('unequip',tr('Déséquiper','Unequip'),slot):''}</div></article>`;}).join('')}</div>`;
+ <div class="echo-equipment"><nav class="echo-slots" aria-label="${tr('Emplacements équipés','Equipped slots')}">${[1,2,3,4,5].map(slot=>{const e=equipped.find(e=>e.slot===slot);return `<button type="button" class="echo-slot ${slot===1?'echo-main':''}" data-echo-action="slot" data-value="${slot}" aria-pressed="${slot===selectedEchoSlot}" aria-label="${esc((slot===1?tr('Écho principal','Main Echo'):tr('Emplacement','Slot')+' '+slot)+' · '+(e?echoName(e):tr('Vide','Empty')))}">${e?`<img src="${esc(echoRow(e)?.image||'./assets/portrait-placeholder.svg')}" alt="" width="64" height="64">`:'<span aria-hidden="true">+</span>'}<small>${slot===1?tr('Principal','Main'):slot}${e?' · '+tr('Niv.','Lv.')+' '+(e.level??'?'):''}</small></button>`;}).join('')}</nav><div class="echo-selected">${selected?`<div class="echo-slot-copy"><img class="echo-artwork" src="${esc(equipmentArtwork(echoRow(selected),'echoes')||'./assets/portrait-placeholder.svg')}" alt=""><div>${echoDescription(selected)}<div class="companion-actions">${echoButton('pick',tr('Remplacer','Replace'),selectedEchoSlot)}${echoButton('draft-edit',tr('Modifier les statistiques','Edit stats'),selected.id)}${echoButton('unequip',tr('Déséquiper','Unequip'),selectedEchoSlot)}</div></div></div>`:`<div class="echo-empty-slot"><h4>${tr('Emplacement','Slot')} ${selectedEchoSlot}</h4><p>${tr('Aucun Écho équipé','No Echo equipped')}</p>${echoButton('pick',tr('Équiper un Écho','Equip an Echo'),selectedEchoSlot)}</div>`}</div></div>`;
  if(focus)document.querySelector('#editor-echo [data-echo-action="'+CSS.escape(focus.action==='unequip'?'pick':focus.action||'pick')+'"][data-value="'+CSS.escape(focus.value||'')+'"]')?.focus({preventScroll:true});
 }
 function openEchoPicker(slot){
- echoPickerSlot=Number(slot);ensureEchoCatalogue();
+ echoPickerSlot=Number(slot);selectedEchoSlot=echoPickerSlot;ensureEchoCatalogue();
  document.getElementById('echoPickerTitle').textContent=tr('Écho · emplacement ','Echo · slot ')+slot;
  const search=document.getElementById('echoPickerQuery');search.value='';search.placeholder=tr('Rechercher un exemplaire…','Search a copy…');
  document.getElementById('echoPickerAdd').textContent=tr('Ajouter un nouvel exemplaire','Add a new copy');
@@ -45,7 +45,7 @@ function drawEchoPicker(){
  const list=editingEchoes.after.filter(e=>echoName(e).toLocaleLowerCase().includes(q));
  document.getElementById('echoPickerList').innerHTML=echoCatalogueStatus()+list.map(e=>{
   const other=e.owner!==null&&e.owner!==editingEchoes.owner;
-  return `<button type="button" class="echo-choice" data-echo-action="choose" data-value="${esc(e.id)}" ${other?'disabled':''}>${echoDescription(e)}<small>${esc(echoOwner(e))}${e.owner?' · '+e.slot:''}</small></button>`;
+  return `<button type="button" class="echo-choice" data-echo-action="choose" data-value="${esc(e.id)}" ${other?'disabled':''}><img src="${esc(echoRow(e)?.image||'./assets/portrait-placeholder.svg')}" alt="" loading="lazy" width="80" height="80">${echoDescription(e)}<small>${esc(echoOwner(e))}${e.owner?' · '+e.slot:''}</small></button>`;
  }).join('')+(list.length?'':`<p>${tr('Ajoute ton premier exemplaire pour l’équiper.','Add your first copy to equip it.')}</p>`);
 }
 function assignDraftEcho(record,slot){
@@ -60,7 +60,7 @@ function echoStatFields(prefix,title,value,types){
  const options=[...new Set([...types,...(value?[value.type]:[])])];
  return `<div class="echo-stat-row"><label>${title}<select name="${prefix}Type"><option value="">?</option>${options.map(type=>`<option value="${type}" ${value?.type===type?'selected':''}>${esc(statLabel(type))}</option>`).join('')}</select></label><label>${tr('Valeur','Value')}<input name="${prefix}Value" type="number" min="0" max="10000000" step="any" placeholder="?" value="${value?.value??''}"></label></div>`;
 }
-function echoCatalogueLabel(row){return row.label||row.name;}
+function echoCatalogueLabel(row){return gameLabel(row);}
 function selectedEchoRow(value){
  const original=echoFormState?.original;
  if(original&&value===echoFormState.inputValue)return echoRow(original);
@@ -92,7 +92,7 @@ function refreshEchoFormCatalogue(){
  const row=selectedEchoRow(input.value);
  const select=form.elements.setId;
  const selected=select.dataset.ready?select.value:original?.setId||'';select.dataset.ready='true';
- form.elements.setId.innerHTML='<option value="">?</option>'+(row?.sets||[]).map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')+(selected&&!row?.sets.some(s=>s.id===selected)?`<option value="${esc(selected)}">${esc(selected)}</option>`:'');
+ form.elements.setId.innerHTML='<option value="">?</option>'+(row?.sets||[]).map(s=>`<option value="${esc(s.id)}">${esc(gameText(s.name))}</option>`).join('')+(selected&&!row?.sets.some(s=>s.id===selected)?`<option value="${esc(selected)}">${esc(selected)}</option>`:'');
  form.elements.setId.value=selected;
  document.getElementById('echoFormStatus').innerHTML=echoCatalogueStatus();
 }
@@ -141,6 +141,7 @@ function echoAction(event){
  const button=event.target.closest('[data-echo-action]');if(!button)return;
  const {echoAction:action,value}=button.dataset;
  try{
+  if(action==='slot'){selectedEchoSlot=Number(value);drawEditorEchoes();}
   if(action==='add')openEchoForm(null);
   if(action==='edit')openEchoForm(value);
   if(action==='draft-edit')openEchoForm(value,{draft:true});

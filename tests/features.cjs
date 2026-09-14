@@ -13,7 +13,9 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(new
    const context=await browser.newContext({viewport:{width:720,height:1122},serviceWorkers:'block'}),page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
    await page.route('https://**/*',route=>{const u=route.request().url();const payload=u.endsWith('/item')?{itemList:[{Id:2,Name:'Shell Credit',TypeName:'Currency'},{Id:3,Name:'Astrite',TypeName:'Currency'}]}:u.endsWith('/echo')?{Echo:[{Id:6001,Name:'Test Echo',Type:'Echo',FetterGroups:[]}]}:{GameVer:'test',ResVer:'test',Skills:[]};return route.fulfill({contentType:'application/json',body:JSON.stringify(payload)});});
-   await page.addInitScript(({chars,weapons,seed,language})=>{if(localStorage.getItem('test-seeded'))return;localStorage.setItem('test-seeded','1');localStorage.setItem('wwc_lang',language);localStorage.setItem('wwc_catalog_canonical_v050',JSON.stringify({characters:chars,weapons,state:{gameVersion:'test',resourceVersion:'test'}}));localStorage.setItem('wwc_owned_ids',JSON.stringify(chars.slice(0,2).map(c=>c.id)));localStorage.setItem('wwc_account_data',JSON.stringify(seed));},{chars,weapons,seed,language});
+   // Verify retained phase-two modules explicitly; they remain hidden in production.
+   await page.addInitScript(()=>document.addEventListener('DOMContentLoaded',()=>{guidesVisible=true;},{once:true}));
+   await page.addInitScript(({chars,weapons,seed,language})=>{if(localStorage.getItem('test-seeded'))return;localStorage.setItem('test-seeded','1');localStorage.setItem('wwc_tutorial_v1','seen');localStorage.setItem('wwc_lang',language);localStorage.setItem('wwc_catalog_canonical_v050',JSON.stringify({characters:chars,weapons,state:{gameVersion:'test',resourceVersion:'test'}}));localStorage.setItem('wwc_owned_ids',JSON.stringify(chars.slice(0,2).map(c=>c.id)));localStorage.setItem('wwc_account_data',JSON.stringify(seed));},{chars,weapons,seed,language});
    await page.goto(base);await page.locator('.res-row').first().waitFor();
    const initial=await page.evaluate(()=>CompanionStore.exportData());
    const nav=async view=>page.locator(`[data-view="${view}"]:visible`).click();
@@ -85,6 +87,7 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(new
    await page.evaluate(()=>CompanionStore.update(s=>{s.weapons=[];}));
    await page.locator('#backupFile').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(backupText)});await page.locator('[data-action="restore-backup"]').click();await page.waitForLoadState();await page.locator('.res-row').first().waitFor();
    assert.deepEqual(await page.evaluate(()=>CompanionStore.exportData().records),backup.records);
+   await page.locator('[data-action="tutorial-skip"]').click();
    await tab('res');await page.locator('#ownedSearch').fill('Qingxiao');await page.locator('.trash-btn').click();await page.reload();await page.locator('.res-row').first().waitFor();assert.equal(await page.evaluate(()=>ownedIds.includes('resonator:1')),false);assert.deepEqual(await page.evaluate(()=>accountData.Qingxiao),seed.Qingxiao);
    // Every new screen at phone, tablet and desktop widths.
    for(const width of [320,720,1152]){

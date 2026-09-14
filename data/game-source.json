@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "gameVersion": "3.6.0",
+  "patchVersion": "3.6.13",
+  "checkedAt": "2026-09-14",
+  "creator": "Kuro Games",
+  "referenceRevision": "353f2eaed119bc9f680eab92807d20ac75a79b40",
+  "localFiles": [
+    "BinData_achievement_achievement.json",
+    "BinData_item_iteminfo.json",
+    "BinData_phantom_phantomfettergroup.json",
+    "BinData_phantom_phantomitem.json",
+    "BinData_property_baseproperty.json",
+    "BinData_property_propertyindex.json",
+    "BinData_resonate_chain_resonantchain.json",
+    "BinData_role_roleinfo.json",
+    "BinData_skillTree_skilltree.json",
+    "BinData_skill_skill.json",
+    "BinData_skill_skilltype.json",
+    "BinData_weapon_weaponconf.json",
+    "en-multitext.json",
+    "fr-multitext.json"
+  ],
+  "supplementaryFiles": [
+    "character-list.json",
+    "weapon-list.json",
+    "echo.json",
+    "item.json",
+    "fr-character-list.json",
+    "fr-weapon-list.json",
+    "fr-echo-list.json",
+    "fr-item-list.json",
+    "BinData_achievement_achievementgroup.json",
+    "BinData_achievement_achievementstarlevel.json",
+    "BinData_drop_droppackage.json",
+    "BinData_phantom_phantomfetter.json",
+    "encore-version.json"
+  ],
+  "files": {
+    "BinData_achievement_achievement.json": "f56fb5a36ab1afc5d6af6fa0e5310119c890327035be662e4f7a05b2deccd762",
+    "BinData_achievement_achievementgroup.json": "68d6558993c144744aff71b358bccbbadf39e59351ed159d9d7350a6daa628f0",
+    "BinData_achievement_achievementstarlevel.json": "bd0241ec4a70f8cec628750c7457c20ed9f2519b065b95f4dcc4e6441931b9b9",
+    "BinData_drop_droppackage.json": "623777751d06baec5ad893b2ea3ed590cebb8e9e5dcc259eb567933328a0ffd8",
+    "BinData_item_iteminfo.json": "ca4b5009582e284fa2ee45f5956ec6fbe50a2d710937a47111014c237d1a18a1",
+    "BinData_phantom_phantomfetter.json": "974b5f52482303abc5da3d56320e61649e550614e5683868b3c1c026868ecc75",
+    "BinData_phantom_phantomfettergroup.json": "d700f0a7990881dd4fd48a60cd9e990fe21eade64e2273035ed1db8bb9f193f4",
+    "BinData_phantom_phantomitem.json": "bcbf862fd376f5e91e31e85a73e4f6f9b1cc163ecded6e371ce69a7cfa83c5ed",
+    "BinData_property_baseproperty.json": "cec090db65b209d5a4395580af34c17209f5bd50df32b97c50675379c638b89a",
+    "BinData_property_propertyindex.json": "2c8d425180db6fa9145ddfdf644a785b6aec021ecf71203056a882a7d66d2d1a",
+    "BinData_resonate_chain_resonantchain.json": "634bc0e6f501c6187c239589678e21400ee7faea78119fb2490caa41019b0be3",
+    "BinData_role_roleinfo.json": "af9d84becc32abd6dc6a621deaea9fb4f962a62a2e84d5afadc897e3e4c37dca",
+    "BinData_skill_skill.json": "d779c3da471b2f9ce16fb54029859efb00a7536562507eb6cd2435de9e71bdc0",
+    "BinData_skill_skilltype.json": "488ed865ea76661cc2a3921e17195cd33e03b3af9ab0e27507b7f43c36ba7b36",
+    "BinData_skillTree_skilltree.json": "9a90d3a9d01e25cd24fd81aca877c0cc6054b2444d59035b161d42136cd26ade",
+    "BinData_weapon_weaponconf.json": "733e232ea7b898b62253ed613c8ba694482bbfca54b0780457ca02c5b2306d4e",
+    "character-list.json": "b3d3a610af60023ce36c0b7afd11e8ad8179fab434f9e0adf7e8aecc90971ad8",
+    "echo.json": "4a95f85ae3ea426b9b3d97ee0663c254a92eaf3d6ffaf763cd92de133616029a",
+    "en-multitext.json": "4809f5e50ddf9e7d758a038eace941e2ac28f56efa84091ab15fdf7fc4b099fc",
+    "fr-character-list.json": "ce390768e82cd4367f8c2dde1ffd5189de20f45aeabe5fd8b10a33aff537e9f4",
+    "fr-echo-list.json": "bbb6fe82d5d432ddc88ad77eb28783085a21710e39d97573dd9148090bc6f5a4",
+    "fr-item-list.json": "5c082ce412f9924f5910c3fe0497803a5e4eb700bf702f3212d465cea9da0a3b",
+    "fr-multitext.json": "0755ca0c12210e0115774eb0bb6875c8837d815638795aa818cde0c7b9f8ee9b",
+    "fr-weapon-list.json": "74f6e580bbf7064f39ffdcc6a1fc32975e9af0bff2f762e4d6dff43677356ac6",
+    "item.json": "192055635d7c333d2da0052ded0201de49d1ec79cbc9f6008e2aff6f5a19d0b5",
+    "weapon-list.json": "de5f4a8ffef353aab6920c039be9528406e650022d9aa3dc270229a17b2e2a67",
+    "encore-version.json": "fb9b99b28bbb9adaee66161d88f9eb0880b2abf2c9086adaa3d030ddff629720"
+  },
+  "archives": [
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_role.db",
+      "archive": "pakchunk44-WindowsNoEditor.pak",
+      "bytes": 901120,
+      "sha256": "0752b36b8784dadaaabd56e399e5a7e30267e9af85f10088a29838612c334b63"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_skill.db",
+      "archive": "pakchunk44-WindowsNoEditor_P.pak",
+      "bytes": 2076672,
+      "sha256": "c4a5ab770fa17b0d7f84396df5c7e87c4dceeda583acccbf7e97a31e632d446f"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_skillTree.db",
+      "archive": "pakchunk2-WindowsNoEditor.pak",
+      "bytes": 495616,
+      "sha256": "1a85bc08ef7d88ed0eabca1db9ac28f816db4732dd5d2163a22b339d1853559f"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_resonate_chain.db",
+      "archive": "pakchunk44-WindowsNoEditor_P.pak",
+      "bytes": 270336,
+      "sha256": "b2d847f109061fd5ec5c40fd5c6f8e79f888672828b2822c1a376cd0c4b1b723"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_property.db",
+      "archive": "pakchunk2-WindowsNoEditor_P.pak",
+      "bytes": 1232896,
+      "sha256": "c49cf60b219908422a325275785d0b803bb8084b45472f10acb67849f104260a"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_achievement.db",
+      "archive": "pakchunk44-WindowsNoEditor.pak",
+      "bytes": 344064,
+      "sha256": "2bea12fcffcd62b59d0d5a513df789e4dfc0e2bd8f2b77e7d11a974cfbe7fad5"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_item.db",
+      "archive": "pakchunk44-WindowsNoEditor_P.pak",
+      "bytes": 2002944,
+      "sha256": "eedbc5261af6ac8cc91b164d552384c1a1aad7c4a673ca16fc9c835d43a02068"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_weapon.db",
+      "archive": "pakchunk44-WindowsNoEditor_P.pak",
+      "bytes": 643072,
+      "sha256": "509370a9f72909fa44eb34a70da7d43545118841f785a0da8b2893a880daab7d"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/db_phantom.db",
+      "archive": "pakchunk44-WindowsNoEditor.pak",
+      "bytes": 1789952,
+      "sha256": "35c6fc90e4e4396bf4d470fafa161d8594cf1854d861f0513267be5b6b0931f2"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/fr/lang_multi_text.db",
+      "archive": "pakchunk44-WindowsNoEditor_P.pak",
+      "bytes": 47968256,
+      "sha256": "a20584426960a0130d22d0003113a61f28ea6a7ce69259753389eaee4cf8e3d3"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/en/lang_multi_text.db",
+      "archive": "pakchunk44-WindowsNoEditor_P.pak",
+      "bytes": 43978752,
+      "sha256": "c691c51f36a634edceaaede9db245352661a2860f7104a33c2469f99b59af6fa"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/fr/lang_multi_text_1sthalf.db",
+      "archive": "pakchunk112-WindowsNoEditor_P.pak",
+      "bytes": 376832,
+      "sha256": "3288c30606289c96082b2a7d6a593a4d868c4eca94fa918042d81cdc3775a675"
+    },
+    {
+      "path": "Client/Content/Aki/ConfigDB/en/lang_multi_text_1sthalf.db",
+      "archive": "pakchunk112-WindowsNoEditor_P.pak",
+      "bytes": 344064,
+      "sha256": "2e4a3b18c1408f327c15dd280216b7ba7b405c0d5d76736155988c4a98646a47"
+    }
+  ]
+}

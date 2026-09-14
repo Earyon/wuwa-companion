@@ -13,12 +13,12 @@ function planningTasks(character,goal){
  step('weaponAscension',tr('Ascension de l’arme','Weapon ascension'),weapon?.ascension,goal.weaponAscension,4);
  for(const type of SKILL_ORDER)step('skill:'+type,SKILL_LABELS[lang][type],actual.skills?.[type],goal.skills?.[type],goal.priorities?.[type]??0);
  const defs=normalizeForteDefs(readCharacterDetailCache(character.gameId));
- for(const [id,wanted]of Object.entries(goal.forteNodes||{}))if(wanted&&actual.forteNodes?.[id]!==true)tasks.push({key:id,text:(defs.find(d=>d.key===id)?.name||id)+' · '+(actual.forteNodes?.[id]===false?tr('à débloquer','unlock'):tr('état actuel à renseigner','record current state')),priority:3});
+ for(const [id,wanted]of Object.entries(goal.forteNodes||{}))if(wanted&&actual.forteNodes?.[id]!==true)tasks.push({key:id,text:((defs.find(d=>d.key===id)?forteLabel(defs.find(d=>d.key===id)).name:id))+' · '+(actual.forteNodes?.[id]===false?tr('à débloquer','unlock'):tr('état actuel à renseigner','record current state')),priority:3});
  return tasks.sort((a,b)=>b.priority-a.priority);
 }
 function goalPassiveHTML(character,goal){
  const defs=normalizeForteDefs(readCharacterDetailCache(character.gameId));
- return defs.length?defs.map(d=>`<label class="plan-passive"><input type="checkbox" name="passive:${d.key}" ${goal.forteNodes?.[d.key]?'checked':''}><span>${esc(d.name)}</span></label>`).join(''):`<p class="companion-note">${tr('Les déblocages s’affichent lorsque les données du personnage sont disponibles.','Unlocks appear when character data is available.')}</p>`;
+ return defs.length?defs.map(d=>`<label class="plan-passive"><input type="checkbox" name="passive:${d.key}" ${goal.forteNodes?.[d.key]?'checked':''}><span>${esc(forteLabel(d).name)}</span></label>`).join(''):`<p class="companion-note">${tr('Les déblocages s’affichent lorsque les données du personnage sont disponibles.','Unlocks appear when character data is available.')}</p>`;
 }
 function personalPlanner(){
  const state=CompanionStore.get(),character=planCharacter();
@@ -28,7 +28,7 @@ function personalPlanner(){
  const goal=goalDrafts.get(character.id)||saved||{level:actual.level??null,skills:{...actual.skills},priorities:{},forteNodes:{}};
  queueMicrotask(()=>loadProgressSources(character));
  return companionPanel(prefarm?tr('Pré-farm explicite','Explicit pre-farming'):tr('Objectif personnel','Personal goal'),`${prefarm?'<p>'+tr('Simulation depuis le niveau 1 et les compétences au niveau 1. Elle reste séparée de ton objectif actif possédé.','Simulation from level 1 and skills at level 1. It stays separate from your owned active goal.')+'</p>':''}<p>${tr('Choisis ce que tu souhaites améliorer. Un objectif vide exclut cette amélioration. Un seul Résonateur possédé est actif à la fois.','Choose what to improve. An empty target excludes that upgrade. Only one owned Resonator is active at a time.')}</p>
- <form id="goalForm" class="companion-form"><label class="wide">${tr('Résonateur','Resonator')}<select id="planningCharacter" name="character">${DATA.filter(r=>state.roster?.includes(r.id)||state.wishlist.includes(r.id)&&(state.goals[r.id]?.prefarm||goalDrafts.get(r.id)?.prefarm)).map(r=>`<option value="${r.id}" ${r.id===character.id?'selected':''}>${esc(r.name)}</option>`).join('')}</select></label>
+ <form id="goalForm" class="companion-form"><label class="wide">${tr('Résonateur','Resonator')}<select id="planningCharacter" name="character">${DATA.filter(r=>state.roster?.includes(r.id)||state.wishlist.includes(r.id)&&(state.goals[r.id]?.prefarm||goalDrafts.get(r.id)?.prefarm)).map(r=>`<option value="${r.id}" ${r.id===character.id?'selected':''}>${esc(gameLabel(r))}</option>`).join('')}</select></label>
  <label>${tr('Niveau actuel','Current level')}<output>${actual.level??'?'}</output></label><label>${tr('Niveau visé','Target level')}<input name="level" type="number" min="1" max="90" step="1" value="${goal.level??''}" placeholder="—"></label>
  ${ascensionField('ascension',goal.ascension,tr('Ascension visée','Target ascension'))}<label>${tr('Niveau d’arme visé','Target weapon level')}<input name="weaponLevel" type="number" min="1" max="90" step="1" value="${goal.weaponLevel??''}" placeholder="—"></label>${ascensionField('weaponAscension',goal.weaponAscension,tr('Ascension d’arme visée','Target weapon ascension'))}
  <div class="wide"><h3>${tr('Compétences : actuel → objectif','Skills: current → target')}</h3></div>
@@ -39,7 +39,7 @@ function personalPlanner(){
 }
 function personalDaily(){
  const state=CompanionStore.get(),character=DATA.find(r=>r.id===state.active&&state.roster?.includes(r.id)),goal=character?state.goals[character.id]:null;
- return companionPanel(tr('Objectif actif','Active goal'),character&&goal?`<h3>${esc(character.name)}</h3><ul>${planningTasks(character,goal).slice(0,5).map(task=>`<li>${esc(task.text)}</li>`).join('')||`<li>${tr('Objectifs atteints : conserve tes ressources.','Targets reached: save your resources.')}</li>`}</ul>${companionButton('open-plan',tr('Voir mon objectif','View my goal'))}${companionButton('waveplate-advice',tr('Que faire avec mes Waveplates ?','How should I use my Waveplates?'))}<div id="waveplateAdvice"></div>`:`<p>${tr('Aucun objectif actif. Tes souhaits ne déclenchent pas de farming automatique.','No active goal. Wishlist entries do not automatically start farming.')}</p>${companionButton('open-plan',tr('Choisir un objectif','Choose a goal'))}`);
+ return companionPanel(tr('Objectif actif','Active goal'),character&&goal?`<h3>${esc(gameLabel(character))}</h3><ul>${planningTasks(character,goal).slice(0,5).map(task=>`<li>${esc(task.text)}</li>`).join('')||`<li>${tr('Objectifs atteints : conserve tes ressources.','Targets reached: save your resources.')}</li>`}</ul>${companionButton('open-plan',tr('Voir mon objectif','View my goal'))}${companionButton('waveplate-advice',tr('Que faire avec mes Waveplates ?','How should I use my Waveplates?'))}<div id="waveplateAdvice"></div>`:`<p>${tr('Aucun objectif actif. Tes souhaits ne déclenchent pas de farming automatique.','No active goal. Wishlist entries do not automatically start farming.')}</p>${companionButton('open-plan',tr('Choisir un objectif','Choose a goal'))}`);
 }
 function readGoalForm(form){
  const v=new FormData(form),id=v.get('character'),base=goalDrafts.get(id)||CompanionStore.get().goals[id]||{};

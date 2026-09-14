@@ -2,7 +2,45 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
-## Avancement : 14 / 14 lots vérifiés
+## Phase Collection — 3 / 4 lots vérifiés
+
+Reprise expressément autorisée le 13 septembre 2026 : réaliser la phase en une traite, tests et publication inclus. L'encyclopédie doit partager le code graphique de toute l'application. Les nouvelles recommandations et les objectifs restent pour une seconde phase ; leurs données existantes sont conservées.
+
+- [x] Socle de consultation : démarrage, textes français sourcés et ressources de référence cohérentes.
+- [x] Collection et encyclopédie : charte commune, recherche et filtres, possessions et inventaires accessibles.
+- [x] Fiche Résonateur : navigation, équipement, arbre de compétences, états de progression et chaîne résonatrice.
+- [ ] Livraison : prise en main, performances mesurées, régressions, responsive et mise à jour publiée vérifiés.
+
+Le compteur porte sur cette nouvelle phase, sans réutiliser les résultats de la livraison précédente. Les tests utilisent des profils isolés ; les essais réels sur la tablette de l'utilisateur restent distingués des simulations.
+
+### Vérifications de la phase Collection — 14 septembre 2026
+
+Les 22 suites de `node scripts/test.cjs` passent, y compris les parcours conservés mais masqués de la seconde phase. La revue utilise les vrais composants avec des comptes synthétiques : FR/EN, largeurs de 320 à 1536 pixels CSS selon les parcours, édition et sauvegarde, changement de personnage, clavier, import/export, échecs de stockage, services indisponibles, cache et fonctionnement hors ligne. Les captures de l'arbre, des attributs, de l'arme, des Échos et de la chaîne ont été examinées. L'arbre vérifie aussi l'absence de chevauchement des zones tactiles et la visibilité des quinze nœuds et deux compétences supplémentaires.
+
+La cause d'un rechargement inutile a été identifiée dans la réponse réelle de l'API : la version arrive dans un tableau, alors que l'ancien code supposait un objet. Un lecteur partagé valide les deux formes et refuse les métadonnées ambiguës. Les catalogues intégrés permettent de démarrer sans attendre l'API ; un ancien cache sans version est réparé sans modifier les données personnelles. La revue finale a aussi corrigé la normalisation répétée des images locales : les catalogues enregistrent leurs URLs sources et la résolution locale reste propre à l'affichage. Un test force une actualisation puis recharge les images et contrôle le compte. Les six suites concernées ont été relancées avec succès après cette correction ; les sept projections et la syntaxe des scripts ont été contrôlées.
+
+La source primaire et les 2 837 fichiers d'images officiels sont vérifiés par empreinte. Les traductions et références locales sont documentées dans `SOURCE_DATA.md`. Le cache d'images limite simultanément le nombre et les octets, regroupe les requêtes identiques et conserve un repli hors ligne ; les données personnelles restent séparées.
+
+Mesures reproductibles : comparaison au commit publié `947c7f8`, Edge headless, 720 × 1122 pixels CSS, trois lancements froids et trois réouvertures par version, profils isolés, identités du catalogue réel et compte synthétique. Les réponses externes sont retardées de 150 ms ; le débit et le processeur ne sont pas bridés, le service worker est désactivé pour isoler les changements de démarrage. Médianes de la dernière exécution complète :
+
+| Mesure | Avant | Après |
+| --- | ---: | ---: |
+| Collection, premier chargement | 521 ms | 233 ms |
+| Portraits visibles, premier chargement | 691 ms | 258 ms |
+| Collection, réouverture | 121 ms | 142 ms |
+| Portraits visibles, réouverture | 271 ms | 165 ms |
+| Requêtes API au démarrage | 3 | 1 |
+| Requêtes d'images vers un service externe | 3 | 0 |
+
+La réouverture du texte de collection est 21 ms plus lente dans cette série ; les gains ne concernent donc pas chaque mesure. L'amélioration principale est la suppression de l'attente du catalogue distant et le chargement local des portraits. Une série exploratoire précédente avait donné 441 → 165 ms au démarrage : cette variation rappelle la portée limitée d'un petit banc d'essai. Les rapports détaillés restent dans `test-results/performance-comparison.json`.
+
+La mise à jour PWA depuis `947c7f8` passe avec deux fenêtres, attente d'activation, fermeture puis nouveau shell disponible hors ligne, données et cache non lié préservés. Publication Pages et empreintes servies : contrôle restant avant le quatrième lot.
+
+Limites : aucun essai sur tablette physique, Safari ou Firefox ; aucune mesure de débit Internet réel, d'animation 3D ou de connexion au compte Kuro. Les icônes et illustrations 2D officielles sont utilisées à leur résolution disponible. Ces limites ne sont pas présentées comme des contrôles réussis.
+
+## Historique : 14 / 15 lots vérifiés — livraison initiale
+
+Les 14 lots cochés décrivent les vérifications techniques de la livraison initiale. Ils ne prouvent ni une traduction intégrale, ni une ergonomie satisfaisante, ni des performances validées en conditions réelles. Les retours utilisateur restent à traiter ; les bilans historiques ci-dessous ne constituent pas une validation de ces corrections.
 
 - [x] Catalogue Résonateurs / armes, compte et niveaux, cinq compétences et passifs.
 - [x] Mise en page consolidée, publication Pages et mises à jour PWA.
@@ -18,6 +56,21 @@ Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue
 - [x] Wishlist et Pull Planner, historique Tracker et imports contrôlés.
 - [x] Optimisation globale fondée sur le compte et ses équipes.
 - [x] Revue finale des parcours FR/EN, tactile, hors ligne, migrations et données absentes.
+- [ ] Optimisation mesurée de la rapidité, du chargement des images et de la compatibilité en conditions représentatives.
+
+## Historique — cadrage initial de l'étape 15
+
+Les paragraphes suivants conservent le cadrage du point d'ensemble antérieur à la reprise. La demande ultérieure de réaliser toute la phase Collection, décrite en tête du document, les remplace. La tablette ciblée utilise Android.
+
+**Statut : à faire.** Ajout demandé pendant le point d'ensemble ; le développement reste en pause jusqu'à sa reprise par l'utilisateur. Les modifications locales commencées ne sont ni validées ni publiées et ne comptent pas comme une étape terminée.
+
+- Établir des mesures reproductibles avant/après : première ouverture sans cache, réouverture avec cache, affichage des images visibles, navigation et réactivité des principaux écrans. Consigner les conditions réseau, les volumes transférés et les requêtes.
+- Identifier les causes des lenteurs, puis optimiser les images, les ressources, le cache et les traitements coûteux lorsque les mesures justifient une modification.
+- Vérifier les connexions lentes, les services externes indisponibles, le fonctionnement hors ligne et les limites de stockage, avec des états de chargement et des solutions de repli compréhensibles.
+- Contrôler les navigateurs et appareils ciblés, notamment la tablette en portrait/paysage et l'application installée. Distinguer les tests automatisés dans Edge/Chromium, Firefox et WebKit selon les outils disponibles des essais sur Safari ou sur un appareil physique ; noter explicitement toute couverture manquante.
+- Vérifier les fonctions liées après modification : stabilité de la mise en page, FR/EN, filtres, saisies, sauvegardes/imports et mises à jour PWA, sans perte de données personnelles.
+
+**Critère de fin :** mesures avant/après consignées, lenteurs identifiées traitées ou limites expliquées, contrôles pertinents réussis et couverture de compatibilité documentée. Un chargement rapide en local ou une simulation de tablette ne suffit pas à valider les performances sur l'appareil réel.
 
 ## Contraintes
 
@@ -195,3 +248,13 @@ Mesure locale finale : cinq démarrages avec catalogue synthétique validé en c
 Sources techniques complémentaires consultées le 13 septembre 2026 : [AbortController, MDN](https://developer.mozilla.org/en-US/docs/Web/API/AbortController), [boutons natifs, MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button). Sources visuelles et périmètre juridique documentés dans `DESIGN.md` ; une identité communautaire n’est pas présentée comme une autorisation de Kuro.
 
 **Bilan : 14 / 14 lots fonctionnels vérifiés ; refonte 3 / 3.** Le périmètre développé est prêt pour la revue utilisateur des usages, partie par partie. Restent des limites déclarées, pas des validations prétendues : aucune vérification sur tablette physique, pas de synchronisation cloud, pas de simulateur de dégâts, données/recommandations/événements datés 3.6, coûts partiels lorsque les données nécessaires manquent. Le README expose ces limites et les procédures de maintenance.
+
+- Phase Collection : objectifs, recommandations et leurs accès sont masqués à la demande expresse de l’utilisateur. Le code et les données restent conservés pour la phase suivante.
+
+## Orientation visuelle actualisée — reproduction fidèle
+
+Dernière demande explicite de l’utilisateur : reprendre au maximum à l’identique l’interface de la vidéo fournie, notamment la disposition exacte de l’arbre, les rubriques et contrôles. Conserver toutes les miniatures officielles sans redessin ; seul le fond est personnalisé. Cette demande remplace l’orientation précédente vers des icônes et compositions inventées. Compléter les vues manquantes avec des sources et vidéos identifiées, en distinguant les versions du jeu. Citer Kuro Games comme créateur du jeu et des ressources, avec le statut communautaire non officiel. Une attribution n’est pas présentée comme une licence. Ne pas afficher un rendu 3D ou une animation comme reproduit si les ressources disponibles ne le permettent pas. Les objectifs et recommandations restent masqués conformément à la phase Collection.
+
+### Socle Collection vérifié
+
+Le 13 septembre : contrôles reproductibles des projections locales réussis sur les sources versionnées (58 Résonateurs, 122 armes, 311 Échos, 2 339 objets, 2 700 termes français, 632 textes Forte). Les 58 fiches bilingues incluent les statistiques de base, les identifiants et parents des nœuds ainsi que six séquences ; aucune substitution de paramètres non résolue. Les traductions restent séparées des identifiants enregistrés. Les détails de montée servant au calcul des coûts gardent leur circuit existant. Les références se chargent par personnage. Démarrage avec services externes bloqués et parcours FR/EN de Collection vérifiés ; contrôle de vitesse, PWA et validation complète des nouveaux visuels encore en cours.

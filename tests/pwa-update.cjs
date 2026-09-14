@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {execFileSync}=require('node:child_process');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-const previous='58fe0e8';
+const previous='947c7f8';
 let latest=false;
 const oldFiles=Object.fromEntries(['sonatas.js','data/sonatas.json','convene-rules.js','convenes.js','pull-store.js','tracker-import.js','wishlist.js','optimization.js','activity-rules.js','activities.js','data/achievements.json','data/events.json','teams.js','profiles.js','recommendations.js','data/recommendations.json','cost-engine.js','progression-data.js','resources.js','data/progression.json','echo-rules.js','echoes.js','dialogs.js','editor-view.js','catalog.js','app.js','skills.js','account-editor.js','bootstrap.js','index.html','styles.css','layout.css','companion.css','account-store.js','companion-ui.js','inventory.js','planning.js','forte.js','pwa.js','sw.js'].map(f=>[f,execFileSync('git',['show',`${previous}:${f}`],{cwd:root})]));
 const server=http.createServer((req,res)=>{
@@ -20,7 +20,7 @@ const server=http.createServer((req,res)=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${server.address().port}`;
  const browser=await chromium.launch({headless:true,channel:process.env.BROWSER_CHANNEL||'msedge'});
  try{
-  const context=await browser.newContext();
+  const context=await browser.newContext();await context.addInitScript(()=>localStorage.setItem('wwc_tutorial_v1','seen'));
   await context.route('https://**/*',r=>r.abort());
   const p=await context.newPage();await p.goto(base);
   await p.evaluate(()=>navigator.serviceWorker.ready);await p.reload();
@@ -30,13 +30,13 @@ const server=http.createServer((req,res)=>{
   const second=await context.newPage();await second.goto(base);
   latest=true;
   await p.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.update();});
-  await p.waitForFunction(async()=>!!(await navigator.serviceWorker.getRegistration()).waiting);
-  assert.equal(await p.evaluate(()=>typeof pullTargetHTML),'undefined','Old open tab must remain on old shell');
+  await p.waitForFunction(()=>pwaState.waiting);
+  assert.equal(await p.evaluate(()=>typeof drawTalentEditor),'undefined','Old open tab remains on old shell');
   const workers=context.serviceWorkers();
   let replacement;
-  for(const worker of workers)if(await worker.evaluate(()=>CACHE_NAME).catch(()=>null)==='wuwa-companion-shell-057-pwa-19')replacement=worker;
+  for(const worker of workers)if(await worker.evaluate(()=>CACHE_NAME).catch(()=>null)==='wuwa-companion-shell-057-pwa-20')replacement=worker;
   assert.ok(replacement,'Replacement worker available');
-  assert.equal(await p.evaluate(()=>pwaState?.waiting).catch(()=>null),null,'Previous shell has no status mechanism');
+  await p.waitForFunction(()=>pwaState.waiting);
   await p.close();await second.close();
   // Observe from the worker: opening a scoped probe too early keeps the old
   // worker alive. Explicitly await the async result outside page polling.
@@ -44,7 +44,7 @@ const server=http.createServer((req,res)=>{
   for(let attempt=0;attempt<100&&!activated;attempt++){
    activated=await replacement.evaluate(async()=>{
     const keys=(await caches.keys()).filter(k=>k.startsWith('wuwa-companion-shell-'));
-    return !self.registration.waiting&&self.registration.active?.state==='activated'&&keys.length===1&&keys[0]==='wuwa-companion-shell-057-pwa-19';
+    return !self.registration.waiting&&self.registration.active?.state==='activated'&&keys.length===1&&keys[0]==='wuwa-companion-shell-057-pwa-20';
    });
    if(!activated)await new Promise(r=>setTimeout(r,100));
   }
@@ -56,8 +56,14 @@ const server=http.createServer((req,res)=>{
   assert.ok(await probe.evaluate(()=>caches.has('unrelated-cache')));
   assert.equal(await probe.evaluate(()=>CompanionStore.get().echoes[0].legacyStats.substats[0]),'Old text','Old Echo entries survive shell migration');
   const keys=await probe.evaluate(()=>caches.keys());
-  assert.deepEqual(keys.filter(k=>k.startsWith('wuwa-companion-shell-')),['wuwa-companion-shell-057-pwa-19']);
+  assert.deepEqual(keys.filter(k=>k.startsWith('wuwa-companion-shell-')),['wuwa-companion-shell-057-pwa-20']);
+  await probe.evaluate(()=>loadResonatorReference('1108'));
   await context.setOffline(true);await probe.reload();
+  await probe.waitForFunction(()=>DATA.length>0);
+  assert.equal(await probe.evaluate(async()=>!!(await loadResonatorReference('1108'))),true,'Viewed character reference works offline');
+  assert.equal(await probe.evaluate(()=>typeof showTutorial),'function');
+  assert.equal(await probe.evaluate(()=>guidesVisible),false);
+  assert.equal(await probe.evaluate(async()=>{await loadExtended('echo');return extendedCatalog.echo.length;}),311);
   assert.equal(await probe.evaluate(()=>document.styleSheets.length),3);
   assert.equal(await probe.evaluate(()=>typeof normalizeForteDefs),'function','New feature script works offline');
   assert.equal(await probe.evaluate(()=>typeof openDialog),'function','Native dialogs work offline');

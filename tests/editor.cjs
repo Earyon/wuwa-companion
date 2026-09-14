@@ -16,7 +16,7 @@ const server=http.createServer((req,res)=>{const name=new URL(req.url,'http://lo
    page.on('pageerror',e=>errors.push(e.message));
    await page.route('https://**/*',route=>{if(route.request().url().includes('/character/'))detailRequests++;return route.fulfill({contentType:'application/json',body:JSON.stringify(route.request().url().includes('/character/')?{...fixture,Id:Number(route.request().url().split('/').pop())}:{GameVer:'test',ResVer:'test'})});});
    await page.addInitScript(({characters,weapons,progress,fixture,language})=>{
-    if(localStorage.getItem('test-seeded'))return;localStorage.setItem('test-seeded','1');localStorage.setItem('wwc_lang',language);
+    if(localStorage.getItem('test-seeded'))return;localStorage.setItem('test-seeded','1');localStorage.setItem('wwc_tutorial_v1','seen');localStorage.setItem('wwc_lang',language);
     localStorage.setItem('wwc_catalog_canonical_v050',JSON.stringify({characters,weapons,state:{gameVersion:'test',resourceVersion:'test'}}));
     localStorage.setItem('wwc_owned_ids','["resonator:1"]');localStorage.setItem('wwc_account_data',JSON.stringify({Qingxiao:progress}));
     localStorage.setItem('wwc_character_detail_v4:1',JSON.stringify({gameVersion:'test',detail:{...fixture,Id:1}}));
@@ -42,7 +42,7 @@ const server=http.createServer((req,res)=>{const name=new URL(req.url,'http://lo
      if((width===720&&height===1122)||(width===1152&&name==='overview')||(width===320&&name==='forte'))await page.screenshot({path:path.join(out,`${language}-editor-${name}-${width}.png`)});
     }
     // Keyboard tab orientation follows the visible layout, including its boundary.
-    await page.locator('#editor-tab-overview').focus();await page.keyboard.press(width>=820?'ArrowDown':'ArrowRight');
+    await page.locator('#editor-tab-overview').focus();await page.keyboard.press(width>=680?'ArrowDown':'ArrowRight');
     assert.equal(await page.locator('#editor-tab-weapon').getAttribute('aria-selected'),'true');
     await page.keyboard.press('End');assert.equal(await page.locator('#editor-tab-sequence').getAttribute('aria-selected'),'true');
    }

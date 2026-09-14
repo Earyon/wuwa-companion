@@ -5,6 +5,24 @@ const CATALOG_VERSION="0.5.7";
 const CATALOG_CACHE_KEY="wwc_catalog_canonical_v050";
 const ENCORE_BASE="https://api-v2.encore.moe/api";
 let catalogState={status:"loading",source:"Encore API / WW_Data",error:null,gameVersion:null,resourceVersion:null};
+let bundledCatalog=null;
+let localGameAssets=null;
+async function loadGameAssets(){
+ try{const data=await fetchJSON('./data/game-assets.json');if(data.schema===1&&data.assets&&data.portraits)localGameAssets=data;}catch{/* Remote originals remain the fallback. */}
+}
+function gameAssetKey(value){const match=String(value||'').match(/(?:^|\/)Game\/(.+)/);return match?'Game/'+match[1].replace(/\.[^/.]+$/,''):'';}
+function characterArtwork(character){return localGameAssets?.gameVersion===catalogState.gameVersion?localGameAssets.portraits[character.gameId]||character.image:character.image;}
+function equipmentArtwork(row,kind){if(!row)return '';return localGameAssets?.gameVersion===catalogState.gameVersion?localGameAssets[kind]?.[row.gameId||row.id]||row.image:row.image;}
+function useCatalogueAssets(){if(localGameAssets?.gameVersion===catalogState.gameVersion){DATA=DATA.map(r=>({...r,image:assetUrl(r.image)}));WEAPONS=WEAPONS.map(r=>({...r,image:assetUrl(r.image)}));}}
+async function loadBundledCatalog(){
+ try{const cached=JSON.parse(localStorage.getItem(CATALOG_CACHE_KEY)||'null');if(cached?.state?.gameVersion&&cached.state.resourceVersion){validateCanonical(cached.characters,cached.weapons);return;}}catch{}
+ try{const data=await fetchJSON('./data/catalogue.json');if(data.schema!==1)throw Error('Invalid bundled catalogue');validateCanonical(data.characters,data.weapons);bundledCatalog=data;}catch{/* Existing network fallback stays available. */}
+}
+function restoreBundledCatalog(){
+ if(!bundledCatalog)return false;
+ DATA=bundledCatalog.characters;WEAPONS=bundledCatalog.weapons;migrateOwnershipToCanonical();
+ catalogState={status:'bundled',source:bundledCatalog.source,gameVersion:bundledCatalog.gameVersion,resourceVersion:bundledCatalog.resourceVersion||null,savedAt:bundledCatalog.checkedAt};useCatalogueAssets();updateHealth();return true;
+}
 
 function content(v){
   if(v==null)return "";
@@ -31,13 +49,15 @@ function normalizeElement(v){
   const map={aero:"Aero",electro:"Electro",fusion:"Fusion",glacio:"Glacio",havoc:"Havoc",spectro:"Spectro"};
   return map[raw]||null;
 }
-function assetUrl(v){
+function assetUrl(v,{local=true}={}){
   if(v==null)return "";
   if(typeof v==="object"){
     v=v.Url ?? v.URL ?? v.url ?? v.Path ?? v.path ?? v.Icon ?? v.icon ?? v.Content ?? v.content ?? "";
   }
   let p=String(v||"").trim();
   if(!p)return "";
+  if(/^(?:\.\/)?assets\//.test(p))return p;
+  if(local&&localGameAssets?.gameVersion===catalogState.gameVersion){const bundled=localGameAssets.assets[gameAssetKey(p)];if(bundled)return bundled;}
   if(/^https?:\/\//i.test(p))return p;
   p=p.split(".")[0];
   if(p.startsWith("/Game/Aki/")) return "https://api.encore.moe/resource/Data"+p+".webp";
@@ -67,7 +87,7 @@ function normalizeWeapon(w){
     name,
     rarity:quality(first(w,["QualityId","Quality","Rarity","rarity"])),
     type:normalizeType(first(w,["WeaponTypeName","WeaponType","TypeName","type"])),
-    image:assetUrl(first(w,["IconSmall","IconMiddle","Icon","icon"]))
+    image:assetUrl(first(w,["IconSmall","IconMiddle","Icon","icon"]),{local:false})
   };
 }
 function normalizeCharacter(r){
@@ -81,7 +101,7 @@ function normalizeCharacter(r){
     weapon:normalizeType(first(r,["WeaponTypeName","WeaponType","weaponType","WeaponName"])),
     element:normalizeElement(first(r,["ElementName","Element","AttributeName","element"])),
     gender:content(first(r,["Gender","Sex","gender","sex"])).trim(),
-    image:assetUrl(first(r,["RoleHeadIconCircle","RoleHeadIcon","Icon","RoleHeadIconBig","icon"]))
+    image:assetUrl(first(r,["RoleHeadIconCircle","RoleHeadIcon","Icon","RoleHeadIconBig","icon"]),{local:false})
   };
 }
 
@@ -159,23 +179,25 @@ async function fetchCanonicalLists(newPayload=null){
   migrateOwnershipToCanonical();
   catalogState={
     status:"ready",source:"Encore API / WW_Data",error:null,
-    gameVersion:first(newPayload,["GameVer","gameVersion"])||null,
-    resourceVersion:first(newPayload,["ResVer","resourceVersion"])||null,
+    ...CatalogueVersion.read(newPayload),
     updatedAt:new Date().toISOString()
   };
   try{localStorage.setItem(CATALOG_CACHE_KEY,JSON.stringify({
     savedAt:new Date().toISOString(),state:catalogState,characters:DATA,weapons:WEAPONS
   }));}catch{catalogState.cacheUnavailable=true;}
+  useCatalogueAssets();
   updateHealth();
 }
 function restoreValidatedCache(){
   try{
     const cached=JSON.parse(localStorage.getItem(CATALOG_CACHE_KEY)||"null");
     if(!cached?.characters?.length || !cached?.weapons?.length) return false;
+    if(!cached.state?.gameVersion||!cached.state.resourceVersion)return false;
     validateCanonical(cached.characters,cached.weapons);
     DATA=keepPlayableMaleRovers(cached.characters); WEAPONS=cached.weapons;
     migrateOwnershipToCanonical();
     catalogState={...cached.state,status:"cached",error:null,savedAt:cached.savedAt};
+    useCatalogueAssets();
     updateHealth();
     return true;
   }catch(e){
@@ -193,9 +215,8 @@ function updateHealth(){
 }
 async function refreshCanonicalCatalog({force=false}={}){
   try{
-    const newPayload=await fetchJSON(`${ENCORE_BASE}/en/new`).catch(()=>null);
-    const newGame=first(newPayload,["GameVer","gameVersion"])||null;
-    const newRes=first(newPayload,["ResVer","resourceVersion"])||null;
+    const newPayload=await fetchJSON(`${ENCORE_BASE}/en/new`);
+    const {gameVersion:newGame,resourceVersion:newRes}=CatalogueVersion.read(newPayload);
     const sameVersion=!force && DATA.length && WEAPONS.length &&
       newGame && newRes &&
       String(newGame)===String(catalogState.gameVersion) &&
@@ -219,7 +240,7 @@ async function refreshCanonicalCatalog({force=false}={}){
 }
 async function bootstrapCanonicalCatalog(){
   setActiveNav();
-  const hadCache=restoreValidatedCache();
+  const hadCache=restoreValidatedCache()||restoreBundledCatalog();
   if(hadCache){
     render(); // immediate startup from last validated catalogue
     // Non-blocking freshness check. Only rerender if the canonical dataset changed.

@@ -1,0 +1,187 @@
+{
+  "creator": "Kuro Games",
+  "game": "Wuthering Waves",
+  "checkedAt": "2026-09-14",
+  "reference": "User video 2026-09-13, character menu",
+  "files": [
+    {
+      "file": "SP_RoleTabiconshuxing.webp",
+      "sha256": "b34668bf052f6aec3f753f84dbaf848e172b628e89d1847880c6b36d3596b9f6",
+      "comparisonUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/UiRole/Atlas/SP_RoleTabiconshuxing.webp",
+      "atlasRect": [
+        1924,
+        596,
+        108,
+        108
+      ]
+    },
+    {
+      "file": "SP_RoleTabiconwuqi.webp",
+      "sha256": "e0c3f1d0155393d90ce58110cb04144c93847547a96a8e2083ad1c0d9690cf88",
+      "comparisonUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/UiRole/Atlas/SP_RoleTabiconwuqi.webp",
+      "atlasRect": [
+        1924,
+        708,
+        108,
+        108
+      ]
+    },
+    {
+      "file": "SP_RoleTabiconyiyin.webp",
+      "sha256": "e17226447df27955ab71cb1f319ac0071abccb2a9a6f3d4acfb55b265e2ecfea",
+      "comparisonUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/UiRole/Atlas/SP_RoleTabiconyiyin.webp",
+      "atlasRect": [
+        1652,
+        1384,
+        108,
+        108
+      ]
+    },
+    {
+      "file": "SP_RoleTabiconzhanji.webp",
+      "sha256": "7d1e5f4931d7625863d74c7703462b33a3efd52c7313bac13411f7a59aba1adf",
+      "comparisonUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/UiRole/Atlas/SP_RoleTabiconzhanji.webp",
+      "atlasRect": [
+        1764,
+        1384,
+        108,
+        108
+      ]
+    },
+    {
+      "file": "SP_RoleTabicongongminglian.webp",
+      "sha256": "24feecb6100878f2d4e07ab0775c24f1baba5cb97dcc0877c86ac8bb31b566f1",
+      "comparisonUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/UiRole/Atlas/SP_RoleTabicongongminglian.webp",
+      "atlasRect": [
+        1924,
+        484,
+        108,
+        108
+      ]
+    },
+    {
+      "file": "SP_SkillFrmBActivateNor.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillFrmBActivateNor",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        1416,
+        4,
+        312,
+        312
+      ],
+      "sha256": "251536e9f961551a61c50362b77592e501e54f55023bce510987ad86e52b0a4f"
+    },
+    {
+      "file": "SP_SkillFrmSActivateNor.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillFrmSActivateNor",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        952,
+        952,
+        312,
+        312
+      ],
+      "sha256": "0aa58506303c2d2b96353c50268e506a6dbae6e5f3e0506679915bcaddb99e55"
+    },
+    {
+      "file": "SP_SkillCircleSActivateNor.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillCircleSActivateNor",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        428,
+        320,
+        312,
+        312
+      ],
+      "sha256": "754bfa5e541a421e0d4f770609dfa70a39968d4ff46b050effb7ba510e5c47c7"
+    },
+    {
+      "file": "SP_SkillFrmBActivateSele.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillFrmBActivateSele",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        1060,
+        320,
+        312,
+        312
+      ],
+      "sha256": "e766061e869e7c0226efe84845b1b391ca0dffc211995d65b9ce2549cc6d98f7"
+    },
+    {
+      "file": "SP_SkillFrmSActivateSele.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillFrmSActivateSele",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        952,
+        1268,
+        312,
+        312
+      ],
+      "sha256": "1402fcbcabb4d4b00cfae136c4bab0a1a31d388de4019fd85973b174d9bdec8e"
+    },
+    {
+      "file": "SP_SkillCircleSActivateSele.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleSkillTree/SP_SkillCircleSActivateSele",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        468,
+        4,
+        312,
+        312
+      ],
+      "sha256": "4adae1bd7e5e6b8bfda37d906bcbae5995fa87d83d52f302ad105632872cb2ee"
+    },
+    {
+      "file": "SP_DeviceItemBg.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleDeviceList/SP_DeviceItemBg",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        360,
+        452,
+        144,
+        256
+      ],
+      "sha256": "fcec995c57391e4675f5f26c25c1f1eb006427b9888ba631050be8394640c549"
+    },
+    {
+      "file": "SP_DeviceItemIconBg.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleDeviceList/SP_DeviceItemIconBg",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        408,
+        4,
+        100,
+        100
+      ],
+      "sha256": "026f26f0f5d04f7a70381adfe10c4f88b78c94d50c5a9e92544d4ba15ca25319"
+    },
+    {
+      "file": "SP_DeviceItemChoose1.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleDeviceList/SP_DeviceItemChoose1",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        360,
+        300,
+        148,
+        148
+      ],
+      "sha256": "4d2098b633164bd073233850a184af056a782f894383021fbe49e426bb3d4f12"
+    },
+    {
+      "file": "SP_DeviceItemActiveDesc1.webp",
+      "source": "Game/Aki/UI/UIResources/UiRole/Atlas/RoleDeviceList/SP_DeviceItemActiveDesc1",
+      "archive": "pakchunk7-WindowsNoEditor.pak",
+      "atlasRect": [
+        328,
+        712,
+        164,
+        164
+      ],
+      "sha256": "4873bc9db4caf737c634c35cf5f1a1607f6ef818c8b03076cda8a52430cc88e7"
+    }
+  ],
+  "patchVersion": "3.6.13",
+  "source": "Original UiRole, RoleSkillTree and RoleDeviceList atlases",
+  "archive": "pakchunk7-WindowsNoEditor.pak",
+  "conversion": "Original atlas pixels cropped at source SpriteInfoMap coordinates; lossless WebP, no redraw or recoloring."
+}

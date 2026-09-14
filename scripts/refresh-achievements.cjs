@@ -7,6 +7,7 @@ async function read(file){
  const response=await fetch(`https://raw.githubusercontent.com/Arikatsu/WutheringWaves_Data/${revision}/${file}`);if(!response.ok)throw Error(`${response.status}: ${file}`);return response.json();
 }
 (async()=>{
+ const localSource=await require('./source-version.cjs')('3.6.0',{local:true});
  const [achievements,groups,levels,drops,en,fr]=await Promise.all(paths.map(read));
  const texts={en:new Map(en.map(r=>[String(r.Id),r.Content])),fr:new Map(fr.map(r=>[String(r.Id),r.Content]))};
  const translate=key=>Object.fromEntries(['en','fr'].map(lang=>[lang,(texts[lang].get(key)||'').replace(/<[^>]*>/g,'').trim()]));
@@ -22,6 +23,7 @@ async function read(file){
  assert.equal(new Set(rows.map(r=>r.id)).size,rows.length);assert.ok(rows.length>1000);
  const used=new Set(rows.map(r=>r.group));
  const data={schema:1,gameVersion:'3.6.0',checkedAt:'2026-09-13',source:`https://github.com/Arikatsu/WutheringWaves_Data/tree/${revision}`,excluded,groups:[...enabled.values()].filter(g=>used.has(String(g.Id))).map(g=>({id:String(g.Id),category:g.Category,sort:g.Sort,name:translate(g.Name)})),achievements:rows};
+ data.localSource=localSource;
  const target=path.resolve(__dirname,'../data/achievements.json');
  if(process.argv.includes('--check'))assert.deepEqual(data,JSON.parse(fs.readFileSync(target,'utf8')));else fs.writeFileSync(target,JSON.stringify(data)+'\n');
  console.log(`PASS: ${rows.length} achievements, ${data.groups.length} groups, ${excluded.length} excluded; ${rows.filter(r=>!r.name.fr||!r.description.fr).length} missing French translations.`);

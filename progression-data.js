@@ -37,7 +37,7 @@ function currentCostPlan(character,goal,{load=true}={}){
  const calculation=CostEngine.calculate(actual,goal,source?.detail,copy,source?.weaponDetail,tables);
  return {...calculation,rows:CostEngine.net(calculation.costs,state.resources,tables),source};
 }
-function materialName(id){return id==='exp:role'?tr('EXP de Résonateur','Resonator EXP'):id==='exp:weapon'?tr('EXP d’arme','Weapon EXP'):extendedCatalog.item.find(r=>r.id===id)?.name||id;}
+function materialName(id){return id==='exp:role'?tr('EXP de Résonateur','Resonator EXP'):id==='exp:weapon'?tr('EXP d’arme','Weapon EXP'):gameLabel(extendedCatalog.item.find(r=>r.id===id))||(lang==='fr'?frenchGameText?.names?.item?.[id]:null)||id;}
 function planCostsHTML(character,goal){
  if(!extendedCatalog.item.length&&!extendedCatalog.loading.item&&!extendedCatalog.errors.item)queueMicrotask(()=>loadExtended('item'));
  const plan=currentCostPlan(character,goal);

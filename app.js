@@ -55,7 +55,7 @@ let ownedElement="All";
 let currentView=CompanionStore.get().settings.startView||"account", accountTab="res", element="All";
 
 const I18N={
- fr:{daily:"Tâches quotidiennes",ency:"Encyclopédie",account:"Mon compte",planner:"Planner",more:"Plus",back:"Retour",res:"Mes Résonateurs",weap:"Mes Armes",echo:"Mes Échos",resources:"Mes Ressources"},
+ fr:{daily:"Tâches quotidiennes",ency:"Encyclopédie",account:"Mon compte",planner:"Planification",more:"Plus",back:"Retour",res:"Mes Résonateurs",weap:"Mes Armes",echo:"Mes Échos",resources:"Mes Ressources"},
  en:{daily:"Daily Tasks",ency:"Encyclopedia",account:"My Account",planner:"Planner",more:"More",back:"Back",res:"My Resonators",weap:"My Weapons",echo:"My Echoes",resources:"My Resources"}
 };
 const WEAPON_LABELS={fr:{Sword:"Sabre",Broadblade:"Épée",Pistols:"Pistolets",Gauntlets:"Gantelets",Rectifier:"Amplificateur",Unknown:"Inconnu"},en:{Sword:"Sword",Broadblade:"Broadblade",Pistols:"Pistols",Gauntlets:"Gauntlets",Rectifier:"Rectifier",Unknown:"Unknown"}};
@@ -205,15 +205,15 @@ function drawCards(){
  if(!document.getElementById("grid"))return;
  const q=(document.querySelector("#q")?.value||"").toLowerCase().trim();
  const a=DATA
-   .filter(x=>(element==="All"||x.element===element)&&x.name.toLowerCase().includes(q))
+   .filter(x=>(element==="All"||x.element===element)&&gameSearch(x,q))
    .sort((a,b)=>{
-     const alpha=a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"});
+     const alpha=gameLabel(a).localeCompare(gameLabel(b),lang==="fr"?"fr":"en",{sensitivity:"base"});
      if(encySort==="alpha")return encySortDir*alpha;
      const rarity=(Number(a.rarity)-Number(b.rarity))*encySortDir;
      return rarity||alpha;
    });
  document.querySelectorAll(".filters button").forEach(b=>b.classList.toggle("active",(element==="All"&&(b.textContent==="Tous"||b.textContent==="All"))||b.textContent===element));
- document.querySelector("#grid").innerHTML=a.map(x=>`<button type="button" class="char-card" onclick='openDetail(${esc(JSON.stringify(x.name))})'><span class="pic">${x.image?`<img src="${esc(x.image)}" alt="${esc(x.name)}" loading="lazy" decoding="async" fetchpriority="low">`:""}</span><span class="info"><b>${esc(x.name)}</b><small>${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</small></span></button>`).join("");
+ document.querySelector("#grid").innerHTML=a.map(x=>`<button type="button" class="char-card" onclick='openDetail(${esc(JSON.stringify(x.name))})'><span class="pic">${x.image?`<img src="${esc(x.image)}" alt="${esc(gameLabel(x))}" loading="lazy" decoding="async" fetchpriority="low">`:""}</span><span class="info"><b>${esc(gameLabel(x))}</b><small>${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}</small></span></button>`).join("");
 }
 function daily(){
  setHeader(t("daily"),lang==="fr"?"Votre tableau de bord personnel.":"Your personal dashboard.");document.querySelector("#accountTabs").innerHTML="";
@@ -261,6 +261,8 @@ function auditOrderingAndOwnership(){
 }
 
 function render(){
+ if(!viewIsVisible(currentView))currentView='account';
+ document.querySelectorAll('[data-view]').forEach(button=>button.hidden=!viewIsVisible(button.dataset.view));
  syncPersonalViews();
  if(DATA.length){auditOrderingAndOwnership();auditRoverUniqueness();}
  const html=currentView==="account"?account():currentView==="ency"?encyclopedia():currentView==="daily"?daily():currentView==="planner"?planner():more();
@@ -271,29 +273,29 @@ function render(){
  const bl=document.querySelector("#backLabel");if(bl)bl.textContent=t("back");
 }
 // Broken remote artwork must keep its reserved space and a usable local fallback.
-document.addEventListener('error',event=>{const img=event.target;if(img instanceof HTMLImageElement&&!img.onerror&&!img.dataset.fallback){img.dataset.fallback='true';img.src='./assets/portrait-placeholder.svg';}},true);
+document.addEventListener('error',event=>{const img=event.target;if(img instanceof HTMLImageElement&&img.hasAttribute('data-official-icon')){img.hidden=true;img.parentElement.title=tr('Miniature indisponible','Thumbnail unavailable');return;}if(img instanceof HTMLImageElement&&!img.onerror&&!img.dataset.fallback){img.dataset.fallback='true';img.src='./assets/portrait-placeholder.svg';}},true);
 
 
 function renderOwnedList(){
  const listEl=document.querySelector("#ownedList"); if(!listEl)return;
  const q=(document.querySelector("#ownedSearch")?.value||"").toLowerCase().trim();
  let rows=ownedIds.map(id=>DATA.find(v=>v.id===id)).filter(Boolean);
- if(q) rows=rows.filter(x=>x.name.toLowerCase().includes(q));
+ if(q) rows=rows.filter(x=>gameSearch(x,q));
  if(ownedElement!=="All")rows=rows.filter(x=>x.element===ownedElement);
  rows.sort((a,b)=>{
-   const alpha=a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"});
+   const alpha=gameLabel(a).localeCompare(gameLabel(b),lang==="fr"?"fr":"en",{sensitivity:"base"});
    if(ownedSort==="alpha")return ownedSortDir*alpha;
    const rarity=(Number(a.rarity)-Number(b.rarity))*ownedSortDir;
    return rarity||alpha;
  });
  listEl.innerHTML=rows.length?rows.map(x=>`<div class="res-row" style="--element:${x.element==="Fusion"?"#ff826d":x.element==="Aero"?"#6ce1d2":x.element==="Spectro"?"#ffe08a":x.element==="Glacio"?"#76d7ff":x.element==="Electro"?"#b99aff":"#d676ff"}">
    <img src="${esc(x.image||'./assets/portrait-placeholder.svg')}" alt="" loading="lazy" decoding="async" fetchpriority="low">
-   <div class="res-main"><b>${esc(x.name)}</b><div class="res-meta"><span class="element">✦ ${x.element}</span><span>${weaponLabel(x.weapon)}</span></div><div class="rarity-stars">${"★".repeat(x.rarity)}</div></div>
+   <div class="res-main"><b>${esc(gameLabel(x))}</b><div class="res-meta"><span class="element">✦ ${x.element}</span><span>${weaponLabel(x.weapon)}</span></div><div class="rarity-stars">${"★".repeat(x.rarity)}</div></div>
    <div class="status">${accountStatus(x.name)}</div>
-   <button class="remove-res trash-btn" title="${lang==="fr"?"Retirer":"Remove"}" aria-label="${lang==="fr"?"Retirer "+esc(x.name):"Remove "+esc(x.name)}" onclick='event.stopPropagation();removeOwned(${esc(JSON.stringify(x.name))})'>
+   <button class="remove-res trash-btn" title="${lang==="fr"?"Retirer":"Remove"}" aria-label="${lang==="fr"?"Retirer "+esc(gameLabel(x)):"Remove "+esc(gameLabel(x))}" onclick='event.stopPropagation();removeOwned(${esc(JSON.stringify(x.name))})'>
      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-.8 11H7.8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/></svg>
    </button>
-   <button class="chev edit-chevron" title="${lang==="fr"?"Modifier":"Edit"}" aria-label="${lang==="fr"?"Modifier "+esc(x.name):"Edit "+esc(x.name)}" onclick='openAccountEditor(${esc(JSON.stringify(x.name))})'>›</button>
+   <button class="chev edit-chevron" title="${lang==="fr"?"Modifier":"Edit"}" aria-label="${lang==="fr"?"Modifier "+esc(gameLabel(x)):"Edit "+esc(gameLabel(x))}" onclick='openAccountEditor(${esc(JSON.stringify(x.name))})'>${lang==='fr'?'Ouvrir la fiche':'Open sheet'} <span aria-hidden="true">›</span></button>
  </div>`).join(""):`<div class="empty">${q?(lang==="fr"?"Aucun Résonateur ne correspond à la recherche.":"No Resonator matches your search."):(lang==="fr"?"Aucun Résonateur confirmé.":"No confirmed Resonator yet.")}</div>`;
  const footer=document.querySelector(".footer-row span");
  if(footer) footer.textContent=lang==="fr"?`Affichage : ${rows.length} sur ${ownedIds.length}`:`Showing: ${rows.length} of ${ownedIds.length}`;
@@ -307,8 +309,10 @@ function removeOwned(name){
  render();
 }
 function filterOwned(){ renderOwnedList(); }
+let selectedResonators=new Set();
 function openSelector(){
- document.querySelector("#selectorTitle").textContent=lang==="fr"?"Ajouter un Résonateur":"Add a Resonator";
+ selectedResonators=new Set();
+ document.querySelector("#selectorTitle").textContent=lang==="fr"?"Ajouter mes Résonateurs":"Add my Resonators";
  document.querySelector("#selectorQ").placeholder=lang==="fr"?"Rechercher un Résonateur…":"Search a Resonator…";
  document.querySelector("#selectorQ").value="";
  openDialog('selector');drawSelector();
@@ -316,16 +320,28 @@ function openSelector(){
 function drawSelector(){
  const q=(document.querySelector("#selectorQ").value||"").toLowerCase();
  const list=DATA
-   .filter(x=>!ownedIds.includes(x.id)&&x.name.toLowerCase().includes(q))
-   .sort((a,b)=>(Number(b.rarity)-Number(a.rarity))||a.name.localeCompare(b.name,lang==="fr"?"fr":"en",{sensitivity:"base"}));
- document.querySelector("#selectorGrid").innerHTML=list.map(x=>`<button class="select-card" onclick='confirmOwned(${esc(JSON.stringify(x.name))})'>${x.image?`<img src="${esc(x.image)}" alt="${esc(x.name)}">`:""}<span>${esc(x.name)}</span></button>`).join("");
+   .filter(x=>!ownedIds.includes(x.id)&&gameSearch(x,q))
+   .sort((a,b)=>(Number(b.rarity)-Number(a.rarity))||gameLabel(a).localeCompare(gameLabel(b),lang==="fr"?"fr":"en",{sensitivity:"base"}));
+ document.querySelector("#selectorGrid").innerHTML=list.map(x=>`<button class="select-card" data-select-resonator="${esc(x.id)}" aria-pressed="${selectedResonators.has(x.id)}">${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy" decoding="async">`:""}<span>${esc(gameLabel(x))}</span></button>`).join("")||`<p>${tr('Aucun Résonateur à ajouter dans cette sélection.','No Resonators to add in this selection.')}</p>`;
+ updateSelectorCount();
 }
-function confirmOwned(name){
- if(!canWritePersonalData())return;
- const r=resolveResonatorRef(name);
- if(r&&!ownedIds.includes(r.id)&&!changeOwnership(r.id,true))return;
- closeDialog('selector');render();
+function updateSelectorCount(){
+ const count=selectedResonators.size,button=document.getElementById('selectorSave');
+ button.textContent=tr('Ajouter à mon compte','Add to my account');button.disabled=!count;
+ document.getElementById('selectorCount').textContent=count+' '+tr('sélectionné(s)','selected');
 }
+document.getElementById('selectorGrid').addEventListener('click',event=>{
+ const button=event.target.closest('[data-select-resonator]');if(!button)return;
+ const id=button.dataset.selectResonator;
+ if(selectedResonators.has(id))selectedResonators.delete(id);else selectedResonators.add(id);
+ button.setAttribute('aria-pressed',String(selectedResonators.has(id)));updateSelectorCount();
+});
+document.getElementById('selectorSave').addEventListener('click',()=>{
+ if(!canWritePersonalData()||!selectedResonators.size)return;
+ const ids=[...selectedResonators].filter(id=>DATA.some(x=>x.id===id));
+ try{CompanionStore.update(state=>{state.roster=[...new Set([...state.roster,...ids])];},tr('Résonateurs ajoutés','Resonators added'));syncPersonalViews();closeDialog('selector');render();}
+ catch{companionMessage(tr('Ajout non enregistré. Ta sélection reste ouverte.','Could not save. Your selection remains open.'),true);}
+});
 function setLang(v){if(!['fr','en'].includes(v))return;localStorage.setItem("wwc_lang",v);lang=v;render()}
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{currentView=b.dataset.view;render()});
 document.querySelector("#selectorClose").onclick=()=>closeDialog('selector');
@@ -347,4 +363,3 @@ function auditCompanionData(){
  return window.__WWC_AUDIT__;
 }
 auditCompanionData();
-

@@ -32,14 +32,9 @@ async function inspect(page,label){
    const boxes=[...row.children].map(rect);
    for(const box of boxes)if(!within(box,rect(row)))errors.push('card child outside card');
    for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)if(overlap(boxes[i],boxes[j]))errors.push('card children overlap');
-   const panel=row.closest('.content-panel'),cs=getComputedStyle(panel);
-   const width=panel.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
-   const identity=rect(row.querySelector('.res-main')),status=rect(row.querySelector('.status'));
-   if(width>=620&&CSS.supports('container-type','inline-size')){
-    if(status.left<identity.right-1)errors.push('wide card: progress is not to right of identity');
-    const centers=[...row.children].map(e=>{const r=rect(e);return (r.top+r.bottom)/2});
-    if(Math.max(...centers)-Math.min(...centers)>1)errors.push('wide card: centers differ');
-   }else if(status.top<identity.bottom-1)errors.push('compact card: progress is not below identity');
+   const identity=rect(row.querySelector('.res-main')),status=rect(row.querySelector('.status')),open=rect(row.querySelector('.edit-chevron'));
+   if(status.top<identity.bottom-1)errors.push('collection card: progress is not below identity');
+   if(open.top<status.bottom-1||open.height<44)errors.push('collection card: open button position/target');
    const icon=row.querySelector('.status-weapon-icon img');if(icon&&icon.getClientRects().length&&(rect(icon).width!==30||rect(icon).height!==30))errors.push('weapon image inherits portrait size');
   }
   for(const bar of document.querySelectorAll('.filter-sort-row')){
@@ -73,7 +68,7 @@ async function inspect(page,label){
     localStorage.setItem('wwc_catalog_canonical_v050',JSON.stringify({characters,weapons,state:{gameVersion:'test',resourceVersion:'test'}}));
     localStorage.setItem('wwc_owned_ids',JSON.stringify(characters.slice(0,3).map(c=>c.id)));
     localStorage.setItem('wwc_account_data',JSON.stringify(account));
-    localStorage.setItem('wwc_lang',lang);localStorage.setItem('test-seeded','1');
+    localStorage.setItem('wwc_lang',lang);localStorage.setItem('test-seeded','1');localStorage.setItem('wwc_tutorial_v1','seen');
    },{characters,weapons,account,lang});
    await page.goto(base);await page.locator('.res-row').first().waitFor();
    const stored=await page.evaluate(()=>localStorage.getItem('wwc_account_data'));

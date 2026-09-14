@@ -2,6 +2,7 @@ const CHARACTER_DETAIL_CACHE_PREFIX="wwc_character_detail_v4:";
 let editingSkills={};
 let editingSkillDefs=[];
 let skillDetailRequestToken=0;
+let editingCharacterDetail=null;
 const SKILL_ORDER=["Normal Attack","Skill","Forte Circuit","Liberation","Intro"];
 const SKILL_LABELS={
  fr:{"Normal Attack":"Attaque normale","Skill":"Compétence de Résonance","Forte Circuit":"Circuit Forte","Liberation":"Libération de Résonance","Intro":"Compétence d’Intro"},
@@ -32,6 +33,7 @@ function normalizeSkillDefs(detail){
    byType.set(type,{
      id:String(first(sk,["Id","SkillId","id"])||type),
      type,
+     name:content(rawName),description:content(sk.SkillDescribe),label:content(sk.TypeLabel),
      icon:skillIcon(first(sk,["Icon","SkillIcon","SkillIconPath","IconPath","SkillIconUrl","icon"]))
    });
  }
@@ -113,6 +115,7 @@ function auditCoreSkillIcons(){
 }
 
 function drawSkillsEditor(state="ready"){
+ if(drawTalentEditor(state))return;
  drawForteEditor(state);
  const box=document.querySelector("#skillsEditor"); if(!box)return;
  const focusedType=box.contains(document.activeElement)?document.activeElement.dataset.skillLevel:null;
@@ -159,11 +162,22 @@ async function loadEditorSkills(resonator){
  editingForteNodes={...(accountData[editingName]?.forteNodes||{})};
  editingForteDefs=[];
  editingForteChanged=false;
+ editingCharacterDetail=null;
+ talentSelection=null;
  drawSkillsEditor("loading");
  if(!resonator?.gameId){drawSkillsEditor("error");return}
  try{
+   const reference=await loadResonatorReference(resonator.gameId);
+   if(token!==skillDetailRequestToken)return;
+   if(reference){
+     editingCharacterDetail=reference.locales[lang];
+     editingSkillDefs=normalizeSkillDefs(editingCharacterDetail);
+     editingForteDefs=normalizeForteDefs(editingCharacterDetail);
+     drawSkillsEditor();drawEditorSequence();return;
+   }
    const cached=readCharacterDetailCache(resonator.gameId);
    if(cached){
+     editingCharacterDetail=cached;
      editingSkillDefs=normalizeSkillDefs(cached);
      editingForteDefs=normalizeForteDefs(cached);
      if(token===skillDetailRequestToken)drawSkillsEditor();
@@ -171,15 +185,16 @@ async function loadEditorSkills(resonator){
      getCharacterDetail(resonator.gameId,{background:true}).then(({detail})=>{
        if(token!==skillDetailRequestToken)return;
        const next=normalizeSkillDefs(detail);
-       if(next.length){editingSkillDefs=next;editingForteDefs=normalizeForteDefs(detail);drawSkillsEditor()}
+       if(next.length){editingCharacterDetail=detail;editingSkillDefs=next;editingForteDefs=normalizeForteDefs(detail);drawSkillsEditor();drawEditorSequence()}
      }).catch(()=>{});
      return;
    }
    const {detail}=await getCharacterDetail(resonator.gameId);
    if(token!==skillDetailRequestToken)return;
+   editingCharacterDetail=detail;
    editingSkillDefs=normalizeSkillDefs(detail);
    editingForteDefs=normalizeForteDefs(detail);
-   drawSkillsEditor();
+   drawSkillsEditor();drawEditorSequence();
  }catch(e){
    console.warn("Skill detail unavailable",e);
    if(token===skillDetailRequestToken)drawSkillsEditor("error");

@@ -12,7 +12,7 @@ function accountStatus(name){
    const wl=d.weapon.level?`${lang==="fr"?"Niv.":"Lv."}${d.weapon.level}`:"";
    const wr=d.weapon.rank?`R${d.weapon.rank}`:"";
    const sub=[wl,wr].filter(Boolean).join(" · ");
-   return `<div class="status-main">${top}</div><div class="status-weapon"><span class="status-weapon-icon"><img src="${esc(w?.image||"")}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></span><span class="status-weapon-copy"><b>${esc(d.weapon.name)}</b>${sub?`<small>${sub}</small>`:""}</span></div>`;
+   return `<div class="status-main">${top}</div><div class="status-weapon"><span class="status-weapon-icon"><img src="${esc(w?.image||"")}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></span><span class="status-weapon-copy"><b>${esc(gameText(d.weapon.name))}</b>${sub?`<small>${sub}</small>`:""}</span></div>`;
  }
  return `<div class="status-main">${top}</div>`;
 }
@@ -21,6 +21,8 @@ function openAccountEditor(name,section='overview'){
  syncPersonalViews();
  const x=DATA.find(v=>v.name===name); if(!x)return;
  editingName=name;
+ editingCharacterDetail=null;
+ pendingEditorCharacter=null;document.getElementById('editorSwitchPrompt').hidden=true;
  const d=accountData[name]||{};
  const state=CompanionStore.get();
  editingOriginal=structuredClone(state.characters[x.id]||{});editingAscension=editingOriginal.ascension??null;
@@ -32,7 +34,7 @@ function openAccountEditor(name,section='overview'){
  editingWeapon=d.weapon?.name||null;
  editingWeaponLevel=d.weapon?.level||null;
  editingWeaponRank=d.weapon?.rank??null;
- document.querySelector("#editorName").textContent=name;
+ document.querySelector("#editorName").textContent=gameLabel(x);
  document.querySelector("#editorSub").textContent=`${x.element} · ${weaponLabel(x.weapon)} · ${"★".repeat(x.rarity)}`;
  document.querySelector("#levelLabel").textContent=lang==="fr"?"Niveau":"Level";
  document.querySelector("#sequenceLabel").textContent=lang==="fr"?"Séquence":"Sequence";
@@ -43,6 +45,7 @@ function openAccountEditor(name,section='overview'){
  updateEditorControls();
  openDialog('accountEditor');
  loadEditorSkills(x);
+ editorOpeningState=editorDraftSnapshot();
 }
 function updateEditorControls(){
  const focusId=document.activeElement?.id==='weaponLevelCurrent'?'weaponLevelCurrent':null;
@@ -55,7 +58,7 @@ function updateEditorControls(){
  if(editingWeapon){
    const w=WEAPONS.find(x=>x.name===editingWeapon);
    wc.classList.remove("empty");
-   wc.innerHTML=`<div class="equipped-img-wrap"><img src="${esc(w?.image||"")}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(editingWeapon)}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
+   wc.innerHTML=`<div class="equipped-img-wrap"><img src="${esc(equipmentArtwork(w,'weapons'))}" alt="" data-candidates='${esc(JSON.stringify(weaponImageCandidates(w?.name||editingWeapon,w?.image||"")))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><div class="weapon-copy"><b>${esc(gameText(editingWeapon))}</b><small>${w?weaponLabel(w.type):""} · ${"★".repeat(w?.rarity||0)}</small></div>`;
    if(editingEquipment.mode==='keep'){
     ws.innerHTML=`<p class="companion-note">${lang==='fr'?'Équipement ancien conservé. Choisis un exemplaire existant ou ajoute un exemplaire depuis le catalogue pour le modifier.':'Previous equipment preserved. Choose its inventory copy or add a copy from the catalogue to edit it.'} · ${editingWeaponLevel||'?'} · R${editingWeaponRank||'?'}</p>`;
    }else ws.innerHTML=`<button class="weapon-setting" id="weaponLevelCurrent" onclick="openWeaponLevelPicker()"><b>${lang==="fr"?"Niveau":"Level"}</b>${editingWeaponLevel||"—"}</button><div class="weapon-setting"><b>${lang==="fr"?"Syntonisation":"Syntony"}</b><div class="rank-row">${[1,2,3,4,5].map(n=>`<button class="rank-btn ${editingWeaponRank===n?"active":""}" aria-pressed="${editingWeaponRank===n}" data-weapon-rank="${n}">R${n}</button>`).join("")}</div></div>`;
@@ -68,53 +71,10 @@ function updateEditorControls(){
  }
  if(focusId)document.getElementById(focusId)?.focus({preventScroll:true});
  if(focusRank)document.querySelector(`[data-weapon-rank="${CSS.escape(focusRank)}"]`)?.focus({preventScroll:true});
+ drawEditorSequence();
 }
 
-function weaponImageCandidates(name, current){
- const raw = String(name||"");
- const strip = t => t.replace(/[^A-Za-z0-9]/g,"");
- const words = raw.replace(/['’]/g,"").split(/[\s:#&-]+/).filter(Boolean);
- const title = words.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join("");
- const keep = strip(raw);
- const lowerConnectors = words.map((w,i)=>{
-   const lw=w.toLowerCase();
-   if(i>0 && ["of","the","in","on","and"].includes(lw)) return lw;
-   return w.charAt(0).toUpperCase()+w.slice(1);
- }).join("");
- const base="https://raw.githubusercontent.com/ryanbenson/wuthering-waves-assets/master/images/weapons/";
- const explicit={
-   "Ages of Harvest":"AgesOfHarvest.png",
-   "Broadblade of Night":"BroadbladeOfNight.png",
-   "Broadblade of Voyager":"BroadbladeOfVoyager.png",
-   "Sword of Night":"SwordOfNight.png",
-   "Sword of Voyager":"SwordOfVoyager.png",
-   "Pistols of Night":"PistolsOfNight.png",
-   "Pistols of Voyager":"PistolsOfVoyager.png",
-   "Gauntlets of Night":"GauntletsOfNight.png",
-   "Gauntlets of Voyager":"GauntletsOfVoyager.png",
-   "Rectifier of Night":"RectifierOfNight.png",
-   "Rectifier of Voyager":"RectifierOfVoyager.png",
-   "Call of the Abyss":"CalloftheAbyss.png",
-   "Fables of Wisdom":"FablesofWisdom.png",
-   "Meditations on Mercy":"MeditationsonMercy.png",
-   "Romance in Farewell":"RomanceinFarewell.png",
-   "Firstlight's Herald":"FirstlightsHerald.png",
-   "Defier's Thorn":"DefiersThorn.png",
-   "Moongazer's Sigil":"MoongazersSigil.png",
-   "Bloodpact's Pledge":"BloodpactsPledge.png",
-   "Starfield Calibrator":"StarfieldCalibrator.png",
-   "Lux & Umbra":"LuxUmbra.png"
- };
- return [...new Set([
-   current,
-   explicit[raw]?base+explicit[raw]:null,
-   base+title+".png",
-   base+keep+".png",
-   base+lowerConnectors+".png",
-   base+title+".webp",
-   base+keep+".webp"
- ].filter(Boolean))];
-}
+function weaponImageCandidates(name,current){return current?[current]:[];}
 function setWeaponImage(img,name,current){
  img.dataset.weaponName=name||"";
  img.dataset.candidates=JSON.stringify(weaponImageCandidates(name,current));
@@ -151,13 +111,13 @@ function drawWeapons(){
  const data=CompanionStore.get(),character=resolveResonatorRef(editingName);
  document.querySelector('#weaponSource').innerHTML=`<button class="companion-button" aria-pressed="${weaponPickerMode==='inventory'}" onclick="weaponPickerMode='inventory';drawWeapons()">${tr('Mes exemplaires','My copies')}</button><button class="companion-button" aria-pressed="${weaponPickerMode==='new'}" onclick="weaponPickerMode='new';drawWeapons()">${tr('Ajouter un exemplaire','Add a copy')}</button>`;
  document.querySelector('#weaponPickerNote').textContent=weaponPickerMode==='new'?tr('Le choix sera ajouté à ton inventaire lors de l’enregistrement du Résonateur.','The choice will be added to your inventory when you save the Resonator.'):tr('Un exemplaire ne peut équiper qu’un Résonateur à la fois.','A copy can equip only one Resonator at a time.');
- const rows=weaponPickerMode==='new'?WEAPONS.filter(w=>w.type===type&&w.name.toLowerCase().includes(q)).map(w=>({row:w,copy:null})):data.weapons.map(copy=>({copy,row:WEAPONS.find(w=>w.id===copy.catalogId)})).filter(({row})=>row?.type===type&&row.name.toLowerCase().includes(q));
+ const rows=weaponPickerMode==='new'?WEAPONS.filter(w=>w.type===type&&gameSearch(w,q)).map(w=>({row:w,copy:null})):data.weapons.map(copy=>({copy,row:WEAPONS.find(w=>w.id===copy.catalogId)})).filter(({row})=>row?.type===type&&gameSearch(row,q));
  rows.sort((a,b)=>(b.row.rarity-a.row.rarity)||a.row.name.localeCompare(b.row.name));
  document.querySelector('#weaponGrid').innerHTML=rows.map(({row,copy})=>{
   const owner=copy?CompanionStore.weaponOwner(data,copy.id):null,unavailable=owner&&owner!==character?.id;
   const selection=copy?`data-copy="${esc(copy.id)}" onclick="selectWeaponCopy(this.dataset.copy)"`:`onclick="selectWeaponByIndex(${WEAPONS.indexOf(row)})"`;
   const subtitle=copy?`#${data.weapons.indexOf(copy)+1} · ${tr('Niv.','Lv.')} ${copy.level??'?'} · R${copy.rank??'?'}`:'★'.repeat(row.rarity);
-  return `<button class="weapon-card" ${selection} ${unavailable?'disabled':''}><div class="weapon-img-wrap"><img src="${esc(row.image)}" alt="" loading="lazy" decoding="async" data-candidates='${esc(JSON.stringify(weaponImageCandidates(row.name,row.image)))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><b>${esc(row.name)}</b><small>${subtitle}${owner?'<br>'+esc(DATA.find(c=>c.id===owner)?.name||owner):''}</small></button>`;
+  return `<button class="weapon-card" ${selection} ${unavailable?'disabled':''}><div class="weapon-img-wrap"><img src="${esc(row.image)}" alt="" loading="lazy" decoding="async" data-candidates='${esc(JSON.stringify(weaponImageCandidates(row.name,row.image)))}' data-try-index="0" onerror="weaponImgFallback(this)"><span class="weapon-fallback">◇</span></div><b>${esc(gameLabel(row))}</b><small>${subtitle}${owner?'<br>'+esc(gameLabel(DATA.find(c=>c.id===owner))||owner):''}</small></button>`;
  }).join('')||`<div class="empty">${tr('Aucun exemplaire compatible. Utilise « Ajouter un exemplaire » si nécessaire.','No compatible copy. Use “Add a copy” if needed.')}</div>`;
 }
 function selectWeaponByIndex(index){
@@ -207,6 +167,7 @@ function saveAccountEditor(){
  catch(error){if(error.message==='Echo cost exceeds 12'){selectEditorSection('echo');companionMessage(tr('Le coût total des Échos équipés dépasse 12. Modifie la sélection avant d’enregistrer.','Total equipped Echo cost exceeds 12. Adjust the selection before saving.'),true);return;}companionMessage(lang==='fr'?'Progression non enregistrée. Tes modifications restent ouvertes ; vérifie le stockage ou une modification dans un autre onglet.':'Progress not saved. Your edits remain open; check storage or changes in another tab.',true);return;}
  closeDialog('accountEditor');
  render();
+ return true;
 }
 
 function ascensionField(name,value,label=tr('Ascension débloquée','Unlocked ascension')){return '<label>'+label+'<select name="'+name+'"><option value="">?</option>'+[20,40,50,60,70,80,90].map((cap,i)=>'<option value="'+i+'" '+(value===i?'selected':'')+'>'+i+' · '+tr('plafond niv. ','level cap ')+cap+'</option>').join('')+'</select></label>';}

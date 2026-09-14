@@ -6,6 +6,8 @@
 - Ordre de priorité : intégrité et fiabilité des données → absence de régressions → maintenabilité du code → simplicité → performances → expérience utilisateur → évolutivité → rapidité de développement.
 
 ## Cadre utilisateur
+- Ordre des sources demandé le 14 septembre : fichiers du jeu installé fournis par l'utilisateur en première référence, recoupement avec la base de données, puis confirmation par les guides et la vidéo. Relever les versions et conserver la distinction entre contenu local réellement lu et information encore vérifiée uniquement à distance. L'inspection de l'installation est en lecture seule.
+- Confirmation explicite : les règles permanentes et la méthode de développement restent prioritaires, y compris pour la reproduction de l'interface du jeu. Soumettre à l'utilisateur toute proposition de modification ou d'ajout à cette méthode avant de l'appliquer. Les choix techniques ordinaires restent autonomes dans le cadre déjà approuvé.
 - Communiquer en français, clairement et brièvement. L'utilisateur ne développe pas : il ne doit pas assurer le contrôle technique à notre place.
 - Conserver le design bleu nuit/doré, les fonctions validées et les clés de stockage personnelles. Ne pas reconstruire l'application ni ajouter un framework sans besoin démontré.
 - Orientation visuelle actualisée : les menus Personnage, Compétences et équipement, ainsi que les écrans déjà modélisés, doivent se rapprocher autant que raisonnablement et légalement possible des menus actuels du jeu. Appliquer `DESIGN.md` à l’ensemble des écrans ; conserver les règles de qualité, les fonctions validées et les données.
@@ -15,6 +17,7 @@
 - Recommander un changement de modèle seulement quand la difficulté le justifie ; ne pas interrompre une étape ordinaire pour cela.
 - Demande du 13 septembre : développer l'ensemble avant la revue utilisateur finale, sans validations intermédiaires systématiques. Fournir après chaque lot terminé un compteur de lots vérifiés sur le total de `DEVELOPMENT.md`. Ne pas inventer un pourcentage ni compter du code non testé comme terminé.
 - Favoriser les pratiques professionnelles éprouvées. Cibler et regrouper les recherches nécessaires, conserver leurs références et éviter les requêtes répétées sans information nouvelle ; réduire les crédits sans supprimer les vérifications utiles.
+- Consulter [GAME_KNOWLEDGE.md](GAME_KNOWLEDGE.md) pour le contexte du jeu et la lecture des références utilisateur ; vérifier les données chiffrées avant de les utiliser. Reprise explicitement autorisée : réaliser en une traite la phase Collection — possessions, fiches Résonateur, armes, Échos, ressources, encyclopédie avec la même charte, traductions, chargement et prise en main. Les nouvelles recommandations et les objectifs appartiennent à une seconde phase distincte. Cette consigne remplace la pause et le gel de l'encyclopédie consignés dans les références historiques.
 
 ## Erreurs observées et prévention
 - Des correctifs CSS ajoutés en cascade ont laissé plusieurs grilles concurrentes. Modifier la règle propriétaire d'un composant ; retirer les règles obsolètes au lieu d'ajouter une nouvelle couche en fin de fichier.
@@ -31,3 +34,13 @@
 - Vérifier syntaxe et `git diff --check`, examiner le diff pour les fonctions/données non concernées. Garder les tests reproductibles, sans dépendance nécessaire aux API de jeu.
 - Consulter au besoin les sources primaires (MDN, documentation officielle du service) pour une décision technique incertaine. La recherche ne remplace pas la reproduction ni les tests.
 - Ajouter un test de régression lorsqu'un défaut répété révèle un manque de couverture. Documenter sa cause et les limites restantes. Ne jamais promettre 100 % de fiabilité ni une validation sur appareil non effectuée.
+
+- Référence française confirmée par l’utilisateur : [Slyraf — Wuthering Waves](https://slyraf.com/wuthering-waves/personnages/). Utiliser ses noms et guides comme complément, recouper les appellations officielles avec les textes du jeu par identifiant. Une formulation communautaire ne prouve pas à elle seule une traduction officielle.
+
+- Phase Collection : objectifs, recommandations et leurs accès sont masqués à la demande expresse de l’utilisateur. Le code et les données restent conservés pour la phase suivante.
+
+- Miniatures : utiliser les visuels officiels fournis par les sources (personnages, armes, Échos, compétences, nœuds et chaînes), sans redessin, recoloration ni invention. Associer les images aux identifiants sourcés ; conserver leurs proportions. Une image indisponible doit être indiquée comme manquante.
+
+## Orientation visuelle actualisée — reproduction fidèle
+
+Dernière demande explicite de l’utilisateur : reprendre au maximum à l’identique l’interface de la vidéo fournie, notamment la disposition exacte de l’arbre, les rubriques et contrôles. Conserver toutes les miniatures officielles sans redessin ; seul le fond est personnalisé. Cette demande remplace l’orientation précédente vers des icônes et compositions inventées. Compléter les vues manquantes avec des sources et vidéos identifiées, en distinguant les versions du jeu. Citer Kuro Games comme créateur du jeu et des ressources, avec le statut communautaire non officiel. Une attribution n’est pas présentée comme une licence. Ne pas afficher un rendu 3D ou une animation comme reproduit si les ressources disponibles ne le permettent pas. Les objectifs et recommandations restent masqués conformément à la phase Collection.
