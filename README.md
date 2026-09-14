@@ -48,13 +48,15 @@ node scripts/test.cjs
 git diff --check
 ```
 
-Le lanceur exécute 23 suites : stockage/migrations, règles, coûts, versions et sources, responsive, inventaires, éditeurs, Échos, fonctions conservées de la seconde phase, Collection, tutoriel, cache d'images, revue finale, mise à jour PWA et comparaison des performances. Les tests utilisent des comptes synthétiques isolés et aucune donnée du navigateur utilisateur. Ils couvrent FR/EN, clavier, interactions tactiles simulées, 320 à 1724 pixels CSS selon les parcours, changements de largeur, erreurs de stockage, requêtes indisponibles, import/export, rechargement et hors ligne. Les captures et mesures restent dans `test-results/`, exclu de Git.
+Le lanceur exécute les suites enregistrées dans `scripts/test.cjs` : stockage/migrations, préparation d’import du module local, règles, coûts, versions et sources, responsive, inventaires, éditeurs, Échos, fonctions conservées de la seconde phase, Collection, tutoriel, cache d'images, revue finale, mise à jour PWA et comparaison des performances. Les tests utilisent des comptes synthétiques isolés et aucune donnée du navigateur utilisateur. Ils couvrent FR/EN, clavier, interactions tactiles simulées, 320 à 1724 pixels CSS selon les parcours, changements de largeur, erreurs de stockage, requêtes indisponibles, import/export, rechargement et hors ligne. Les captures et mesures restent dans `test-results/`, exclu de Git.
 
-Le test PWA part de `51eca36` et vérifie deux fenêtres ouvertes, attente d'activation, fermeture, nouveau shell et données préservées. Après publication, comparer aussi les empreintes des fichiers réellement servis. Un push seul ne prouve pas le déploiement.
+Le test PWA part de la révision Git indiquée dans son en-tête (`8ea0510` pour le cache 26) et vérifie deux fenêtres ouvertes, attente d'activation, fermeture, nouveau shell et données préservées. Après publication, comparer aussi les empreintes des fichiers réellement servis. Un push seul ne prouve pas le déploiement.
 
 Les projections de données sont reproductibles avec `scripts/refresh-progression.cjs`, `scripts/refresh-achievements.cjs` et `scripts/refresh-sonatas.cjs`. Elles identifient la révision source WW_Data utilisée. `--check` compare avec les fichiers livrés ; `WUWA_SOURCE_CACHE` réutilise les téléchargements pour éviter les requêtes répétées. Les recommandations sont une synthèse éditoriale sourcée, à revoir à chaque évolution significative du jeu.
 
 ## Limites explicites
+
+- Import automatique du compte : préparation et prototype local dans [addon/README.md](addon/README.md), comparaison des méthodes dans [ADDON_METHODS.md](ADDON_METHODS.md). Aucun collecteur complet ni synchronisation cloud opérationnelle à ce stade ; la méthode reste à choisir.
 
 - Aucun simulateur de dégâts du compte : les recommandations donnent des repères contextualisés, et l’optimisation répartit les stocks connus entre objectifs sans les dépenser.
 - Les coûts partent du début du niveau actuel ; l’EXP déjà acquise dans ce niveau n’est pas déduite. Les données manquantes rendent le calcul partiel. Le pré-farm d’un Résonateur sans arme équipée n’établit pas les coûts d’une future arme inconnue.

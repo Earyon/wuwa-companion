@@ -341,13 +341,21 @@ Objectif demandé : aucune saisie manuelle des possessions, avec module local fa
 
 | Lot | Résultat attendu | État |
 | --- | --- | --- |
-| 1 | Sélection d’équipement limitée aux Échos possédés | Vérifié localement |
-| 2 | Comparatif sourcé des méthodes et audit du code candidat | En cours |
-| 3 | Prototype local vérifié sur données de référence, couverture mesurée | À réaliser |
-| 4 | Import commun validé, conservation des données et doublons | À réaliser |
+| 1 | Sélection d’équipement limitée aux Échos possédés | Vérifié et publié |
+| 2 | Comparatif sourcé des méthodes et audit du code candidat | Vérifié, voir `ADDON_METHODS.md` |
+| 3 | Prototype local vérifié sur données de référence, couverture mesurée | Vérifié sur cinq observations de la vidéo, couverture partielle explicite |
+| 4 | Import commun validé, conservation des données et doublons | Vérifié en mémoire et dans Edge isolé ; fournisseur réel restant à choisir |
 | 5 | Distribution et synchronisation privée, sans service payant | À réaliser après choix de la méthode et configuration du service |
 | 6 | Parcours réel complet sur le compte, publication et revue finale | À réaliser après choix de la méthode |
 
-**Avancement de ce nouveau périmètre : 1 / 6 lots vérifiés localement.** Ce compteur est distinct du périmètre historique de 14 lots ; il ne prétend pas que l’import automatique est opérationnel.
+**Avancement de ce nouveau périmètre : 4 / 6 lots vérifiés.** Ce compteur est distinct du périmètre historique de 14 lots ; il ne prétend pas que l’import automatique est opérationnel. Les lots 2 à 4 constituent la préparation demandée avant le choix de la méthode. Aucun pourcentage de couverture du compte réel n’est établi.
 
 Lot 1 : le sélecteur d’équipement ne bascule plus automatiquement sur les 311 références lorsque l’inventaire est vide. Un état vide explique l’ajout d’exemplaires ; le catalogue est accessible par l’action explicite du formulaire d’ajout. Aucun exemplaire n’est créé par simple consultation. Tests réussis : `echo-selector` (12 dispositions FR/EN, inventaire vide et peuplé), `echoes` (16 dispositions et parcours d’équipement, annulation, enregistrement, transfert, conflits), `pwa-update` depuis `8ea0510` et `pwa-recovery`. Le cache 26 préserve le stockage personnel et les éditions ouvertes. Validation physique sur tablette non effectuée.
+
+Publication du lot 1 : `6411415`, déploiement Pages réussi et 197 fichiers servis comparés à Git. Parcours réel sur le site avec un compte synthétique isolé : fiche Résonateur, arme, Échos possédés, galerie explicite, compétences, sauvegarde/rechargement et service worker. Captures examinées.
+
+Lots 2–3 : ressources locales et sources publiques comparées ; audit de WuWa Inventory Kamera à la révision `7b5ecf4eca355d3f4a06fb0d65e8419d1f984883`. Cinq défauts de pagination et la transformation d’une quantité illisible en 1 reproduits avec des commandes factices, sans piloter le jeu. Moteur OCR Windows français testé sur cinq images privées ; attributs et niveaux de compétences lisibles, statistiques d’Écho insuffisamment fiables. Le recadrage/seuillage a également été essayé sans résoudre toute la lecture. Pas de scan réel des possessions, pas de lecture mémoire ni d’interception. Le comparatif expose ces limites et les risques contractuels sans les confondre avec une qualification juridique définitive.
+
+Lot 4 : nouveau prototype séparé `addon/`, sans effet sur les ressources chargées par le site. Validation par le véritable `account-store`, préparation sans mutation, copies distinctes, références contrôlées, versions/serveurs/comptes, relevés anciens, champs inconnus, répétition et modification concurrente. `addon-import` et `addon-browser` réussis ; compte synthétique restauré dans l’application réelle avec personnage, arme équipée, Écho possédé et rechargement. `account-store` revérifié. Les nœuds Forte réels, l’identité durable des copies OCR et les suppressions d’un inventaire complet restent à traiter avec le collecteur sélectionné ; ils ne sont pas déclarés résolus par le format de staging.
+
+Lots 5–6 : restent le choix du collecteur, son développement, sa distribution, la configuration de synchronisation privée gratuite et le parcours complet sur le compte réel. Firebase Spark est une proposition documentée, pas un service configuré. Aucune dépense, aucun abonnement ou service payant n’a été engagé.
