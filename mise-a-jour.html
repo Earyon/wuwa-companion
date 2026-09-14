@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#08121e">
+<title>Mise à jour · WuWa Companion</title>
+<!-- Independent of the app's cached scripts and styles, including older releases. -->
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:radial-gradient(ellipse at top,#183149,#07111c 70%);color:#e7eef8;font:16px/1.6 system-ui,sans-serif;padding:24px}main{width:100%;max-width:620px;background:#0a1724;border:1px solid #38516a;border-radius:16px;padding:clamp(20px,5vw,40px)}.brand{color:#f0d48b;letter-spacing:.06em}h1{font-size:clamp(24px,5vw,32px);line-height:1.25}#status{min-height:80px}#status[data-state="error"]{color:#ffb7b7}.note{color:#a8bbce;font-size:14px}.actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:24px}button{min-height:44px;padding:10px 20px;border:1px solid #f0d48b;border-radius:24px;background:#f0d48b;color:#08121e;font:inherit;cursor:pointer}button:disabled{opacity:.65;cursor:wait}a{color:#f0d48b;padding:8px 0;min-height:44px}a:focus-visible,button:focus-visible{outline:2px solid #74d6d1;outline-offset:4px}
+</style>
+</head>
+<body>
+<main>
+<p class="brand">WUWA COMPANION</p>
+<h1 id="heading">Mise à jour de l’application</h1>
+<p id="status" role="status" aria-live="polite">Vérification de la version disponible…</p>
+<p class="note" id="privacy">Tes personnages, armes et Échos enregistrés sont conservés. Aucune donnée personnelle n’est effacée.</p>
+<div class="actions"><button id="retry" type="button">Vérifier à nouveau</button><a id="back" href="./">Revenir à Companion</a></div>
+<noscript>Active JavaScript pour vérifier la mise à jour.</noscript>
+</main>
+<script>
+'use strict';
+let english=false;try{english=localStorage.getItem('wwc_lang')==='en';}catch{}
+const text=(fr,en)=>english?en:fr;
+document.documentElement.lang=english?'en':'fr';
+document.title=text('Mise à jour · WuWa Companion','Update · WuWa Companion');
+document.getElementById('heading').textContent=text('Mise à jour de l’application','Update the app');
+document.getElementById('privacy').textContent=text('Tes personnages, armes et Échos enregistrés sont conservés. Aucune donnée personnelle n’est effacée.','Your saved characters, weapons and Echoes are kept. No personal data is cleared.');
+document.getElementById('back').textContent=text('Revenir à Companion','Return to Companion');
+const statusBox=document.getElementById('status'),retry=document.getElementById('retry');
+retry.textContent=text('Vérifier à nouveau','Check again');
+function status(state,message){statusBox.dataset.state=state;statusBox.textContent=message;}
+function waitForState(worker,states){
+ return new Promise((resolve,reject)=>{
+  const finish=error=>{clearTimeout(timer);worker.removeEventListener('statechange',check);error?reject(error):resolve();};
+  const check=()=>{if(states.includes(worker.state))finish();else if(worker.state==='redundant')finish(Error('Installation failed'));};
+  const timer=setTimeout(()=>finish(Error('Installation timed out')),30000);
+  worker.addEventListener('statechange',check);check();
+ });
+}
+function message(worker,type){
+ return new Promise((resolve,reject)=>{
+  const channel=new MessageChannel(),timer=setTimeout(()=>{channel.port1.close();reject(Error('Worker did not respond'));},8000);
+  channel.port1.onmessage=event=>{clearTimeout(timer);channel.port1.close();resolve(event.data);};
+  worker.postMessage({type},[channel.port2]);
+ });
+}
+async function install(){
+ if(retry.disabled)return;retry.disabled=true;
+ status('checking',text('Vérification de la version disponible…','Checking for the latest version…'));
+ try{
+  if(!('serviceWorker' in navigator)||!window.isSecureContext)throw Error('Service worker unavailable');
+  const root=new URL('./',location.href),registration=await navigator.serviceWorker.register(new URL('sw.js',root),{scope:root.href,updateViaCache:'none'});
+  await registration.update();
+  if(registration.installing)await waitForState(registration.installing,['installed','activated']);
+  const waiting=registration.waiting,worker=waiting||registration.active;
+  if(!worker)throw Error('Worker unavailable');
+  if(waiting){
+   const result=await message(worker,'COMPANION_APPLY_UPDATE');
+   if(result?.status==='blocked'){
+    status('blocked',text('La nouvelle version est prête. Enregistre tes modifications puis ferme les autres onglets ou fenêtres de WuWa Companion, y compris l’application installée. Garde cette page ouverte et clique sur « Vérifier à nouveau ».','The new version is ready. Save your changes, then close the other WuWa Companion tabs or windows, including the installed app. Keep this page open and click “Check again”.'));
+    return;
+   }
+   if(result?.status!=='activating')throw Error('Activation refused');
+   status('activating',text('Installation terminée. Ouverture de Companion…','Installation complete. Opening Companion…'));
+   await waitForState(worker,['activated']);
+  }else{
+   const result=await message(worker,'COMPANION_UPDATE_INFO');
+   if(result?.status!=='ready')throw Error('Version unavailable');
+  }
+  location.replace(root.href);
+ }catch{
+  status('error',text('La mise à jour n’a pas pu être terminée. Vérifie ta connexion puis réessaie. Ta version actuelle et tes données enregistrées restent disponibles.','The update could not be completed. Check your connection and try again. Your current version and saved data remain available.'));
+ }finally{retry.disabled=false;}
+}
+retry.addEventListener('click',install);
+install();
+</script>
+</body>
+</html>

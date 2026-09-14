@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {execFileSync}=require('node:child_process');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-const previous='d5c1f9a';
+const previous='79b8c78';
 let latest=false;
 const readPrevious=file=>execFileSync('git',['show',`${previous}:${file}`],{cwd:root,maxBuffer:8*1024*1024});
 const oldWorker=readPrevious('sw.js');
@@ -34,10 +34,11 @@ const server=http.createServer((req,res)=>{
   latest=true;
   await p.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.update();});
   await p.waitForFunction(()=>pwaState.waiting);
-  assert.equal(await p.evaluate(()=>fetch('./resonator-tree.js').then(r=>r.text())),oldFiles['resonator-tree.js'].toString(),'Old open tab remains on its actual published shell');
+  await p.reload();
+  assert.equal(await p.evaluate(()=>fetch('./pwa.js').then(r=>r.text())),oldFiles['pwa.js'].toString(),'An ordinary reload still uses the old shell while another tab is open');
   const workers=context.serviceWorkers();
   let replacement;
-  for(const worker of workers)if(await worker.evaluate(()=>CACHE_NAME).catch(()=>null)==='wuwa-companion-shell-057-pwa-22')replacement=worker;
+  for(const worker of workers)if(await worker.evaluate(()=>CACHE_NAME).catch(()=>null)==='wuwa-companion-shell-057-pwa-23')replacement=worker;
   assert.ok(replacement,'Replacement worker available');
   await p.waitForFunction(()=>pwaState.waiting);
   await p.close();await second.close();
@@ -47,7 +48,7 @@ const server=http.createServer((req,res)=>{
   for(let attempt=0;attempt<100&&!activated;attempt++){
    activated=await replacement.evaluate(async()=>{
     const keys=(await caches.keys()).filter(k=>k.startsWith('wuwa-companion-shell-'));
-    return !self.registration.waiting&&self.registration.active?.state==='activated'&&keys.length===1&&keys[0]==='wuwa-companion-shell-057-pwa-22';
+    return !self.registration.waiting&&self.registration.active?.state==='activated'&&keys.length===1&&keys[0]==='wuwa-companion-shell-057-pwa-23';
    });
    if(!activated)await new Promise(r=>setTimeout(r,100));
   }
@@ -59,7 +60,7 @@ const server=http.createServer((req,res)=>{
   assert.ok(await probe.evaluate(()=>caches.has('unrelated-cache')));
   assert.equal(await probe.evaluate(()=>CompanionStore.get().echoes[0].legacyStats.substats[0]),'Old text','Old Echo entries survive shell migration');
   const keys=await probe.evaluate(()=>caches.keys());
-  assert.deepEqual(keys.filter(k=>k.startsWith('wuwa-companion-shell-')),['wuwa-companion-shell-057-pwa-22']);
+  assert.deepEqual(keys.filter(k=>k.startsWith('wuwa-companion-shell-')),['wuwa-companion-shell-057-pwa-23']);
   await probe.evaluate(()=>loadResonatorReference('1108'));
   await context.setOffline(true);await probe.reload();
   await probe.waitForFunction(()=>DATA.length>0);

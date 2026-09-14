@@ -34,9 +34,13 @@ const {startServer,seedPage,root}=require('./support.cjs');
    await p.locator('[data-action="cancel-tracker"]').click();
    // Delayed import completing after navigation has no visible or stored effect.
    await p.locator('#trackerFile').setInputFiles({name:'slow.json',mimeType:'application/json',buffer:profile(30)});await nav('account');await p.evaluate(()=>window.__releaseFile());await p.waitForFunction(()=>window.__slowFinished);assert.equal(await p.evaluate(()=>trackerPending),null);assert.equal(await p.evaluate(()=>CompanionStore.get().resources['3']),undefined);
+   // A late reference response must not replace the configuration being edited.
+   let releaseRecommendations;const recommendationsGate=new Promise(resolve=>releaseRecommendations=resolve);
+   await p.route('**/data/recommendations.json',async route=>{await recommendationsGate;await route.continue();});
    // Shared catalogue searches preserve the selected entry and every other field.
    await p.evaluate(()=>{extendedCatalog.echo=[{id:'e1',name:'Echo One',label:'Echo One',sets:[{id:'s1',name:'First Sonata'}]},{id:'e2',name:'Echo Two',label:'Echo Two',sets:[{id:'s2',name:'Second Sonata'}]}];extendedCatalog.errors.echo=false;openProfile('character','resonator:1413');profileTab='build';renderProfileSection();companionActions['new-build']('resonator:1413');});
    const build=p.locator('#buildForm');await build.locator('[name="name"]').fill('TEST ONLY');await build.locator('[name="echoId"]').selectOption('e1');await build.locator('[name="catalogueQuery"]').fill('Two');assert.equal(await build.locator('[name="echoId"]').inputValue(),'e1');assert.equal(await build.locator('[name="name"]').inputValue(),'TEST ONLY');await build.locator('[name="echoId"]').selectOption('e2');await build.locator('[name="catalogueQuery"]').fill('no result');assert.equal(await build.locator('[name="echoId"]').inputValue(),'e2');
+   releaseRecommendations();await p.waitForFunction(()=>recommendationData&&!recommendationLoading);assert.equal(await build.locator('[name="name"]').inputValue(),'TEST ONLY');assert.equal(await build.locator('[name="echoId"]').inputValue(),'e2');
    await p.keyboard.press('Escape');
    // Read-only navigation has bounded game requests; it never reloads detail per tab.
    let requests=0;p.on('request',r=>{if(r.url().includes('/character/'))requests++;});

@@ -2,6 +2,30 @@
 
 Demande du 13 septembre 2026 : développer les fonctions prévues avant la revue utilisateur, puis présenter une partie à la fois. Les tests techniques restent à la charge de l'agent. Une case vide est du travail restant, pas une fonctionnalité terminée.
 
+## Mise à jour restée invisible — 14 septembre 2026
+
+Retour utilisateur : le lien public ouvre encore l'ancienne présentation sur PC. Le déploiement `79b8c78` est réussi et les 195 empreintes publiques sont à jour ; le navigateur personnel n'est pas accessible aux outils. Le mécanisme existant conserve l'ancien shell tant qu'un autre client reste ouvert, et son avertissement n'apparaît que dans les réglages. L'état exact du navigateur de l'utilisateur reste à distinguer de cette reproduction isolée.
+
+Suivi : **2 / 3 lots vérifiés**.
+
+- [x] Reproduire l'ancienne version après actualisation et examiner les conditions d'activation.
+- [x] Fournir un accès de mise à jour indépendant de l'ancien shell et un avertissement visible, sans interrompre une édition ni effacer les données.
+- [ ] Vérifier les mises à jour, les blocages, le hors ligne et les petits écrans ; publier et contrôler le site réellement servi.
+
+`pwa-update` et `pwa-recovery` passent depuis le commit publié `79b8c78`. Le second utilise de vrais workers et reproduit l'ancienne version après rechargement, deux onglets bloquants, le refus d'une demande d'activation depuis l'application, l'installation après fermeture des autres fenêtres, les données conservées, une première installation, l'échec réseau et le hors ligne. L'avertissement FR/EN est contrôlé à 320, 720 et 1152 pixels. Les captures ont été examinées. La page autonome `mise-a-jour.html` privilégie le réseau, avec repli local après sa première installation. Aucun rechargement automatique de l'application ouverte et aucune suppression du stockage personnel. Le fonctionnement suit le [cycle de vie documenté par web.dev](https://web.dev/articles/service-worker-lifecycle) ; l'activation anticipée est réservée au cas où seules les pages de mise à jour sont encore ouvertes dans le périmètre de Companion.
+
+La revue finale a également reproduit un défaut de chargement tardif dans le formulaire de configuration conservé pour la seconde phase : l'arrivée des recommandations reconstruisait le formulaire et effaçait son brouillon. Le rendu différé respecte désormais le formulaire ouvert ; un test retarde explicitement la réponse. `final-review` et `recommendations` passent après cette correction ; les recommandations restent masquées dans l'application publiée.
+
+## Sélection visuelle des Échos — demande complémentaire du 14 septembre 2026
+
+La vidéo 01:32–01:49 est la référence : rail des cinq emplacements, grille de miniatures, coûts Tous/1/3/4, sélection distincte de l'équipement, illustration et attributs à droite, retrait/changement et amélioration. La demande inclut aussi le choix visuel d'un type d'Écho lors de l'ajout d'un exemplaire, auparavant limité à une liste de noms.
+
+Suivi : **0 / 3 lots vérifiés**.
+
+- [ ] Examiner la vidéo et les parcours de sélection, y compris ajout, équipement, déplacement et remplacement.
+- [ ] Intégrer une grille visuelle commune, ses filtres et le détail préalable à l'action, avec les miniatures officielles.
+- [ ] Vérifier interactions, données, chargement, responsive et publication.
+
 ## Reproduction complète — reprise du 14 septembre 2026
 
 L'utilisateur demande de terminer l'ensemble sans nouvelle validation. Cette reprise couvre les cinq rubriques et leurs commandes de consultation/édition, et non uniquement l'arbre. Les recommandations et objectifs restent masqués.

@@ -1,6 +1,6 @@
 'use strict';
 const CACHE_PREFIX='wuwa-companion-shell-';
-const CACHE_NAME=CACHE_PREFIX+'057-pwa-22';
+const CACHE_NAME=CACHE_PREFIX+'057-pwa-23';
 const IMAGE_CACHE='wuwa-companion-images-v2',IMAGE_LIMIT=160,IMAGE_AGE=7*24*60*60*1000,IMAGE_BYTES=24*1024*1024;
 let imageWrites=Promise.resolve();
 const imageRequests=new Map();
@@ -40,8 +40,10 @@ async function fetchImage(request,event){
  })();imageRequests.set(request.url,work);
  try{return (await work).clone();}finally{imageRequests.delete(request.url);}
 }
-const SHELL=['./assets/game-ui/SP_RoleSkillTreeNotActive0.webp','./assets/game-ui/SP_RoleSkillTreeNotActive1.webp','./assets/game-ui/SP_SkillCircleArrow.webp','./assets/game-ui/SP_SkillCircleBHold.webp','./assets/game-ui/SP_SkillCircleBNor.webp','./assets/game-ui/SP_SkillCircleSNor.webp','./assets/game-ui/SP_SkillCircleSSele.webp','./assets/game-ui/SP_SkillFrmArrow.webp','./assets/game-ui/SP_SkillFrmSNor.webp','./assets/game-ui/SP_SkillFrmSSele.webp','./assets/game-ui/SP_SkillNameBg.webp','./assets/game-ui/SP_SkillFrmBActivateNor.webp','./assets/game-ui/SP_SkillFrmSActivateNor.webp','./assets/game-ui/SP_SkillCircleSActivateNor.webp','./assets/game-ui/SP_SkillFrmBActivateSele.webp','./assets/game-ui/SP_SkillFrmSActivateSele.webp','./assets/game-ui/SP_SkillCircleSActivateSele.webp','./assets/game-ui/SP_DeviceItemBg.webp','./assets/game-ui/SP_DeviceItemIconBg.webp','./assets/game-ui/SP_DeviceItemChoose1.webp','./assets/game-ui/SP_DeviceItemActiveDesc1.webp','./catalogue-version.js','./data/game-assets.json','./data/weapons.json','./assets/game-ui/SP_RoleTabiconshuxing.webp','./assets/game-ui/SP_RoleTabiconwuqi.webp','./assets/game-ui/SP_RoleTabiconyiyin.webp','./assets/game-ui/SP_RoleTabiconzhanji.webp','./assets/game-ui/SP_RoleTabicongongminglian.webp','./localization.js','./resonator-data.js','./resonator-tree.js','./features.js','./tutorial.js','./data/catalogue.json','./data/localization-fr.json','./data/echo-catalogue.json','./data/item-catalogue.json','./','./index.html','./styles.css','./layout.css','./companion.css','./catalog.js','./dialogs.js','./editor-view.js','./app.js','./skills.js','./account-editor.js','./bootstrap.js','./echo-rules.js', './echoes.js','./menu-stats.js','./resonator-menu.js','./data/menu-rules.json', './account-store.js','./companion-ui.js','./inventory.js','./planning.js','./cost-engine.js','./progression-data.js','./resources.js','./data/progression.json','./activity-rules.js','./activities.js','./data/achievements.json','./data/events.json','./teams.js','./profiles.js','./sonatas.js','./data/sonatas.json','./recommendations.js','./data/recommendations.json','./convene-rules.js','./tracker-import.js','./pull-store.js','./convenes.js','./wishlist.js','./optimization.js','./forte.js','./manifest.webmanifest','./pwa.js','./assets/portrait-placeholder.svg','./assets/icon-192.png','./assets/icon-512.png'];
+const SHELL=['./assets/game-ui/SP_RoleSkillTreeNotActive0.webp','./assets/game-ui/SP_RoleSkillTreeNotActive1.webp','./assets/game-ui/SP_SkillCircleArrow.webp','./assets/game-ui/SP_SkillCircleBHold.webp','./assets/game-ui/SP_SkillCircleBNor.webp','./assets/game-ui/SP_SkillCircleSNor.webp','./assets/game-ui/SP_SkillCircleSSele.webp','./assets/game-ui/SP_SkillFrmArrow.webp','./assets/game-ui/SP_SkillFrmSNor.webp','./assets/game-ui/SP_SkillFrmSSele.webp','./assets/game-ui/SP_SkillNameBg.webp','./assets/game-ui/SP_SkillFrmBActivateNor.webp','./assets/game-ui/SP_SkillFrmSActivateNor.webp','./assets/game-ui/SP_SkillCircleSActivateNor.webp','./assets/game-ui/SP_SkillFrmBActivateSele.webp','./assets/game-ui/SP_SkillFrmSActivateSele.webp','./assets/game-ui/SP_SkillCircleSActivateSele.webp','./assets/game-ui/SP_DeviceItemBg.webp','./assets/game-ui/SP_DeviceItemIconBg.webp','./assets/game-ui/SP_DeviceItemChoose1.webp','./assets/game-ui/SP_DeviceItemActiveDesc1.webp','./catalogue-version.js','./data/game-assets.json','./data/weapons.json','./assets/game-ui/SP_RoleTabiconshuxing.webp','./assets/game-ui/SP_RoleTabiconwuqi.webp','./assets/game-ui/SP_RoleTabiconyiyin.webp','./assets/game-ui/SP_RoleTabiconzhanji.webp','./assets/game-ui/SP_RoleTabicongongminglian.webp','./localization.js','./resonator-data.js','./resonator-tree.js','./features.js','./tutorial.js','./data/catalogue.json','./data/localization-fr.json','./data/echo-catalogue.json','./data/item-catalogue.json','./','./index.html','./styles.css','./layout.css','./companion.css','./catalog.js','./dialogs.js','./editor-view.js','./app.js','./skills.js','./account-editor.js','./bootstrap.js','./echo-rules.js', './echoes.js','./menu-stats.js','./resonator-menu.js','./data/menu-rules.json', './account-store.js','./companion-ui.js','./inventory.js','./planning.js','./cost-engine.js','./progression-data.js','./resources.js','./data/progression.json','./activity-rules.js','./activities.js','./data/achievements.json','./data/events.json','./teams.js','./profiles.js','./sonatas.js','./data/sonatas.json','./recommendations.js','./data/recommendations.json','./convene-rules.js','./tracker-import.js','./pull-store.js','./convenes.js','./wishlist.js','./optimization.js','./forte.js','./manifest.webmanifest','./pwa.js','./mise-a-jour.html','./assets/portrait-placeholder.svg','./assets/icon-192.png','./assets/icon-512.png'];
 const shellURLs=new Set(SHELL.map(p=>new URL(p,self.registration.scope).href));
+const updateURL=new URL('./mise-a-jour.html',self.registration.scope);
+// This self-contained entry point also works under an older cached application.
 const artworkPath=new URL('./assets/game/',self.registration.scope).pathname;
 const referencePath=new URL('./data/resonators/',self.registration.scope).pathname;
 self.addEventListener('install',event=>{
@@ -51,10 +53,33 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith(CACHE_PREFIX)&&key!==CACHE_NAME||key==='wuwa-companion-images-v1').map(key=>caches.delete(key)))).then(()=>self.clients.claim()));
 });
+function isUpdatePage(url){const parsed=new URL(url);return parsed.origin===updateURL.origin&&parsed.pathname===updateURL.pathname;}
+self.addEventListener('message',event=>{
+  if(!['COMPANION_UPDATE_INFO','COMPANION_APPLY_UPDATE'].includes(event.data?.type)||!event.ports[0])return;
+  const reply=data=>event.ports[0].postMessage(data);
+  event.waitUntil((async()=>{
+    const source=event.source?.id&&await self.clients.get(event.source.id);
+    if(!source||!isUpdatePage(source.url)){reply({status:'refused'});return;}
+    if(event.data.type==='COMPANION_UPDATE_INFO'){reply({status:'ready',version:CACHE_NAME});return;}
+    // Never replace the worker underneath an application window, even a hidden
+    // one or an old version that cannot report whether it has an unsaved draft.
+    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    const other=windows.filter(client=>client.url.startsWith(self.registration.scope)&&!isUpdatePage(client.url));
+    if(other.length){reply({status:'blocked',count:other.length});return;}
+    reply({status:'activating',version:CACHE_NAME});
+    await self.skipWaiting();
+  })().catch(()=>reply({status:'error'})));
+});
 self.addEventListener('fetch',event=>{
   const request=event.request;
   if(request.method!=='GET')return;
   const url=new URL(request.url);
+  if(isUpdatePage(request.url)){
+    event.respondWith((async()=>{
+      try{const response=await fetch(request,{cache:'no-store'});if(response.ok)return response;}catch{/* Keep recovery readable offline. */}
+      return await (await caches.open(CACHE_NAME)).match('./mise-a-jour.html')||Response.error();
+    })());return;
+  }
   if(url.origin===self.location.origin&&url.pathname.startsWith(referencePath)&&/^\d+\.json$/.test(url.pathname.slice(referencePath.length))&&!url.search){
    event.respondWith(caches.open(CACHE_NAME).then(async cache=>{
     const stored=await cache.match(request);if(stored)return stored;

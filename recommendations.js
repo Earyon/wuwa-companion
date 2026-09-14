@@ -4,7 +4,8 @@ async function loadRecommendations(){
  if(recommendationLoading||recommendationData)return;recommendationLoading=true;
  try{const data=await fetchJSON('./data/recommendations.json');if(data.schema!==1||!Array.isArray(data.profiles))throw Error('Invalid recommendations');recommendationData=data;recommendationError=false;}
  catch{recommendationError=true;}finally{recommendationLoading=false;}
- if(document.getElementById('detail').open&&['build','teams'].includes(profileTab))renderProfileSection();
+ // Late reference data must not rebuild an open, unsaved configuration form.
+ if(document.getElementById('detail').open&&['build','teams'].includes(profileTab)&&!document.getElementById('buildForm'))renderProfileSection();
 }
 const recommendationContexts=new Map();
 function recommendationFor(id){const base=recommendationData?.profiles.find(p=>p.characterId===id);if(!base)return null;const choice=base.variants?.[recommendationContexts.get(id)-1];return choice?{...base,...choice,stats:{...base.stats,...choice.stats}}:base;}
